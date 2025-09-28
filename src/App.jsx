@@ -277,6 +277,7 @@ function App() {
 
   // Estados para receitas
   const [recipes, setRecipes] = useState([])
+  const [localRecipes, setLocalRecipes] = useState([])
   const [showRecipes, setShowRecipes] = useState(false)
   const [searchMode, setSearchMode] = useState('relevante') // 'estrito' ou 'relevante'
 
@@ -813,10 +814,10 @@ function App() {
 
   // ==================== FIM DO SISTEMA DE TRADUÇÃO ====================
 
-  // Função para buscar todas as receitas das APIs para a sidebar
+  // Função para buscar todas as receitas das APIs e locais para a sidebar
   const fetchAllApiRecipes = async () => {
     setIsLoadingAllRecipes(true)
-    console.log('🌍 Buscando todas as receitas das APIs...')
+    console.log('🌍 Buscando todas as receitas das APIs e locais...')
     
     try {
       const allRecipes = []
@@ -872,56 +873,22 @@ function App() {
         console.log('⚠️ Erro ao buscar receitas do Spoonacular:', error)
       }
       
-      // 3. Adicionar receitas criativas locais
-      const creativeRecipes = [
-        {
-          id: 'creative-1',
-          title: 'Arroz Brasileiro Tradicional',
-          image: 'https://via.placeholder.com/300x200?text=Arroz+Brasileiro',
-          category: 'Prato Principal',
-          area: 'Brasil',
-          source: 'Receita Local',
-          apiType: 'local'
-        },
-        {
-          id: 'creative-2',
-          title: 'Feijão Tropeiro',
-          image: 'https://via.placeholder.com/300x200?text=Feijão+Tropeiro',
-          category: 'Prato Principal',
-          area: 'Brasil',
-          source: 'Receita Local',
-          apiType: 'local'
-        },
-        {
-          id: 'creative-3',
-          title: 'Macarrão à Carbonara',
-          image: 'https://via.placeholder.com/300x200?text=Carbonara',
-          category: 'Prato Principal',
-          area: 'Italiano',
-          source: 'Receita Local',
-          apiType: 'local'
-        },
-        {
-          id: 'creative-4',
-          title: 'Frango Grelhado',
-          image: 'https://via.placeholder.com/300x200?text=Frango+Grelhado',
-          category: 'Prato Principal',
-          area: 'Internacional',
-          source: 'Receita Local',
-          apiType: 'local'
-        },
-        {
-          id: 'creative-5',
-          title: 'Salada Caesar',
-          image: 'https://via.placeholder.com/300x200?text=Salada+Caesar',
-          category: 'Salada',
-          area: 'Americano',
-          source: 'Receita Local',
-          apiType: 'local'
-        }
-      ]
-      
-      allRecipes.push(...creativeRecipes)
+      // 3. Adicionar receitas locais
+      console.log('🏠 Adicionando receitas locais...')
+      if (localRecipes.length > 0) {
+        localRecipes.forEach(recipe => {
+          allRecipes.push({
+            id: recipe.id,
+            title: recipe.title,
+            image: recipe.image || 'https://via.placeholder.com/300x200?text=Receita',
+            category: recipe.category || 'Internacional',
+            area: recipe.area || 'Internacional',
+            source: 'Receita Local',
+            apiType: 'local'
+          })
+        })
+        console.log(`🏠 ${localRecipes.length} receitas locais adicionadas`)
+      }
       
       // Remover duplicatas baseado no título
       const uniqueRecipes = allRecipes.filter((recipe, index, self) => 
@@ -929,7 +896,7 @@ function App() {
       )
       
       setAllApiRecipes(uniqueRecipes)
-      console.log(`✅ ${uniqueRecipes.length} receitas carregadas para a sidebar`)
+      console.log(`✅ ${uniqueRecipes.length} receitas carregadas para a sidebar (APIs + Locais)`)
       
     } catch (error) {
       console.error('❌ Erro ao buscar receitas das APIs:', error)
@@ -968,10 +935,36 @@ function App() {
     }
   }
 
-  // Carregar receitas das APIs quando o componente montar
+  // Função para carregar receitas locais
+  const loadLocalRecipes = async () => {
+    try {
+      const response = await fetch('/local-recipes/recipes.json')
+      if (response.ok) {
+        const localRecipesData = await response.json()
+        setLocalRecipes(localRecipesData)
+        console.log('✅ Receitas locais carregadas:', localRecipesData.length)
+        console.log('📋 Receitas locais:', localRecipesData.map(r => r.title))
+      } else {
+        console.log('⚠️ Arquivo de receitas locais não encontrado')
+        setLocalRecipes([])
+      }
+    } catch (error) {
+      console.error('❌ Erro ao carregar receitas locais:', error)
+      setLocalRecipes([])
+    }
+  }
+
+  // Carregar receitas das APIs e locais quando o componente montar
   useEffect(() => {
-    fetchAllApiRecipes()
+    loadLocalRecipes()
   }, [])
+
+  // Recarregar receitas das APIs quando as receitas locais forem carregadas
+  useEffect(() => {
+    if (localRecipes.length > 0) {
+      fetchAllApiRecipes()
+    }
+  }, [localRecipes])
   
 
   // Função para buscar receitas no TheMealDB
@@ -1464,7 +1457,7 @@ PASSO 1: Esta receita requer instruções detalhadas que não estão disponívei
       }
       
       // Para receitas locais, adicionar detalhes creativos
-      if (recipe.source?.includes('Local') || recipe.source?.includes('Sugestão')) {
+      if (false) {
         const creativeDetails = generateCreativeDetails(recipe)
         detailedRecipe = { ...detailedRecipe, ...creativeDetails }
       }
@@ -1722,79 +1715,67 @@ ${template.tips.join('\n')}
       console.log(`🥄 Spoonacular retornou ${spoonacularRecipes.length} receitas`)
       allRecipes = [...allRecipes, ...spoonacularRecipes]
       
-      // 3. SEMPRE adicionar receitas criativas locais para garantir variedade
-      console.log('🔄 Adicionando receitas criativas locais...')
+      // 3. Adicionar receitas locais (sempre incluir)
+      console.log('🏠 Adicionando receitas locais...')
+      console.log('🏠 Total de receitas locais disponíveis:', localRecipes.length)
+      console.log('🏠 Ingredientes selecionados pelo usuário:', selectedIngredients.map(ing => ing.name))
+      console.log('🏠 Receitas de milho disponíveis:', localRecipes.filter(r => r.ingredient === 'Milho').map(r => r.title))
       
-      // Receitas criativas baseadas nos ingredientes selecionados
-      selectedIngredients.forEach((ingredient, index) => {
-        const creativeRecipes = [
-          {
-            id: `creative-${ingredient.id}-1`,
-            title: `${ingredient.name} Refogado Especial`,
-            image: `https://via.placeholder.com/300x200?text=${encodeURIComponent(ingredient.name + ' Refogado')}`,
-            instructions: `Refogue ${ingredient.name} com alho, cebola e temperos de sua preferência. Uma receita simples e saborosa!`,
-            ingredient: ingredient.name,
-            category: 'Receita Criativa',
-            area: 'Brasil',
-            video: null,
-            source: 'Sugestão Local',
-            ingredientsList: `${ingredient.name}, alho, cebola, sal, pimenta`,
-            relevanceScore: 25
-          },
-          {
-            id: `creative-${ingredient.id}-2`,
-            title: `Salada de ${ingredient.name}`,
-            image: `https://via.placeholder.com/300x200?text=${encodeURIComponent('Salada ' + ingredient.name)}`,
-            instructions: `Uma salada fresca e nutritiva com ${ingredient.name} como ingrediente principal. Ideal para refeições leves!`,
-            ingredient: ingredient.name,
-            category: 'Salada',
-            area: 'Brasil',
-            video: null,
-            source: 'Sugestão Local',
-            ingredientsList: `${ingredient.name}, alface, tomate, azeite`,
-            relevanceScore: 20
-          }
-        ]
+      const localRecipesToAdd = localRecipes.filter(recipe => {
+        // Filtrar receitas locais que tenham ingredientes correspondentes
+        if (!recipe.ingredientsList) {
+          console.log('🏠 Receita sem ingredientes, incluindo:', recipe.title)
+          return true
+        }
         
-        creativeRecipes.forEach(recipe => {
-          // Evitar duplicatas
-          const exists = allRecipes.some(existing => existing.id === recipe.id)
-          if (!exists) {
-            allRecipes.push(recipe)
-          }
+        const recipeIngredients = recipe.ingredientsList.toLowerCase()
+        const userIngredients = selectedIngredients.map(ing => ing.name.toLowerCase())
+        
+        console.log(`🏠 Verificando receita: ${recipe.title}`)
+        console.log(`🏠 Ingredientes da receita: ${recipeIngredients}`)
+        console.log(`🏠 Ingredientes do usuário: ${userIngredients}`)
+        
+        // Verificar se pelo menos um ingrediente corresponde
+        const hasMatch = userIngredients.some(userIng => {
+          const englishName = translateToEnglish(userIng)
+          const matches = recipeIngredients.includes(userIng) || recipeIngredients.includes(englishName)
+          console.log(`🏠 ${userIng} (${englishName}) -> ${matches}`)
+          return matches
         })
+        
+        // Se não encontrou match, verificar se é uma receita de ovos e o usuário selecionou ovos
+        if (!hasMatch && recipe.ingredient && recipe.ingredient.toLowerCase().includes('ovo')) {
+          const hasOvos = userIngredients.some(ing => ing.includes('ovo') || ing.includes('egg'))
+          console.log(`🏠 Receita de ovos sem match direto, mas usuário tem ovos: ${hasOvos}`)
+          if (hasOvos) {
+            console.log(`🏠 ${recipe.title} -> INCLUÍDA (receita de ovos)`)
+            return true
+          }
+        }
+        
+        // Se não encontrou match, verificar se é uma receita de milho e o usuário selecionou milho
+        if (!hasMatch && recipe.ingredient && recipe.ingredient === 'Milho') {
+          const hasMilho = userIngredients.some(ing => ing.toLowerCase().includes('milho') || ing.toLowerCase().includes('corn'))
+          console.log(`🏠 Receita de milho sem match direto, mas usuário tem milho: ${hasMilho}`)
+          if (hasMilho) {
+            console.log(`🏠 ${recipe.title} -> INCLUÍDA (receita de milho)`)
+            return true
+          }
+        }
+        
+        console.log(`🏠 ${recipe.title} -> ${hasMatch ? 'INCLUÍDA' : 'EXCLUÍDA'}`)
+        return hasMatch
       })
       
-      console.log(`✅ Total com receitas criativas: ${allRecipes.length}`)
+      console.log(`🏠 ${localRecipesToAdd.length} receitas locais selecionadas`)
+      console.log('🏠 Receitas selecionadas:', localRecipesToAdd.map(r => r.title))
+      allRecipes = [...allRecipes, ...localRecipesToAdd]
       
-      // 4. Se ainda não temos receitas, criar fallback de emergência
-      if (allRecipes.length === 0) {
-        console.log('🚨 Criando fallback de emergência...')
-        
-        selectedIngredients.slice(0, 3).forEach((ingredient, index) => {
-          const emergencyRecipe = {
-            id: `emergency-${ingredient.id}`,
-            title: `${ingredient.name} Delicioso`,
-            image: `https://via.placeholder.com/300x200?text=${encodeURIComponent(ingredient.name)}`,
-            instructions: `Receita de emergência com ${ingredient.name}. Consulte livros de culinária para mais detalhes.`,
-            ingredient: ingredient.name,
-            category: 'Emergência',
-            area: 'Local',
-            video: null,
-            source: 'Fallback de Emergência',
-            ingredientsList: `${ingredient.name}, ingredientes básicos`,
-            relevanceScore: 15
-          }
-          allRecipes.push(emergencyRecipe)
-        })
-        
-        console.log(`✅ Criadas ${allRecipes.length} receitas de emergência`)
-      }
       
       // Aplicar filtro de modo estrito se necessário
       if (isStrictMode && allRecipes.length > 0) {
         const filteredRecipes = allRecipes.filter(recipe => {
-          if (!recipe.ingredientsList || recipe.source === 'Sugestão Local') return true
+          if (!recipe.ingredientsList) return true
           
           const recipeIngredients = recipe.ingredientsList.toLowerCase()
           const userIngredients = selectedIngredients.map(ing => ing.name.toLowerCase())
@@ -1842,25 +1823,9 @@ ${template.tips.join('\n')}
     } catch (error) {
       console.error('❌ Erro geral ao buscar receitas:', error)
       
-      // Fallback de emergência
-      const emergencyRecipes = selectedIngredients.slice(0, 3).map((ingredient, index) => ({
-        id: `emergency-fallback-${ingredient.id}`,
-        title: `${ingredient.name} Delicioso`,
-        image: `https://via.placeholder.com/300x200?text=${encodeURIComponent(ingredient.name)}`,
-        instructions: `Receita de emergência com ${ingredient.name}. Consulte livros de culinária ou sites especializados para instruções detalhadas.`,
-        ingredient: ingredient.name,
-        category: 'Emergência',
-        area: 'Local',
-        video: null,
-        source: 'Fallback de Emergência',
-        ingredientsList: `${ingredient.name}, ingredientes básicos`,
-        relevanceScore: 10
-      }))
-      
-      // Retornar receitas de emergência (SEM TRADUÇÃO)
-      console.log(`✅ ${emergencyRecipes.length} receitas de emergência criadas`)
-      
-      return emergencyRecipes
+      // Retornar array vazio em caso de erro
+      console.log('❌ Nenhuma receita encontrada devido a erro')
+      return []
     }
   }
 
@@ -1884,31 +1849,8 @@ ${template.tips.join('\n')}
       totalSelecionados: selectedIngredients.length
     })
     
-    // Teste simples para verificar se está funcionando
-    console.log('🧪 Teste: Criando receita de teste...')
-    const testRecipe = {
-      id: 'test-1',
-      title: 'Receita de Teste com ' + (selected[0]?.name || 'Ingredientes'),
-      image: 'https://via.placeholder.com/300x200?text=Receita+Teste',
-      instructions: 'Esta é uma receita de teste para verificar se a funcionalidade está funcionando. Instruções detalhadas: 1. Prepare os ingredientes. 2. Cozinhe conforme indicado. 3. Sirva quente.',
-      ingredient: selected[0]?.name || 'Arroz',
-      category: 'Prato Principal',
-      area: 'Brasil',
-      video: null,
-      source: 'Teste Local',
-      ingredientsList: selected.map(ing => ing.name).join(', ') || 'Arroz, Sal, Água',
-      relevanceScore: 100
-    }
-    
-    console.log('🧪 Receita de teste criada:', testRecipe)
-    
-    console.log('🧪 Teste: Definindo receita de teste...')
-    setRecipes([testRecipe])
-    setShowRecipes(true)
-    console.log('🧪 Teste: Receita de teste definida!')
-    
-    // Continuar com a busca real das APIs
-    console.log('🔄 Continuando com busca real das APIs...')
+    // Buscar receitas das APIs
+    console.log('🔄 Buscando receitas das APIs...')
     
     try {
       const foundRecipes = await searchRecipesFromAPI(selected, isStrictMode)
@@ -1940,25 +1882,10 @@ ${template.tips.join('\n')}
     } catch (error) {
       console.error('❌ Erro na busca:', error)
       
-      // Sempre criar receitas de fallback mais detalhadas
-      const fallbackRecipes = selected.slice(0, 3).map((ingredient, index) => ({
-        id: `fallback-${index}`,
-        title: `Receita com ${ingredient.name}`,
-        image: 'https://via.placeholder.com/300x200?text=Receita+com+' + encodeURIComponent(ingredient.name),
-        instructions: `Uma deliciosa receita utilizando ${ingredient.name} como ingrediente principal. Esta é uma receita de fallback enquanto corrigimos a conexão com a API.`,
-        ingredient: ingredient.name,
-        category: 'Sugestão',
-          area: 'Brasil',
-        source: 'Fallback Local',
-        ingredientsList: `${ingredient.name} e outros ingredientes básicos`,
-        relevanceScore: 50
-      }))
-      
-      setRecipes(fallbackRecipes)
-      setShowRecipes(true)
-      
-      // Alertar o usuário sobre o problema
-      alert('Houve um problema ao buscar receitas online. Mostrando sugestões locais.')
+      // Mostrar mensagem de erro
+      alert('Houve um problema ao buscar receitas online. Tente novamente mais tarde.')
+      setRecipes([])
+      setShowRecipes(false)
       
         } finally {
           console.log('🏁 Finalizando busca de receitas')
@@ -2237,9 +2164,9 @@ ${template.tips.join('\n')}
                               🥄 {recipes.filter(r => r.source === 'Spoonacular').length} do Spoonacular
                             </span>
                           )}
-                          {recipes.filter(r => r.source?.includes('Local') || r.source?.includes('Sugestão')).length > 0 && (
+                          {recipes.filter(r => r.source === 'Receita Local').length > 0 && (
                             <span className="api-stat local">
-                              💡 {recipes.filter(r => r.source?.includes('Local') || r.source?.includes('Sugestão')).length} sugestões locais
+                              🏠 {recipes.filter(r => r.source === 'Receita Local').length} receitas locais
                             </span>
                           )}
                         </div>
@@ -2269,9 +2196,7 @@ ${template.tips.join('\n')}
                                 <span className={`recipe-source source-${recipe.source?.toLowerCase().replace(/\s+/g, '-')}`}>
                                   {recipe.source === 'TheMealDB' && '🍽️ MDB'}
                                   {recipe.source === 'Spoonacular' && '🥄 SP'}
-                                  {(recipe.source?.includes('Local') || recipe.source?.includes('Sugestão')) && '💡 LOC'}
-                                  {recipe.source === 'Teste Local' && '🧪 TEST'}
-                                  {recipe.source === 'Fallback de Emergência' && '🚨 EMG'}
+                                  {recipe.source === 'Receita Local' && '🏠 LOC'}
                                   {!recipe.source && '❓ N/A'}
                                 </span>
                               </div>
@@ -2290,7 +2215,7 @@ ${template.tips.join('\n')}
                                 <span className="ingredient-emoji-dynamic">{getIngredientEmoji(recipe.ingredient)}</span>
                                 <span className="ingredient-text-contains">Contém: {recipe.ingredient}</span>
                               </p>
-                              <p className="recipe-instructions">
+                              <p className="recipe-instructions" style={{ whiteSpace: 'pre-line' }}>
                                 {recipe.instructions?.substring(0, 100)}...
                               </p>
                               <div className="recipe-actions">
@@ -2389,7 +2314,7 @@ ${template.tips.join('\n')}
                               <span className={`recipe-source source-${recipe.apiType}`}>
                                 {recipe.apiType === 'themealdb' && '🍽️ MDB'}
                                 {recipe.apiType === 'spoonacular' && '🥄 SP'}
-                                {recipe.apiType === 'local' && '💡 LOC'}
+                                {recipe.apiType === 'local' && '🏠 LOC'}
                               </span>
                             </div>
                           </div>
@@ -2539,7 +2464,9 @@ ${template.tips.join('\n')}
                   <h3>📝 Modo de Preparo</h3>
                   <div className="instructions-content">
                     <div className="basic-instructions">
-                      <p>{selectedRecipe.instructions || 'Instruções não disponíveis'}</p>
+                      <p style={{ whiteSpace: 'pre-line' }}>
+                        {selectedRecipe.instructions || 'Instruções não disponíveis'}
+                      </p>
                     </div>
                   </div>
                 </div>
