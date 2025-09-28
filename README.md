@@ -1,15 +1,28 @@
-# 🍽️ FoodDidDo - Aplicativo de Receitas Inteligente
+# 🍽️ FoodDidDo - Aplicativo de Receitas e Gestão de Refeições
 
 ## 📋 Sobre o Projeto
 
-O **FoodDidDo** é uma aplicação web moderna desenvolvida em React que permite aos usuários descobrir receitas baseadas nos ingredientes disponíveis em sua geladeira. O aplicativo utiliza múltiplas APIs de receitas para fornecer uma experiência rica e diversificada.
+O **FoodDidDo** é uma aplicação web moderna desenvolvida em React que combina descoberta de receitas inteligente com gestão pessoal de refeições. O aplicativo permite aos usuários descobrir receitas baseadas nos ingredientes disponíveis e gerenciar suas refeições diárias de forma organizada.
 
 ## 🎯 Funcionalidades Principais
+
+### 🔐 Sistema de Autenticação
+- **Login e Registro**: Sistema completo de autenticação com validação
+- **Tela de Boas-vindas**: Interface elegante com animações de emojis flutuantes
+- **Sessão Persistente**: Login mantido entre sessões do navegador
+- **Logout Seguro**: Deslogar e retornar à tela inicial
+
+### 🍽️ Gerenciamento de Refeições
+- **Criar Refeições**: Adicionar refeições com título, calorias, ingredientes e tempo
+- **Editar Refeições**: Modificar refeições existentes facilmente
+- **Deletar Refeições**: Remover refeições com confirmação
+- **Status de Refeições**: Marcar como "fazer", "fazendo" ou "feito"
+- **Armazenamento Local**: Dados salvos no localStorage do navegador
 
 ### 🥘 Busca Inteligente de Receitas
 - **Modo Relevante**: Busca receitas que contenham pelo menos um dos ingredientes selecionados
 - **Modo Estrito**: Busca receitas que contenham todos os ingredientes selecionados
-- **Integração Multi-API**: Consome dados de TheMealDB e Spoonacular para máxima variedade
+- **Integração Multi-API**: Consome dados de TheMealDB para variedade de receitas
 
 ### 🧾 Gerenciamento de Ingredientes
 - **Seleção Visual**: Interface intuitiva com mais de 100 ingredientes disponíveis
@@ -27,10 +40,6 @@ O **FoodDidDo** é uma aplicação web moderna desenvolvida em React que permite
 - **Paginação**: Navegação fácil através de todas as receitas disponíveis
 - **Filtros Inteligentes**: Receitas filtradas por qualidade de instruções
 
-### 🔐 Sistema de Login
-- **Modal de Autenticação**: Interface moderna para login
-- **Design Responsivo**: Funciona perfeitamente em desktop e mobile
-
 ## 🛠️ Tecnologias Utilizadas
 
 ### Frontend
@@ -38,10 +47,10 @@ O **FoodDidDo** é uma aplicação web moderna desenvolvida em React que permite
 - **Vite** - Build tool e servidor de desenvolvimento
 - **CSS3** - Estilização com variáveis CSS e gradientes
 - **JavaScript ES6+** - Lógica da aplicação
+- **Context API** - Gerenciamento de estado global
 
 ### APIs Integradas
 - **TheMealDB** - API gratuita com receitas internacionais
-- **Spoonacular** - API premium com receitas diversificadas
 - **MyMemory** - API de tradução para localização
 
 ### Funcionalidades Avançadas
@@ -49,6 +58,7 @@ O **FoodDidDo** é uma aplicação web moderna desenvolvida em React que permite
 - **Filtros Inteligentes** - Validação de qualidade das receitas
 - **Responsive Design** - Interface adaptável a diferentes telas
 - **Animações CSS** - Transições suaves e feedback visual
+- **Sistema de Fallback** - Funcionamento offline com localStorage
 
 ## 🚀 Como Executar o Projeto
 
@@ -76,56 +86,67 @@ Abra seu navegador e acesse: `http://localhost:5173`
 
 ## 📱 Como Usar
 
-### 1. Seleção de Ingredientes
+### 1. Autenticação
+- **Primeiro Acesso**: Clique em "Cadastrar" para criar uma conta
+- **Login**: Use suas credenciais para acessar o sistema
+- **Logout**: Clique no botão "🚪 Sair" na sidebar
+
+### 2. Gerenciar Refeições
+- **Criar**: Clique em "+ Nova Refeição" e preencha os dados
+- **Editar**: Clique no ícone de lápis na refeição desejada
+- **Deletar**: Clique no ícone de lixeira na refeição desejada
+- **Status**: Use o dropdown para marcar o status da refeição
+
+### 3. Buscar Receitas
 - Na seção "Minha Geladeira", clique nos ingredientes disponíveis
-- Os ingredientes selecionados aparecerão destacados
 - Escolha entre "Relevante" ou "Estrito" para o tipo de busca
-
-### 2. Busca de Receitas
 - Clique em "Buscar Receitas" para encontrar opções
-- As receitas aparecerão em cards organizados
-- Cada card mostra ingredientes, categoria e origem
-
-### 3. Visualização Detalhada
-- Clique em "Ver Receita Completa" para abrir o modal
-- Navegue pelas instruções passo a passo
-- Feche o modal clicando no "X" ou fora da área
 
 ### 4. Explorar Receitas
 - Acesse a seção "Receitas" na sidebar
 - Navegue pelas páginas para ver todas as opções
-- Use a paginação para explorar o catálogo completo
+- Clique em "Ver Receita Completa" para detalhes
 
 ## 🎨 Design e Interface
 
 ### Paleta de Cores
-- **Verde Principal**: `#2dd4bf` (Teal-400)
-- **Vermelho Vivido**: `#dc2626` (Red-600)
-- **Cinza Escuro**: `#374151` (Gray-700)
-- **Branco**: `#ffffff`
+- **Vermelho Principal**: `#dc2626` (Red-600) - Tema principal
+- **Verde Secundário**: `#2dd4bf` (Teal-400) - Botões e destaques
+- **Cinza Escuro**: `#374151` (Gray-700) - Textos
+- **Branco**: `#ffffff` - Fundos
 
 ### Componentes Principais
-- **Header**: Navegação principal com botão de login
-- **Sidebar**: Menu lateral com seções do app
+- **AuthScreen**: Tela de boas-vindas com animações
+- **Login/Register**: Modais de autenticação elegantes
+- **Sidebar**: Menu lateral com navegação
+- **Cards de Refeições**: Exibição das refeições do usuário
 - **Cards de Receitas**: Exibição visual das receitas
 - **Modal de Detalhes**: Visualização completa das receitas
-- **Sistema de Paginação**: Navegação através das receitas
 
 ## 🔧 Estrutura do Projeto
 
 ```
 FoodDidDo/
 ├── public/
-│   ├── images_/          # Imagens das receitas
+│   ├── images_/          # Imagens e logos
 │   └── vite.svg
 ├── src/
-│   ├── App.jsx           # Componente principal
-│   ├── App.css           # Estilos globais
-│   ├── main.jsx          # Ponto de entrada
-│   └── index.css         # Reset CSS
-├── package.json          # Dependências e scripts
-├── vite.config.js        # Configuração do Vite
-└── README.md            # Este arquivo
+│   ├── components/
+│   │   ├── AuthProvider.jsx    # Context de autenticação
+│   │   ├── AuthScreen.jsx      # Tela de boas-vindas
+│   │   ├── Login.jsx           # Modal de login
+│   │   ├── Register.jsx        # Modal de registro
+│   │   ├── Auth.css            # Estilos de autenticação
+│   │   └── AuthScreen.css      # Estilos da tela de boas-vindas
+│   ├── lib/
+│   │   └── supabase.js         # Configuração do Supabase
+│   ├── App.jsx                 # Componente principal
+│   ├── App.css                 # Estilos globais
+│   ├── main.jsx                # Ponto de entrada
+│   └── index.css               # Reset CSS
+├── package.json                # Dependências e scripts
+├── vite.config.js              # Configuração do Vite
+└── README.md                   # Este arquivo
 ```
 
 ## 🌟 Características Técnicas
@@ -134,16 +155,32 @@ FoodDidDo/
 - **Lazy Loading**: Carregamento otimizado de imagens
 - **Cache Inteligente**: Armazenamento local de traduções
 - **Filtros Eficientes**: Validação rápida de qualidade das receitas
+- **Sistema Híbrido**: Funcionamento offline com localStorage
 
 ### Acessibilidade
 - **Navegação por Teclado**: Suporte completo a navegação
 - **Contraste Adequado**: Cores que atendem padrões de acessibilidade
 - **Responsive Design**: Funciona em todos os dispositivos
+- **Feedback Visual**: Indicações claras de ações do usuário
 
 ### Manutenibilidade
 - **Código Modular**: Funções bem organizadas e reutilizáveis
+- **Context API**: Gerenciamento de estado global eficiente
 - **Comentários Detalhados**: Documentação inline do código
 - **Estrutura Clara**: Organização lógica dos componentes
+
+## 🔐 Sistema de Autenticação
+
+### Funcionalidades
+- **Registro de Usuários**: Criação de contas com validação
+- **Login Seguro**: Autenticação com email e senha
+- **Sessão Persistente**: Login mantido entre sessões
+- **Logout Completo**: Limpeza de dados e redirecionamento
+
+### Armazenamento
+- **localStorage**: Dados de usuário e refeições
+- **Validação**: Verificação de dados antes do salvamento
+- **Fallback**: Sistema robusto de recuperação de dados
 
 ## 📚 Desenvolvimento e Contexto Acadêmico
 
@@ -162,7 +199,22 @@ O FoodDidDo representa um projeto pessoal de desenvolvimento web que demonstra:
 - Integração com APIs externas
 - Design responsivo e UX/UI
 - Gerenciamento de estado complexo
+- Sistema de autenticação completo
 - Implementação de funcionalidades avançadas
+
+## 🚀 Funcionalidades em Destaque
+
+### ✨ Interface Moderna
+- **Tema Vermelho**: Design elegante e moderno
+- **Animações Suaves**: Emojis flutuantes e transições
+- **Cards Responsivos**: Layout adaptável para todos os dispositivos
+- **Modais Elegantes**: Interface de login/registro profissional
+
+### 🔧 Sistema Robusto
+- **Funcionamento Offline**: Dados salvos localmente
+- **Validação Completa**: Verificação de dados em tempo real
+- **Feedback Visual**: Alertas e confirmações claras
+- **Navegação Intuitiva**: Interface fácil de usar
 
 ## 🤝 Contribuições
 
@@ -178,4 +230,4 @@ Este projeto é de uso pessoal e educacional.
 
 ---
 
-*Desenvolvido com ❤️ usando React e Vite*
+*Desenvolvido com ❤️ usando React, Vite e muito café ☕*
