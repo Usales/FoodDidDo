@@ -1,10 +1,18 @@
 import { useState, useEffect } from 'react'
+import { AuthProvider, useAuth } from './components/AuthProvider'
+import Login from './components/Login'
+import Register from './components/Register'
+import AuthScreen from './components/AuthScreen'
+import { supabase } from './lib/supabase'
 import './App.css'
 
 function App() {
+  const { user, login, logout, isAuthenticated } = useAuth()
   const [activeNav, setActiveNav] = useState('home')
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState(null)
+  const [showLogin, setShowLogin] = useState(false)
+  const [showRegister, setShowRegister] = useState(false)
   const [formData, setFormData] = useState({
     title: '',
     calories: '',
@@ -13,61 +21,121 @@ function App() {
     status: 'fazer'
   })
   
-  const [meals, setMeals] = useState([
-    {
-      id: 1,
-      title: 'Torrada com abacate',
-      calories: '250Cal',
-      ingredients: 'Abacate, Pão, Ovos',
-      time: '15min',
-      status: 'em progresso'
-    },
-    {
-      id: 2,
-      title: 'Macarrão Alfredo',
-      calories: '450Cal',
-      ingredients: 'Frango, Macarrão, Molho Alfredo, Queijo',
-      time: '30min',
-      status: 'fazer'
-    },
-    {
-      id: 3,
-      title: 'Salada de Quinoa',
-      calories: '200Cal',
-      ingredients: 'Cenoura, Tomate, Minta',
-      time: '10min',
-      status: 'feita'
-    }
-  ])
+  const [meals, setMeals] = useState([])
 
-  const handleSaveMeal = () => {
-    if (!formData.title.trim()) return
-    
-    if (editingId) {
-      // Editar refeição existente
-      setMeals(meals.map(meal => 
-        meal.id === editingId 
-          ? { ...meal, ...formData }
-          : meal
-      ))
-      setEditingId(null)
-    } else {
-      // Adicionar nova refeição
-      const newMeal = {
-        id: Date.now(),
-        ...formData
+  // Carregar refeições do usuário quando ele fizer login
+  useEffect(() => {
+    const loadUserMeals = async () => {
+      if (user?.id) {
+        console.log('Carregando refeições para usuário:', user.id)
+        try {
+          // SISTEMA HÍBRIDO: Tentar Supabase primeiro, fallback para localStorage
+          console.log('Tentando carregar do Supabase...')
+          
+          const { data, error } = await supabase
+            .from('meals')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false })
+
+          if (error) {
+            console.error('Erro ao carregar do Supabase:', error)
+            throw error
+          }
+
+          console.log('✅ Carregado do Supabase com sucesso!')
+          setMeals(data || [])
+          
+        } catch (supabaseError) {
+          console.log('⚠️ Supabase falhou, carregando do localStorage...')
+          
+          // Fallback: carregar do localStorage
+          const savedMeals = JSON.parse(localStorage.getItem('fooddiddo_meals') || '[]')
+          const userMeals = savedMeals.filter(meal => meal.user_id === user.id)
+          console.log('Refeições carregadas do localStorage:', userMeals)
+          setMeals(userMeals)
+        }
+      } else {
+        console.log('Usuário não logado, limpando refeições')
+        setMeals([])
       }
-      setMeals([...meals, newMeal])
+    }
+
+    loadUserMeals()
+  }, [user?.id])
+
+  const handleSaveMeal = async () => {
+    console.log('🔍 handleSaveMeal chamado:', { formData, userId: user?.id, editingId })
+    
+    if (!formData.title.trim() || !user?.id) {
+      console.log('❌ Dados inválidos:', { title: formData.title, userId: user?.id })
+      return
     }
     
-    setFormData({
-      title: '',
-      calories: '',
-      ingredients: '',
-      time: '',
-      status: 'fazer'
-    })
-    setShowForm(false)
+    try {
+      if (editingId) {
+        // Editar refeição existente - APENAS LOCALSTORAGE
+        console.log('✏️ Editando refeição no localStorage...')
+        
+        const savedMeals = JSON.parse(localStorage.getItem('fooddiddo_meals') || '[]')
+        const updatedMeals = savedMeals.map(meal => 
+          meal.id === editingId 
+            ? { 
+                ...meal, 
+                title: formData.title,
+                calories: formData.calories,
+                ingredients: formData.ingredients,
+                time: formData.time,
+                status: formData.status,
+                updated_at: new Date().toISOString()
+              }
+            : meal
+        )
+        localStorage.setItem('fooddiddo_meals', JSON.stringify(updatedMeals))
+
+        setMeals(meals.map(meal => 
+          meal.id === editingId 
+            ? { ...meal, ...formData, updated_at: new Date().toISOString() }
+            : meal
+        ))
+        setEditingId(null)
+        alert('✅ Refeição editada com sucesso!')
+      } else {
+        // Adicionar nova refeição - APENAS LOCALSTORAGE
+        console.log('💾 Salvando refeição no localStorage...')
+        
+        const newMeal = {
+          id: Date.now().toString(),
+          user_id: user.id,
+          title: formData.title,
+          calories: formData.calories,
+          ingredients: formData.ingredients,
+          time: formData.time,
+          status: formData.status,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }
+        
+        const savedMeals = JSON.parse(localStorage.getItem('fooddiddo_meals') || '[]')
+        savedMeals.unshift(newMeal)
+        localStorage.setItem('fooddiddo_meals', JSON.stringify(savedMeals))
+        
+        setMeals([newMeal, ...meals])
+        alert('✅ Refeição salva com sucesso!')
+      }
+      
+      setFormData({
+        title: '',
+        calories: '',
+        ingredients: '',
+        time: '',
+        status: 'fazer'
+      })
+      setShowForm(false)
+    } catch (error) {
+      console.error('Erro ao salvar refeição:', error)
+      alert('❌ Erro ao salvar refeição!')
+    }
   }
 
   const handleEditMeal = (meal) => {
@@ -82,8 +150,48 @@ function App() {
     setShowForm(true)
   }
 
-  const handleDeleteMeal = (id) => {
+  const handleDeleteMeal = async (id) => {
+    if (!user?.id) return
+
+    console.log('🗑️ Deletando refeição do localStorage...')
+    
+    // Deletar do localStorage
+    const savedMeals = JSON.parse(localStorage.getItem('fooddiddo_meals') || '[]')
+    const updatedMeals = savedMeals.filter(meal => meal.id !== id)
+    localStorage.setItem('fooddiddo_meals', JSON.stringify(updatedMeals))
+
+    // Atualizar estado local
     setMeals(meals.filter(meal => meal.id !== id))
+    alert('✅ Refeição deletada com sucesso!')
+  }
+
+  // Funções de autenticação
+  const handleLogin = (userData) => {
+    login(userData)
+    setShowLogin(false)
+  }
+
+  const handleRegister = (userData) => {
+    login(userData)
+    setShowRegister(false)
+  }
+
+  const handleShowLogin = () => {
+    setShowLogin(true)
+    setShowRegister(false)
+  }
+
+  const handleShowRegister = () => {
+    setShowRegister(true)
+    setShowLogin(false)
+  }
+
+  const handleLogout = async () => {
+    console.log('🚪 Iniciando logout...')
+    await logout()
+    setMeals([]) // Limpar refeições
+    setActiveNav('home') // Voltar para home
+    console.log('✅ Logout concluído')
   }
 
   // Estados para a geladeira
@@ -296,8 +404,6 @@ function App() {
   const [loadingRecipeDetails, setLoadingRecipeDetails] = useState(false)
   
   // Estados para login
-  const [showLoginModal, setShowLoginModal] = useState(false)
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
 
 
   // Dicionário completo de traduções inglês → português
@@ -817,7 +923,6 @@ function App() {
   // Função para buscar todas as receitas das APIs e locais para a sidebar
   const fetchAllApiRecipes = async () => {
     setIsLoadingAllRecipes(true)
-    console.log('🌍 Buscando todas as receitas das APIs e locais...')
     
     try {
       const allRecipes = []
@@ -851,30 +956,9 @@ function App() {
         console.log('⚠️ Erro ao buscar receitas do TheMealDB:', error)
       }
       
-      // 2. Buscar receitas populares do Spoonacular (usando API key demo)
-      try {
-        const response = await fetch('https://api.spoonacular.com/recipes/random?number=10&apiKey=demo')
-        const data = await response.json()
-        
-        if (data.recipes && data.recipes.length > 0) {
-          data.recipes.forEach(recipe => {
-            allRecipes.push({
-              id: `spoonacular-${recipe.id}`,
-              title: translateToPortuguese(recipe.title) || recipe.title,
-              image: recipe.image || 'https://via.placeholder.com/300x200?text=Receita',
-              category: 'Internacional',
-              area: translateToPortuguese(recipe.cuisines?.[0] || recipe.dishTypes?.[0] || 'Internacional'),
-              source: 'Spoonacular',
-              apiType: 'spoonacular'
-            })
-          })
-        }
-      } catch (error) {
-        console.log('⚠️ Erro ao buscar receitas do Spoonacular:', error)
-      }
+      // 2. Spoonacular API desabilitada (erro 401 - API key inválida)
       
       // 3. Adicionar receitas locais
-      console.log('🏠 Adicionando receitas locais...')
       if (localRecipes.length > 0) {
         localRecipes.forEach(recipe => {
           allRecipes.push({
@@ -887,7 +971,6 @@ function App() {
             apiType: 'local'
           })
         })
-        console.log(`🏠 ${localRecipes.length} receitas locais adicionadas`)
       }
       
       // Remover duplicatas baseado no título
@@ -896,7 +979,6 @@ function App() {
       )
       
       setAllApiRecipes(uniqueRecipes)
-      console.log(`✅ ${uniqueRecipes.length} receitas carregadas para a sidebar (APIs + Locais)`)
       
     } catch (error) {
       console.error('❌ Erro ao buscar receitas das APIs:', error)
@@ -925,15 +1007,6 @@ function App() {
     }
   }
 
-  // Função para lidar com o login
-  const handleLogin = () => {
-    if (isLoggedIn) {
-      setIsLoggedIn(false)
-      setShowLoginModal(false)
-    } else {
-      setShowLoginModal(true)
-    }
-  }
 
   // Função para carregar receitas locais
   const loadLocalRecipes = async () => {
@@ -1912,6 +1985,16 @@ ${template.tips.join('\n')}
         }
   }
 
+  // Se não estiver autenticado, mostrar tela de bloqueio
+  if (!isAuthenticated) {
+    return (
+      <AuthScreen 
+        onLogin={handleLogin}
+        onRegister={handleRegister}
+      />
+    )
+  }
+
   return (
     <div className="app">
       <div className="main-layout">
@@ -1953,6 +2036,19 @@ ${template.tips.join('\n')}
             >
               <span>Receitas</span>
             </a>
+            
+            {/* Botão de Logout */}
+            <div className="sidebar-divider"></div>
+            <a 
+              href="#" 
+              className="nav-item logout-btn"
+              onClick={(e) => {
+                e.preventDefault()
+                handleLogout()
+              }}
+            >
+              <span>🚪 Sair</span>
+            </a>
           </nav>
         </div>
 
@@ -1962,9 +2058,23 @@ ${template.tips.join('\n')}
           <header className="header">
             <div className="header-actions">
               <button className="header-btn">🌙</button>
-              <button className="header-btn login-btn" onClick={handleLogin}>
-                {isLoggedIn ? '👤' : '👤'}
-              </button>
+              {isAuthenticated ? (
+                <div className="user-menu">
+                  <span className="user-name">Olá, {user?.name}</span>
+                  <button className="header-btn logout-btn" onClick={handleLogout} title="Sair">
+                    🚪
+                  </button>
+                </div>
+              ) : (
+                <div className="auth-buttons">
+                  <button className="header-btn login-btn" onClick={handleShowLogin} title="Entrar">
+                    👤
+                  </button>
+                  <button className="header-btn register-btn" onClick={handleShowRegister} title="Cadastrar">
+                    ✍️
+                  </button>
+                </div>
+              )}
             </div>
           </header>
 
@@ -2080,8 +2190,8 @@ ${template.tips.join('\n')}
                     {meals.map(meal => (
                       <div key={meal.id} className="meal-item">
                         <div className="meal-info">
-                          <h3 className="meal-title">{meal.title}</h3>
                           <div className="meal-details">
+                            <span className="meal-title">{meal.title}</span>
                             <span className="meal-calories">{meal.calories}</span>
                             <span className="meal-ingredients">{meal.ingredients}</span>
                             <span className="meal-time">{meal.time}</span>
@@ -2496,58 +2606,21 @@ ${template.tips.join('\n')}
         </div>
       )}
 
-      {/* Modal de Login */}
-      {showLoginModal && (
-        <div className="modal-overlay" onClick={() => setShowLoginModal(false)}>
-          <div className="login-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="login-header">
-              <h2>Entrar na Conta</h2>
-              <button 
-                className="close-btn"
-                onClick={() => setShowLoginModal(false)}
-              >
-                ✕
-              </button>
-            </div>
-            <div className="login-body">
-              <div className="login-form">
-                <div className="form-group">
-                  <label>Email:</label>
-                  <input 
-                    type="email" 
-                    placeholder="seu@email.com"
-                    className="login-input"
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Senha:</label>
-                  <input 
-                    type="password" 
-                    placeholder="Sua senha"
-                    className="login-input"
-                  />
-                </div>
-                <div className="login-actions">
-                  <button 
-                    className="login-submit-btn"
-                    onClick={() => {
-                      setIsLoggedIn(true)
-                      setShowLoginModal(false)
-                    }}
-                  >
-                    Entrar
-                  </button>
-                  <button 
-                    className="login-cancel-btn"
-                    onClick={() => setShowLoginModal(false)}
-                  >
-                    Cancelar
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+      {/* Modais de Autenticação */}
+      {showLogin && (
+        <Login
+          onLogin={handleLogin}
+          onSwitchToRegister={handleShowRegister}
+          onClose={() => setShowLogin(false)}
+        />
+      )}
+
+      {showRegister && (
+        <Register
+          onRegister={handleRegister}
+          onSwitchToLogin={handleShowLogin}
+          onClose={() => setShowRegister(false)}
+        />
       )}
     </div>
   )
