@@ -944,6 +944,7 @@ function App() {
         setLocalRecipes(localRecipesData)
         console.log('✅ Receitas locais carregadas:', localRecipesData.length)
         console.log('📋 Receitas locais:', localRecipesData.map(r => r.title))
+        console.log('🥩 Receitas de carne bovina:', localRecipesData.filter(r => r.ingredient === 'Carne Bovina').map(r => r.title))
       } else {
         console.log('⚠️ Arquivo de receitas locais não encontrado')
         setLocalRecipes([])
@@ -1720,6 +1721,7 @@ ${template.tips.join('\n')}
       console.log('🏠 Total de receitas locais disponíveis:', localRecipes.length)
       console.log('🏠 Ingredientes selecionados pelo usuário:', selectedIngredients.map(ing => ing.name))
       console.log('🏠 Receitas de milho disponíveis:', localRecipes.filter(r => r.ingredient === 'Milho').map(r => r.title))
+      console.log('🥩 Receitas de carne bovina disponíveis:', localRecipes.filter(r => r.ingredient === 'Carne Bovina').map(r => r.title))
       
       const localRecipesToAdd = localRecipes.filter(recipe => {
         // Filtrar receitas locais que tenham ingredientes correspondentes
@@ -1740,6 +1742,8 @@ ${template.tips.join('\n')}
           const englishName = translateToEnglish(userIng)
           const matches = recipeIngredients.includes(userIng) || recipeIngredients.includes(englishName)
           console.log(`🏠 ${userIng} (${englishName}) -> ${matches}`)
+          console.log(`🏠 Verificando: "${userIng}" em "${recipeIngredients}"`)
+          console.log(`🏠 Verificando: "${englishName}" em "${recipeIngredients}"`)
           return matches
         })
         
@@ -1759,6 +1763,22 @@ ${template.tips.join('\n')}
           console.log(`🏠 Receita de milho sem match direto, mas usuário tem milho: ${hasMilho}`)
           if (hasMilho) {
             console.log(`🏠 ${recipe.title} -> INCLUÍDA (receita de milho)`)
+            return true
+          }
+        }
+        
+        // Se não encontrou match, verificar se é uma receita de carne bovina e o usuário selecionou carne bovina
+        if (!hasMatch && recipe.ingredient && recipe.ingredient === 'Carne Bovina') {
+          const hasCarneBovina = userIngredients.some(ing => 
+            ing.toLowerCase().includes('carne bovina') || 
+            ing.toLowerCase().includes('beef') || 
+            ing.toLowerCase().includes('carne')
+          )
+          console.log(`🏠 Receita de carne bovina sem match direto, mas usuário tem carne bovina: ${hasCarneBovina}`)
+          console.log(`🏠 Ingrediente da receita: ${recipe.ingredient}`)
+          console.log(`🏠 Ingredientes do usuário: ${userIngredients}`)
+          if (hasCarneBovina) {
+            console.log(`🏠 ${recipe.title} -> INCLUÍDA (receita de carne bovina)`)
             return true
           }
         }
