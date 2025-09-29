@@ -229,5 +229,3 @@ Este projeto é de uso pessoal e educacional.
 **Gabriel** - Desenvolvimento Frontend e Integração de APIs
 
 ---
-
-*Desenvolvido com ❤️ usando React, Vite e muito café ☕*
