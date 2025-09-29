@@ -258,13 +258,9 @@ function App() {
     { id: 55, name: 'Salsicha', emoji: '🌭' },
     { id: 56, name: 'Linguiça', emoji: '🌭' },
     { id: 57, name: 'Tofu', emoji: '🧀' },
-    { id: 58, name: 'Tempeh', emoji: '🫘' },
     
     // Frutos do Mar
-    { id: 59, name: 'Salmão', emoji: '🐟' },
-    { id: 60, name: 'Atum', emoji: '🐟' },
-    { id: 61, name: 'Bacalhau', emoji: '🐟' },
-    { id: 62, name: 'Sardinha', emoji: '🐟' },
+    { id: 59, name: 'Peixe', emoji: '🐟' },
     { id: 63, name: 'Lula', emoji: '🦑' },
     { id: 64, name: 'Polvo', emoji: '🐙' },
     { id: 65, name: 'Mexilhão', emoji: '🦪' },
@@ -292,11 +288,7 @@ function App() {
     { id: 83, name: 'Ameixa', emoji: '🟣' },
     { id: 84, name: 'Cereja', emoji: '🍒' },
     { id: 85, name: 'Framboesa', emoji: '🫐' },
-    { id: 86, name: 'Mirtilo', emoji: '🫐' },
-    { id: 87, name: 'Amora', emoji: '🫐' },
     { id: 88, name: 'Coco', emoji: '🥥' },
-    { id: 89, name: 'Tâmara', emoji: '🫒' },
-    { id: 90, name: 'Figo', emoji: '🟫' },
     { id: 91, name: 'Romã', emoji: '🍎' },
     { id: 92, name: 'Caqui', emoji: '🍅' },
     
@@ -311,64 +303,24 @@ function App() {
     { id: 100, name: 'Leite de Coco', emoji: '🥥' },
     
     // Grãos e Cereais
-    { id: 101, name: 'Cevada', emoji: '🌾' },
-    { id: 102, name: 'Trigo', emoji: '🌾' },
-    { id: 103, name: 'Centeio', emoji: '🌾' },
-    { id: 104, name: 'Amaranto', emoji: '🌾' },
-    { id: 105, name: 'Chia', emoji: '🌱' },
-    { id: 106, name: 'Linhaça', emoji: '🌱' },
-    { id: 107, name: 'Gergelim', emoji: '🌱' },
     { id: 108, name: 'Nozes', emoji: '🥜' },
     { id: 109, name: 'Amêndoas', emoji: '🥜' },
     { id: 110, name: 'Castanha', emoji: '🥜' },
-    { id: 111, name: 'Avelã', emoji: '🥜' },
-    { id: 112, name: 'Pistache', emoji: '🥜' },
     
     // Temperos e Ervas
     { id: 113, name: 'Alecrim', emoji: '🌿' },
     { id: 114, name: 'Tomilho', emoji: '🌿' },
     { id: 115, name: 'Sálvia', emoji: '🌿' },
-    { id: 116, name: 'Coentro', emoji: '🌿' },
-    { id: 117, name: 'Hortelã', emoji: '🌿' },
     { id: 118, name: 'Louro', emoji: '🍃' },
     { id: 119, name: 'Gengibre', emoji: '🫚' },
     { id: 120, name: 'Alho-poró', emoji: '🧄' },
     { id: 121, name: 'Cebolinha', emoji: '🧅' },
     { id: 122, name: 'Cebola Roxa', emoji: '🧅' },
-    { id: 123, name: 'Alho Negro', emoji: '🧄' },
-    { id: 124, name: 'Pimenta-do-reino', emoji: '⚫' },
-    { id: 125, name: 'Pimenta Caiena', emoji: '🌶️' },
-    { id: 126, name: 'Páprica', emoji: '🌶️' },
-    { id: 127, name: 'Cominho', emoji: '🟤' },
-    { id: 128, name: 'Cardamomo', emoji: '🟢' },
-    { id: 129, name: 'Cravo', emoji: '🟤' },
-    { id: 130, name: 'Noz-moscada', emoji: '🟤' },
     
-    // Molhos e Condimentos
-    { id: 131, name: 'Molho de Soja', emoji: '🫗' },
-    { id: 132, name: 'Vinagre', emoji: '🫗' },
-    { id: 133, name: 'Vinagre Balsâmico', emoji: '🫗' },
-    { id: 134, name: 'Mostarda', emoji: '🟡' },
-    { id: 135, name: 'Ketchup', emoji: '🍅' },
-    { id: 136, name: 'Maionese', emoji: '🟡' },
-    { id: 137, name: 'Worcestershire', emoji: '🫗' },
-    { id: 138, name: 'Tabasco', emoji: '🌶️' },
-    { id: 139, name: 'Sriracha', emoji: '🌶️' },
-    { id: 140, name: 'Tahine', emoji: '🫘' },
     
     // Legumes e Tubérculos
     { id: 141, name: 'Batata Doce', emoji: '🍠' },
-    { id: 142, name: 'Inhame', emoji: '🍠' },
-    { id: 143, name: 'Aipim', emoji: '🍠' },
-    { id: 144, name: 'Cenoura Baby', emoji: '🥕' },
-    { id: 145, name: 'Nabo Japonês', emoji: '🥕' },
-    { id: 146, name: 'Rabanete Branco', emoji: '🥕' },
     
-    // Frutas Secas
-    { id: 147, name: 'Uva Passa', emoji: '🍇' },
-    { id: 148, name: 'Ameixa Seca', emoji: '🟣' },
-    { id: 149, name: 'Damasco Seco', emoji: '🟠' },
-    { id: 150, name: 'Figo Seco', emoji: '🟫' }
   ]
 
   const handleIngredientToggle = (ingredientId) => {
@@ -410,7 +362,7 @@ function App() {
   const translationDictionary = {
     // Ingredientes principais
     'chicken': 'frango', 'beef': 'bovina', 'pork': 'porco', 'lamb': 'cordeiro',
-    'fish': 'peixe', 'salmon': 'salmão', 'tuna': 'atum', 'cod': 'bacalhau',
+    'fish': 'peixe', 'salmon': 'peixe', 'tuna': 'peixe', 'cod': 'peixe',
     'shrimp': 'camarão', 'lobster': 'lagosta', 'crab': 'caranguejo',
     'egg': 'ovo', 'eggs': 'ovos', 'milk': 'leite', 'cream': 'creme',
     'cheese': 'queijo', 'butter': 'manteiga', 'yogurt': 'iogurte',
@@ -432,28 +384,27 @@ function App() {
     'orange': 'laranja', 'oranges': 'laranjas', 'lemon': 'limão', 'lemons': 'limões',
     'lime': 'lima', 'limes': 'limas', 'lime juice': 'suco de lima',
     'strawberry': 'morango', 'strawberries': 'morangos',
-    'blueberry': 'mirtilo', 'blueberries': 'mirtilos',
     'grape': 'uva', 'grapes': 'uvas', 'watermelon': 'melancia',
     'pineapple': 'abacaxi', 'mango': 'manga', 'peach': 'pêssego',
     'avocado': 'abacate', 'coconut': 'coco',
     
     // Grãos e cereais
     'rice': 'arroz', 'pasta': 'macarrão', 'bread': 'pão', 'flour': 'farinha',
-    'quinoa': 'quinoa', 'oats': 'aveia', 'barley': 'cevada',
+    'quinoa': 'quinoa', 'oats': 'aveia',
     'lentils': 'lentilhas', 'chickpeas': 'grão-de-bico',
     
     // Temperos e ervas
-    'salt': 'sal', 'pepper': 'pimenta', 'black pepper': 'pimenta-do-reino',
+    'salt': 'sal', 'pepper': 'pimenta',
     'oregano': 'orégano', 'basil': 'manjericão', 'parsley': 'salsa',
-    'cilantro': 'coentro', 'thyme': 'tomilho', 'rosemary': 'alecrim',
+    'thyme': 'tomilho', 'rosemary': 'alecrim',
     'bay leaves': 'folhas de louro', 'cinnamon': 'canela',
-    'ginger': 'gengibre', 'cumin': 'cominho', 'paprika': 'páprica',
-    'turmeric': 'açafrão', 'cardamom': 'cardamomo',
+    'ginger': 'gengibre',
+    'turmeric': 'açafrão',
     
     // Líquidos e óleos
     'water': 'água', 'olive oil': 'azeite de oliva', 'vegetable oil': 'óleo vegetal',
-    'coconut oil': 'óleo de coco', 'vinegar': 'vinagre',
-    'soy sauce': 'molho de soja', 'honey': 'mel', 'sugar': 'açúcar',
+    'coconut oil': 'óleo de coco',
+    'honey': 'mel', 'sugar': 'açúcar',
     'brown sugar': 'açúcar mascavo', 'vanilla': 'baunilha',
     'jam': 'geleia', 'jelly': 'geleia', 'apricot': 'damasco', 'apricot jam': 'geleia de damasco',
     
@@ -1622,7 +1573,6 @@ PASSO 1: Esta receita requer instruções detalhadas que não estão disponívei
         { name: 'Alho', measure: '3 dentes picados' },
         { name: 'Cebola', measure: '1 unidade média' },
         { name: 'Sal', measure: 'a gosto' },
-        { name: 'Pimenta-do-reino', measure: 'a gosto' },
         { name: 'Temperos frescos', measure: 'a gosto' }
       ],
       steps: [
