@@ -1856,6 +1856,52 @@ ${template.tips.join('\n')}
           }
         }
         
+        // Se não encontrou match, verificar se é uma receita de pimentão e o usuário selecionou pimentão
+        if (!hasMatch && recipe.ingredient && recipe.ingredient === 'Pimentão') {
+          const hasPimentao = userIngredients.some(ing => 
+            ing.toLowerCase().includes('pimentão') || 
+            ing.toLowerCase().includes('bell pepper') || 
+            ing.toLowerCase().includes('pimenta')
+          )
+          console.log(`🏠 Receita de pimentão sem match direto, mas usuário tem pimentão: ${hasPimentao}`)
+          console.log(`🏠 Ingrediente da receita: ${recipe.ingredient}`)
+          console.log(`🏠 Ingredientes do usuário: ${userIngredients}`)
+          if (hasPimentao) {
+            console.log(`🏠 ${recipe.title} -> INCLUÍDA (receita de pimentão)`)
+            return true
+          }
+        }
+        
+        // Se não encontrou match, verificar se é uma receita de pepino e o usuário selecionou pepino
+        if (!hasMatch && recipe.ingredient && recipe.ingredient === 'Pepino') {
+          const hasPepino = userIngredients.some(ing => 
+            ing.toLowerCase().includes('pepino') || 
+            ing.toLowerCase().includes('cucumber')
+          )
+          console.log(`🏠 Receita de pepino sem match direto, mas usuário tem pepino: ${hasPepino}`)
+          console.log(`🏠 Ingrediente da receita: ${recipe.ingredient}`)
+          console.log(`🏠 Ingredientes do usuário: ${userIngredients}`)
+          if (hasPepino) {
+            console.log(`🏠 ${recipe.title} -> INCLUÍDA (receita de pepino)`)
+            return true
+          }
+        }
+        
+        // Se não encontrou match, verificar se é uma receita de alface e o usuário selecionou alface
+        if (!hasMatch && recipe.ingredient && recipe.ingredient === 'Alface') {
+          const hasAlface = userIngredients.some(ing => 
+            ing.toLowerCase().includes('alface') || 
+            ing.toLowerCase().includes('lettuce')
+          )
+          console.log(`🏠 Receita de alface sem match direto, mas usuário tem alface: ${hasAlface}`)
+          console.log(`🏠 Ingrediente da receita: ${recipe.ingredient}`)
+          console.log(`🏠 Ingredientes do usuário: ${userIngredients}`)
+          if (hasAlface) {
+            console.log(`🏠 ${recipe.title} -> INCLUÍDA (receita de alface)`)
+            return true
+          }
+        }
+        
         console.log(`🏠 ${recipe.title} -> ${hasMatch ? 'INCLUÍDA' : 'EXCLUÍDA'}`)
         return hasMatch
       })
