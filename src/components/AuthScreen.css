@@ -281,6 +281,10 @@
 .auth-header {
   margin-bottom: 2rem;
   position: relative;
+  background: var(--primary-color);
+  padding: 1.5rem;
+  border-radius: 16px;
+  border: 1px solid var(--primary-dark);
 }
 
 .auth-logo-container {
@@ -288,10 +292,11 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background: var(--bg-secondary);
+  background: var(--bg-card);
   padding: 2rem;
   border-radius: 20px;
-  border: 1px solid var(--border-primary);
+  border: 2px solid var(--text-inverse);
+  box-shadow: var(--shadow-lg);
 }
 
 .auth-logo-main {
