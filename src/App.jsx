@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react'
 import { AuthProvider, useAuth } from './components/AuthProvider'
+import { ThemeProvider } from './contexts/ThemeContext'
 import Login from './components/Login'
 import Register from './components/Register'
 import AuthScreen from './components/AuthScreen'
+import ThemeToggle from './components/ThemeToggle'
 import { supabase } from './lib/supabase'
+import './styles/themes.css'
 import './App.css'
 
 function App() {
@@ -2075,7 +2078,7 @@ ${template.tips.join('\n')}
               ☰
             </button>
             <div className="header-actions">
-              <button className="header-btn">🌙</button>
+              <ThemeToggle className="header" />
               {isAuthenticated ? (
                 <div className="user-menu">
                   <span className="user-name">Olá, {user?.name}</span>
@@ -2644,4 +2647,13 @@ ${template.tips.join('\n')}
   )
 }
 
-export default App
+// Wrapper com ThemeProvider
+const AppWithTheme = () => {
+  return (
+    <ThemeProvider>
+      <App />
+    </ThemeProvider>
+  )
+}
+
+export default AppWithTheme

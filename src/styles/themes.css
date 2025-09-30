@@ -1,0 +1,112 @@
+/* Variáveis CSS para Temas */
+
+/* Tema Claro (Padrão) */
+:root {
+  /* Cores principais */
+  --primary-color: #dc2626;
+  --primary-dark: #b91c1c;
+  --primary-light: #ef4444;
+  --primary-lighter: #f87171;
+  --primary-lightest: #fca5a5;
+
+  /* Cores de fundo */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --bg-tertiary: #f1f5f9;
+  --bg-card: #ffffff;
+  --bg-overlay: rgba(0, 0, 0, 0.5);
+
+  /* Cores de texto */
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --text-tertiary: #94a3b8;
+  --text-inverse: #ffffff;
+  --text-muted: #64748b;
+
+  /* Cores de borda */
+  --border-primary: #e2e8f0;
+  --border-secondary: #cbd5e1;
+  --border-focus: #dc2626;
+
+  /* Cores de sombra */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+
+  /* Cores de status */
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --info: #3b82f6;
+
+  /* Cores de input */
+  --input-bg: #ffffff;
+  --input-border: #d1d5db;
+  --input-focus: #dc2626;
+  --input-text: #1e293b;
+  --input-placeholder: #9ca3af;
+}
+
+/* Tema Escuro */
+.dark-theme {
+  /* Cores principais (mantém o vermelho) */
+  --primary-color: #dc2626;
+  --primary-dark: #b91c1c;
+  --primary-light: #ef4444;
+  --primary-lighter: #f87171;
+  --primary-lightest: #fca5a5;
+
+  /* Cores de fundo */
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-tertiary: #334155;
+  --bg-card: #1e293b;
+  --bg-overlay: rgba(0, 0, 0, 0.8);
+
+  /* Cores de texto */
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-tertiary: #94a3b8;
+  --text-inverse: #0f172a;
+  --text-muted: #64748b;
+
+  /* Cores de borda */
+  --border-primary: #334155;
+  --border-secondary: #475569;
+  --border-focus: #dc2626;
+
+  /* Cores de sombra */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.6);
+
+  /* Cores de status */
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --info: #3b82f6;
+
+  /* Cores de input */
+  --input-bg: #334155;
+  --input-border: #475569;
+  --input-focus: #dc2626;
+  --input-text: #f8fafc;
+  --input-placeholder: #94a3b8;
+}
+
+/* Aplicar tema ao body */
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Transições suaves para mudança de tema */
+* {
+  transition: background-color 0.3s ease, 
+              color 0.3s ease, 
+              border-color 0.3s ease,
+              box-shadow 0.3s ease;
+}

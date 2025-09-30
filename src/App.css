@@ -1,7 +1,8 @@
 .app {
   display: flex;
   min-height: 100vh;
-  background-color: var(--bg-light);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
 }
 
 /* Layout Principal */
@@ -33,14 +34,15 @@
   top: 0;
   width: 280px;
   height: 100vh;
-  background: rgba(255, 255, 255, 0.8);
+  background: var(--bg-card);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-right: 1px solid rgba(255, 255, 255, 0.2);
+  border-right: 1px solid var(--border-primary);
   z-index: 1000;
   overflow-y: auto;
   transform: translateX(-100%); /* Mobile-first: escondida por padrão */
   transition: transform 0.3s ease;
+  color: var(--text-primary);
 }
 
 .sidebar.open {
@@ -88,7 +90,7 @@
   align-items: center;
   padding: 0.75rem 1.5rem;
   margin: 0.25rem 1rem;
-  color: var(--gray-600);
+  color: var(--text-secondary);
   text-decoration: none;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   border-radius: 12px;
@@ -97,8 +99,8 @@
 }
 
 .nav-item:hover {
-  background-color: rgba(0, 0, 0, 0.05);
-  color: var(--gray-800);
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
   transform: translateY(-1px);
 }
 
@@ -137,17 +139,18 @@
 
 /* Header */
 .header {
-  background: rgba(255, 255, 255, 0.8);
+  background: var(--bg-card);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   padding: 1rem 2rem;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  border-bottom: 1px solid var(--border-primary);
   display: flex;
   align-items: center;
   justify-content: flex-end;
   position: sticky;
   top: 0;
   z-index: 100;
+  color: var(--text-primary);
 }
 
 /* Menu Toggle - Oculto por padrão */
@@ -413,21 +416,22 @@
 }
 
 .recipe-card {
-  background: white;
+  background: var(--bg-card);
   border-radius: 12px; /* Mobile-first: bordas menores */
   overflow: hidden;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Mobile-first: sombra menor */
-  border: 2px solid transparent;
+  box-shadow: var(--shadow-sm); /* Mobile-first: sombra menor */
+  border: 2px solid var(--border-primary);
   cursor: pointer;
   width: 100%; /* Garantir que não transborde */
   max-width: 100%;
+  color: var(--text-primary);
 }
 
 .recipe-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-  border-color: var(--red-vivid);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--primary-color);
 }
 
 .recipe-image-container {
@@ -2490,8 +2494,8 @@
 
 .recipe-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-  border-color: var(--red-vivid);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--primary-color);
 }
 
 .recipe-image-container {
