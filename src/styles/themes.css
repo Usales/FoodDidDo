@@ -57,23 +57,23 @@
   --primary-lighter: #f87171;
   --primary-lightest: #fca5a5;
 
-  /* Cores de fundo */
-  --bg-primary: #0f172a;
-  --bg-secondary: #1e293b;
-  --bg-tertiary: #334155;
-  --bg-card: #1e293b;
-  --bg-overlay: rgba(0, 0, 0, 0.8);
+  /* Cores de fundo - mais escuras */
+  --bg-primary: #0a0a0a;
+  --bg-secondary: #111111;
+  --bg-tertiary: #1a1a1a;
+  --bg-card: #0f0f0f;
+  --bg-overlay: rgba(0, 0, 0, 0.9);
 
-  /* Cores de texto */
-  --text-primary: #f8fafc;
-  --text-secondary: #cbd5e1;
-  --text-tertiary: #94a3b8;
-  --text-inverse: #0f172a;
-  --text-muted: #64748b;
+  /* Cores de texto - mais contrastantes */
+  --text-primary: #ffffff;
+  --text-secondary: #e2e8f0;
+  --text-tertiary: #a0aec0;
+  --text-inverse: #000000;
+  --text-muted: #718096;
 
-  /* Cores de borda */
-  --border-primary: #334155;
-  --border-secondary: #475569;
+  /* Cores de borda - mais visíveis */
+  --border-primary: #2d3748;
+  --border-secondary: #4a5568;
   --border-focus: #dc2626;
 
   /* Cores de sombra */
@@ -88,12 +88,12 @@
   --error: #ef4444;
   --info: #3b82f6;
 
-  /* Cores de input */
-  --input-bg: #334155;
-  --input-border: #475569;
+  /* Cores de input - mais escuras */
+  --input-bg: #1a1a1a;
+  --input-border: #2d3748;
   --input-focus: #dc2626;
-  --input-text: #f8fafc;
-  --input-placeholder: #94a3b8;
+  --input-text: #ffffff;
+  --input-placeholder: #a0aec0;
 }
 
 /* Aplicar tema ao body */

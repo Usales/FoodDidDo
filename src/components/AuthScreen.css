@@ -316,8 +316,8 @@
 }
 
 .feature-card {
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: var(--bg-card);
+  border: 1px solid var(--border-primary);
   border-radius: 16px;
   padding: 1.5rem;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -326,6 +326,7 @@
   backdrop-filter: blur(10px);
   display: flex;
   align-items: center;
+  color: var(--text-primary);
   gap: 1rem;
   text-align: left;
   box-sizing: border-box;
@@ -345,10 +346,9 @@
 
 .feature-card:hover {
   transform: translateY(-8px) scale(1.02);
-  box-shadow: 
-    0 20px 40px rgba(0, 0, 0, 0.1),
-    0 0 0 1px rgba(255, 255, 255, 0.3);
-  border-color: rgba(102, 126, 234, 0.3);
+  box-shadow: var(--shadow-xl);
+  border-color: var(--primary-color);
+  background: var(--bg-secondary);
 }
 
 .feature-icon {
@@ -620,6 +620,7 @@
   .auth-content {
     align-items: center; /* Desktop: centralizar verticalmente */
     min-height: 100vh; /* Desktop: altura total da tela */
+    padding: 2rem; /* Desktop: padding maior para evitar corte */
   }
 }
 
