@@ -226,6 +226,6 @@ Este projeto é de uso pessoal e educacional.
 
 ## 👨‍💻 Desenvolvedor
 
-**Gabriel** - Desenvolvimento Frontend e Integração de APIs
+**Gabriel Henriques Sales** - Desenvolvimento completo
 
 ---
