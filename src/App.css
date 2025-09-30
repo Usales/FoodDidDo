@@ -301,16 +301,16 @@
 
 .hero-title {
   font-family: 'Poppins', sans-serif;
-  color: #0dc42b;
+  color: var(--success);
   font-size: 2.5rem;
   font-weight: 700;
   margin-bottom: 1rem;
   line-height: 1.2;
-  text-shadow: 1px 1px 0px #027c16, -1px -1px 0px #027c16, 1px -1px 0px #027c16, -1px 1px 0px #027c16;
+  text-shadow: 1px 1px 0px var(--success), -1px -1px 0px var(--success), 1px -1px 0px var(--success), -1px 1px 0px var(--success);
 }
 
 .hero-subtitle {
-  text-shadow: 1px 1px 0px #000000, -1px -1px 0px #000000, 1px -1px 0px #000000, -1px 1px 0px #000000;
+  text-shadow: 1px 1px 0px var(--text-primary), -1px -1px 0px var(--text-primary), 1px -1px 0px var(--text-primary), -1px 1px 0px var(--text-primary);
   font-size: 1.2rem;
   opacity: 0.9;
   margin-bottom: 2rem;
@@ -319,7 +319,7 @@
 
 .hero-btn {
   background: white;
-  color: #0dc42b;
+  color: var(--success);
   font-weight: 600;
   padding: 0.875rem 2rem;
   border-radius: 12px;
@@ -344,7 +344,7 @@
 
 /* Your Meal Today */
 .meal-today {
-  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
   border-radius: 20px;
   padding: 2rem;
   position: relative;
@@ -535,7 +535,7 @@
 }
 
 .recipe-details-btn:hover {
-  background: linear-gradient(135deg, var(--red-dark), #991b1b);
+  background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
 }
@@ -742,7 +742,7 @@
 
 .edit-btn {
   background: rgba(59, 130, 246, 0.1);
-  color: #3b82f6;
+  color: var(--info);
 }
 
 .edit-btn:hover {
@@ -752,7 +752,7 @@
 
 .delete-btn {
   background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
+  color: var(--error);
 }
 
 .delete-btn:hover {
@@ -769,18 +769,18 @@
 }
 
 .status-fazer {
-  background: #dbeafe;
-  color: #2563eb;
+  background: var(--bg-secondary);
+  color: var(--info);
 }
 
 .status-em-progresso {
-  background: #fef3c7;
-  color: #d97706;
+  background: var(--bg-tertiary);
+  color: var(--warning);
 }
 
 .status-feita {
-  background: #dcfce7;
-  color: #16a34a;
+  background: var(--bg-tertiary);
+  color: var(--success);
 }
 
 /* Responsive */
@@ -1416,7 +1416,7 @@
 
 .api-stat.international {
   background: rgba(59, 130, 246, 0.1);
-  color: #3b82f6;
+  color: var(--info);
   border: 1px solid rgba(59, 130, 246, 0.2);
 }
 
@@ -1775,18 +1775,18 @@
 }
 
 .status-progress {
-  background: #fef3c7;
-  color: #d97706;
+  background: var(--bg-tertiary);
+  color: var(--warning);
 }
 
 .status-todo {
-  background: #dbeafe;
-  color: #2563eb;
+  background: var(--bg-secondary);
+  color: var(--info);
 }
 
 .status-completed {
-  background: #dcfce7;
-  color: #16a34a;
+  background: var(--bg-tertiary);
+  color: var(--success);
 }
 
 /* Right Sidebar */
@@ -2572,7 +2572,7 @@
 }
 
 .view-recipe-btn:hover {
-  background: linear-gradient(135deg, var(--red-dark), #991b1b);
+  background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
 }
