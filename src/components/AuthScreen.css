@@ -288,10 +288,14 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  background: var(--bg-secondary);
+  padding: 2rem;
+  border-radius: 20px;
+  border: 1px solid var(--border-primary);
 }
 
 .auth-logo-main {
-  height: 150px;
+  height: 200px;
   width: auto;
   max-width: 100%;
   object-fit: contain;
@@ -615,13 +619,18 @@
 /* Desktop: 1024px+ */
 @media (min-width: 1024px) {
   .auth-screen {
-    align-items: center; /* Desktop: centralizar verticalmente */
+    align-items: flex-start; /* Desktop: alinhar ao topo */
+    padding-top: 2rem; /* Desktop: padding moderado no topo da tela */
   }
   
   .auth-content {
     align-items: center; /* Desktop: centralizar verticalmente */
     min-height: 100vh; /* Desktop: altura total da tela */
-    padding: 3rem 2rem; /* Desktop: padding maior para evitar corte */
+    padding: 4rem 2rem 2rem 2rem; /* Desktop: padding moderado no topo */
+  }
+  
+  .auth-container {
+    margin: 3rem auto 2rem auto; /* Desktop: margem moderada no topo */
   }
 }
 
@@ -642,7 +651,7 @@
   }
   
   .auth-logo-main {
-    height: 100px;
+    height: 150px;
   }
   
   .features-grid {
@@ -722,7 +731,7 @@
   }
   
   .auth-logo-main {
-    height: 80px;
+    height: 120px;
   }
   
   .feature-card {
