@@ -59,7 +59,13 @@ const Login = ({ onLogin, onSwitchToRegister, onClose }) => {
       })
       
       if (error) {
-        setErrors({ general: 'Email ou senha incorretos' })
+        if (error.message.includes('Email not confirmed')) {
+          setErrors({ general: 'Por favor, verifique seu email e clique no link de confirmação antes de fazer login.' })
+        } else if (error.message.includes('Invalid login credentials')) {
+          setErrors({ general: 'Email ou senha incorretos' })
+        } else {
+          setErrors({ general: error.message })
+        }
         return
       }
 

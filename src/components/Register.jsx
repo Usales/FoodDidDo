@@ -87,20 +87,24 @@ const Register = ({ onRegister, onSwitchToLogin, onClose }) => {
       }
 
       if (authData.user) {
-        // Criar perfil do usuário na tabela profiles
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert([
-            {
-              id: authData.user.id,
-              name: formData.name.trim(),
-              email: formData.email.trim(),
-              created_at: new Date().toISOString()
-            }
-          ])
+        // Tentar criar perfil do usuário na tabela profiles (opcional)
+        try {
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .insert([
+              {
+                id: authData.user.id,
+                name: formData.name.trim(),
+                email: formData.email.trim(),
+                created_at: new Date().toISOString()
+              }
+            ])
 
-        if (profileError) {
-          console.error('Erro ao criar perfil:', profileError)
+          if (profileError) {
+            console.warn('Aviso: Não foi possível criar perfil na tabela profiles:', profileError.message)
+          }
+        } catch (error) {
+          console.warn('Aviso: Tabela profiles não existe ou não está acessível:', error.message)
         }
 
         // Salvar dados do usuário logado
