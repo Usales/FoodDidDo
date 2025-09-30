@@ -15,16 +15,18 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  margin-left: 280px; /* Espaço para sidebar fixa */
+  margin-left: 0; /* Mobile-first: sem margem por padrão */
+  transition: margin-left 0.3s ease;
 }
 
 .main-content {
   flex: 1;
-  padding: 2rem;
-  max-width: 100%; /* Sem limitação, sidebar direita removida */
+  padding: 1rem; /* Mobile-first: padding menor */
+  max-width: 100%;
+  overflow-x: hidden; /* Evitar scroll horizontal */
 }
 
-/* Sidebar Esquerda */
+/* Sidebar Esquerda - Mobile First */
 .sidebar {
   position: fixed;
   left: 0;
@@ -37,6 +39,31 @@
   border-right: 1px solid rgba(255, 255, 255, 0.2);
   z-index: 1000;
   overflow-y: auto;
+  transform: translateX(-100%); /* Mobile-first: escondida por padrão */
+  transition: transform 0.3s ease;
+}
+
+.sidebar.open {
+  transform: translateX(0); /* Mostrar quando aberta */
+}
+
+/* Overlay para mobile */
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.sidebar-overlay.open {
+  opacity: 1;
+  visibility: visible;
 }
 
 .sidebar-header {
@@ -377,22 +404,24 @@
   font-size: 0.875rem;
 }
 
-/* Recipe Cards - Layout Principal */
+/* Recipe Cards - Layout Principal - Mobile First */
 .recipe-cards {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
-  margin-bottom: 2rem;
+  grid-template-columns: 1fr; /* Mobile-first: 1 coluna */
+  gap: 1rem; /* Gap menor para mobile */
+  margin-bottom: 1rem;
 }
 
 .recipe-card {
   background: white;
-  border-radius: 16px;
+  border-radius: 12px; /* Mobile-first: bordas menores */
   overflow: hidden;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Mobile-first: sombra menor */
   border: 2px solid transparent;
   cursor: pointer;
+  width: 100%; /* Garantir que não transborde */
+  max-width: 100%;
 }
 
 .recipe-card:hover {
@@ -403,7 +432,7 @@
 
 .recipe-image-container {
   position: relative;
-  height: 200px;
+  height: 180px; /* Mobile-first: altura menor */
   overflow: hidden;
 }
 
@@ -751,6 +780,34 @@
 }
 
 /* Responsive */
+/* Desktop: 1024px+ */
+@media (min-width: 1024px) {
+  .content-area {
+    margin-left: 280px; /* Mostrar sidebar em desktop */
+  }
+  
+  .sidebar {
+    transform: translateX(0); /* Sempre visível em desktop */
+  }
+  
+  .main-content {
+    padding: 2rem; /* Padding maior em desktop */
+  }
+  
+  .recipe-cards {
+    grid-template-columns: repeat(2, 1fr); /* 2 colunas em desktop */
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+}
+
+/* Desktop grande: 1400px+ */
+@media (min-width: 1400px) {
+  .recipe-cards {
+    grid-template-columns: repeat(3, 1fr); /* 3 colunas em telas grandes */
+  }
+}
+
 /* Responsividade - Melhorada */
 @media (max-width: 1400px) {
   .content-area {
@@ -825,7 +882,7 @@
   }
   
   .main-content {
-    padding: 1rem;
+    padding: 0.75rem; /* Mobile: padding menor para evitar cortes */
   }
   
   /* Header com menu hambúrguer */
@@ -933,7 +990,7 @@
 
 @media (max-width: 480px) {
   .main-content {
-    padding: 0.75rem;
+    padding: 0.5rem; /* Telas muito pequenas: padding mínimo */
   }
   
   .hero-banner {
@@ -1399,7 +1456,7 @@
 
 .recipe-image {
   width: 100%;
-  height: 200px;
+  height: 180px; /* Mobile-first: altura menor */
   object-fit: cover;
 }
 
@@ -1620,7 +1677,7 @@
   }
   
   .recipe-image-container {
-    height: 200px;
+    height: 180px; /* Mobile-first: altura menor */
   }
   
   .recipe-content {
@@ -2319,7 +2376,7 @@
   
   .recipe-modal-image {
     width: 100%;
-    height: 200px;
+    height: 180px; /* Mobile-first: altura menor */
   }
   
   .recipe-info-grid {
@@ -2439,7 +2496,7 @@
 
 .recipe-image-container {
   position: relative;
-  height: 200px;
+  height: 180px; /* Mobile-first: altura menor */
   overflow: hidden;
 }
 
@@ -2893,6 +2950,11 @@
 }
 
 /* Melhorias gerais de responsividade */
+/* Mobile-first: Garantir que elementos não transbordem */
+* {
+  box-sizing: border-box;
+}
+
 @media (max-width: 768px) {
   /* Garantir que elementos não transbordem */
   * {
