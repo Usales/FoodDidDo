@@ -58,6 +58,22 @@ const Register = ({ onRegister, onSwitchToLogin, onClose }) => {
     return Object.keys(newErrors).length === 0
   }
 
+  // Função para verificar se o email já existe
+  const checkEmailExists = async (email) => {
+    try {
+      // Tentar fazer login com o email (se existir, vai dar erro de senha)
+      const { error } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: 'dummy_password_to_check_if_email_exists'
+      })
+      
+      // Se não deu erro de "email não encontrado", significa que o email existe
+      return !error?.message?.includes('Invalid login credentials')
+    } catch (error) {
+      return false
+    }
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     
@@ -66,6 +82,13 @@ const Register = ({ onRegister, onSwitchToLogin, onClose }) => {
     setIsLoading(true)
 
     try {
+      // Verificar se o email já existe antes de tentar criar
+      const emailExists = await checkEmailExists(formData.email)
+      if (emailExists) {
+        setErrors({ general: 'Este email já foi utilizado. Tente fazer login ou use outro email.' })
+        setIsLoading(false)
+        return
+      }
       // Criar usuário no Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
@@ -78,10 +101,17 @@ const Register = ({ onRegister, onSwitchToLogin, onClose }) => {
       })
 
       if (authError) {
-        if (authError.message.includes('already registered')) {
-          setErrors({ general: 'Este email já está cadastrado' })
+        if (authError.message.includes('already registered') || 
+            authError.message.includes('User already registered') ||
+            authError.message.includes('duplicate key value') ||
+            authError.message.includes('already exists')) {
+          setErrors({ general: 'Este email já foi utilizado. Tente fazer login ou use outro email.' })
+        } else if (authError.message.includes('Invalid email')) {
+          setErrors({ general: 'Email inválido. Verifique se o email está correto.' })
+        } else if (authError.message.includes('Password should be at least')) {
+          setErrors({ general: 'A senha deve ter pelo menos 6 caracteres.' })
         } else {
-          setErrors({ general: authError.message })
+          setErrors({ general: 'Erro ao criar conta. Tente novamente.' })
         }
         return
       }
