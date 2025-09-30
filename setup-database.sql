@@ -36,3 +36,30 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 CREATE OR REPLACE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+-- Função para verificar se email já existe (para validação)
+CREATE OR REPLACE FUNCTION public.check_email_exists(email_to_check TEXT)
+RETURNS BOOLEAN AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 FROM public.profiles 
+    WHERE email = email_to_check
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Função para validar email único antes de inserir
+CREATE OR REPLACE FUNCTION public.validate_unique_email()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF public.check_email_exists(NEW.email) THEN
+    RAISE EXCEPTION 'Email já está em uso: %', NEW.email;
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger para validar email único antes de inserir
+CREATE OR REPLACE TRIGGER validate_email_before_insert
+  BEFORE INSERT ON public.profiles
+  FOR EACH ROW EXECUTE FUNCTION public.validate_unique_email();

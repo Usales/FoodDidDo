@@ -58,18 +58,44 @@ const Register = ({ onRegister, onSwitchToLogin, onClose }) => {
     return Object.keys(newErrors).length === 0
   }
 
-  // Função para verificar se o email já existe
+  // Função para verificar se o email já existe usando a função SQL
   const checkEmailExists = async (email) => {
     try {
-      // Tentar fazer login com o email (se existir, vai dar erro de senha)
-      const { error } = await supabase.auth.signInWithPassword({
-        email: email,
-        password: 'dummy_password_to_check_if_email_exists'
-      })
+      // Usar a função SQL para verificar se email existe
+      const { data, error } = await supabase
+        .rpc('check_email_exists', { email_to_check: email })
       
-      // Se não deu erro de "email não encontrado", significa que o email existe
-      return !error?.message?.includes('Invalid login credentials')
+      if (error) {
+        console.error('Erro ao verificar email:', error)
+        // Se a função não existir, tentar método alternativo
+        return await checkEmailExistsFallback(email)
+      }
+      
+      return data || false
     } catch (error) {
+      console.error('Erro ao verificar email:', error)
+      // Fallback para método alternativo
+      return await checkEmailExistsFallback(email)
+    }
+  }
+
+  // Método alternativo caso a função SQL não esteja disponível
+  const checkEmailExistsFallback = async (email) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('email')
+        .eq('email', email)
+        .single()
+      
+      if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
+        console.error('Erro ao verificar email (fallback):', error)
+        return false
+      }
+      
+      return !!data
+    } catch (error) {
+      console.error('Erro ao verificar email (fallback):', error)
       return false
     }
   }
@@ -85,10 +111,27 @@ const Register = ({ onRegister, onSwitchToLogin, onClose }) => {
       // Verificar se o email já existe antes de tentar criar
       const emailExists = await checkEmailExists(formData.email)
       if (emailExists) {
-        setErrors({ general: 'Este email já foi utilizado. Tente fazer login ou use outro email.' })
+        setErrors({ general: 'O email já está em uso. Tente fazer login ou use outro email.' })
         setIsLoading(false)
         return
       }
+
+      // Validação adicional: tentar reset de senha para verificar se email existe
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(formData.email, {
+        redirectTo: 'http://localhost:3000/reset-password'
+      })
+      
+      // Se não deu erro de "email não encontrado", pode ser que o email já existe
+      if (!resetError || !resetError.message.includes('not found')) {
+        // Verificar novamente se realmente existe
+        const doubleCheck = await checkEmailExists(formData.email)
+        if (doubleCheck) {
+          setErrors({ general: 'O email já está em uso. Tente fazer login ou use outro email.' })
+          setIsLoading(false)
+          return
+        }
+      }
+
       // Criar usuário no Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
@@ -101,18 +144,25 @@ const Register = ({ onRegister, onSwitchToLogin, onClose }) => {
       })
 
       if (authError) {
+        console.error('Erro do Supabase Auth:', authError)
+        
         if (authError.message.includes('already registered') || 
             authError.message.includes('User already registered') ||
             authError.message.includes('duplicate key value') ||
-            authError.message.includes('already exists')) {
-          setErrors({ general: 'Este email já foi utilizado. Tente fazer login ou use outro email.' })
+            authError.message.includes('already exists') ||
+            authError.message.includes('email address is already registered') ||
+            authError.message.includes('already been registered')) {
+          setErrors({ general: 'O email já está em uso. Tente fazer login ou use outro email.' })
         } else if (authError.message.includes('Invalid email')) {
           setErrors({ general: 'Email inválido. Verifique se o email está correto.' })
         } else if (authError.message.includes('Password should be at least')) {
           setErrors({ general: 'A senha deve ter pelo menos 6 caracteres.' })
+        } else if (authError.message.includes('Signup is disabled')) {
+          setErrors({ general: 'Cadastro temporariamente desabilitado. Tente novamente mais tarde.' })
         } else {
-          setErrors({ general: 'Erro ao criar conta. Tente novamente.' })
+          setErrors({ general: `Erro ao criar conta: ${authError.message}` })
         }
+        setIsLoading(false)
         return
       }
 
