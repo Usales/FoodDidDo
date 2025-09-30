@@ -13,6 +13,7 @@ function App() {
   const [editingId, setEditingId] = useState(null)
   const [showLogin, setShowLogin] = useState(false)
   const [showRegister, setShowRegister] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const [formData, setFormData] = useState({
     title: '',
     calories: '',
@@ -191,7 +192,22 @@ function App() {
     await logout()
     setMeals([]) // Limpar refeições
     setActiveNav('home') // Voltar para home
+    setSidebarOpen(false) // Fechar sidebar
     console.log('✅ Logout concluído')
+  }
+
+  // Funções para controlar o menu hambúrguer
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen)
+  }
+
+  const closeSidebar = () => {
+    setSidebarOpen(false)
+  }
+
+  const handleNavClick = (nav) => {
+    setActiveNav(nav)
+    setSidebarOpen(false) // Fechar sidebar após clicar em um item
   }
 
   // Estados para a geladeira
@@ -1994,8 +2010,11 @@ ${template.tips.join('\n')}
   return (
     <div className="app">
       <div className="main-layout">
+        {/* Overlay para fechar sidebar no mobile */}
+        {sidebarOpen && <div className="sidebar-overlay open" onClick={closeSidebar}></div>}
+        
         {/* Sidebar Esquerda */}
-        <div className="sidebar">
+        <div className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
           <div className="sidebar-header">
             <div className="logo">
               <img src="/images_/2.png" alt="FoodDidDo" className="logo-image" />
@@ -2007,7 +2026,7 @@ ${template.tips.join('\n')}
               className={`nav-item ${activeNav === 'home' ? 'active' : ''}`}
               onClick={(e) => {
                 e.preventDefault()
-                setActiveNav('home')
+                handleNavClick('home')
               }}
             >
               <span>Home</span>
@@ -2017,7 +2036,7 @@ ${template.tips.join('\n')}
               className={`nav-item ${activeNav === 'grocery' ? 'active' : ''}`}
               onClick={(e) => {
                 e.preventDefault()
-                setActiveNav('grocery')
+                handleNavClick('grocery')
               }}
             >
               <span>Minha Geladeira</span>
@@ -2027,7 +2046,7 @@ ${template.tips.join('\n')}
               className={`nav-item ${activeNav === 'recipes' ? 'active' : ''}`}
               onClick={(e) => {
                 e.preventDefault()
-                setActiveNav('recipes')
+                handleNavClick('recipes')
               }}
             >
               <span>Receitas</span>
@@ -2052,6 +2071,9 @@ ${template.tips.join('\n')}
         <div className="content-area">
           {/* Header */}
           <header className="header">
+            <button className="menu-toggle" onClick={toggleSidebar} title="Menu">
+              ☰
+            </button>
             <div className="header-actions">
               <button className="header-btn">🌙</button>
               {isAuthenticated ? (

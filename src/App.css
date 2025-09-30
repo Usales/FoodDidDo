@@ -123,6 +123,40 @@
   z-index: 100;
 }
 
+/* Menu Toggle - Oculto por padrão */
+.menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--gray-700);
+  padding: 0.5rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.menu-toggle:hover {
+  color: var(--red-vivid);
+  background: rgba(220, 38, 38, 0.1);
+}
+
+/* Overlay para fechar sidebar no mobile */
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: none;
+}
+
+.sidebar-overlay.open {
+  display: block;
+}
+
 /* CSS da barra de pesquisa removido - não é mais necessário */
 
 .header-actions {
@@ -717,19 +751,146 @@
 }
 
 /* Responsive */
+/* Responsividade - Melhorada */
+@media (max-width: 1400px) {
+  .content-area {
+    margin-left: 260px;
+  }
+  
+  .main-content {
+    max-width: 100%;
+  }
+  
+  .sidebar {
+    width: 260px;
+  }
+}
+
 @media (max-width: 1200px) {
+  .recipe-cards {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .content-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .hero-title {
+    font-size: 2rem;
+  }
+  
+  .hero-content {
+    max-width: 70%;
+  }
+  
   .form-grid {
     grid-template-columns: 1fr 1fr 1fr;
     gap: 1rem;
   }
 }
 
+@media (max-width: 1024px) {
+  .main-content {
+    max-width: 100%;
+  }
+  
+  .recipe-cards {
+    grid-template-columns: 1fr;
+  }
+  
+  .sidebar {
+    width: 240px;
+  }
+  
+  .content-area {
+    margin-left: 240px;
+  }
+}
+
 @media (max-width: 768px) {
+  /* Sidebar responsiva - vira menu hambúrguer */
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    width: 280px;
+    z-index: 1001;
+  }
+  
+  .sidebar.open {
+    transform: translateX(0);
+  }
+  
+  .content-area {
+    margin-left: 0;
+  }
+  
+  .main-content {
+    padding: 1rem;
+  }
+  
+  /* Header com menu hambúrguer */
+  .header {
+    padding: 1rem;
+    justify-content: space-between;
+  }
+  
+  .menu-toggle {
+    display: block;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--gray-700);
+  }
+  
+  .menu-toggle:hover {
+    color: var(--red-vivid);
+  }
+  
+  /* Hero banner responsivo */
+  .hero-banner {
+    padding: 2rem 1.5rem;
+    min-height: 250px;
+  }
+  
+  .hero-overlay {
+    padding: 2rem 1.5rem;
+    margin: -2rem -1.5rem;
+    min-height: 250px;
+  }
+  
+  .hero-content {
+    max-width: 100%;
+  }
+  
+  .hero-title {
+    font-size: 1.8rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 1rem;
+  }
+  
+  .hero-illustrations {
+    display: none;
+  }
+  
+  /* Grids responsivos */
   .form-grid {
     grid-template-columns: 1fr;
     gap: 1rem;
   }
   
+  .recipe-cards {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .content-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  /* Meal items responsivos */
   .meal-item {
     flex-direction: column;
     align-items: flex-start;
@@ -738,6 +899,93 @@
   
   .meal-actions {
     align-self: flex-end;
+  }
+  
+  .meal-details {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  
+  /* Recipe cards responsivos */
+  .recipe-image-container {
+    height: 180px;
+  }
+  
+  .recipe-content {
+    padding: 1rem;
+  }
+  
+  .recipe-title {
+    font-size: 1.1rem;
+  }
+  
+  .recipe-actions {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .recipe-details-btn,
+  .recipe-video-btn {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-content {
+    padding: 0.75rem;
+  }
+  
+  .hero-banner {
+    padding: 1.5rem 1rem;
+    min-height: 200px;
+  }
+  
+  .hero-overlay {
+    padding: 1.5rem 1rem;
+    margin: -1.5rem -1rem;
+    min-height: 200px;
+  }
+  
+  .hero-title {
+    font-size: 1.5rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 0.9rem;
+  }
+  
+  .recipe-image-container {
+    height: 160px;
+  }
+  
+  .recipe-content {
+    padding: 0.75rem;
+  }
+  
+  .recipe-title {
+    font-size: 1rem;
+  }
+  
+  .meal-item {
+    padding: 1rem;
+  }
+  
+  .meal-title {
+    font-size: 1rem;
+  }
+  
+  .meal-details {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+  
+  .meal-calories,
+  .meal-ingredients,
+  .meal-time {
+    font-size: 0.8rem;
+    padding: 0.2rem 0.5rem;
   }
 }
 
@@ -943,14 +1191,41 @@
 }
 
 /* Responsive para geladeira */
+@media (max-width: 1024px) {
+  .ingredients-grid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1rem;
+  }
+  
+  .search-mode-buttons {
+    max-width: 100%;
+  }
+}
+
 @media (max-width: 768px) {
+  .fridge-page {
+    padding: 1rem 0;
+  }
+  
+  .page-title {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+  }
+  
+  .search-section {
+    margin-bottom: 2rem;
+    gap: 1.5rem;
+  }
+  
   .search-bar-container {
     flex-direction: column;
     align-items: stretch;
+    gap: 1rem;
   }
   
   .search-recipes-btn {
     border-radius: 12px;
+    padding: 0.875rem 1.5rem;
   }
   
   .ingredients-grid {
@@ -960,11 +1235,63 @@
   
   .ingredient-item {
     padding: 0.75rem;
+    flex-direction: column;
+    text-align: center;
+    gap: 0.5rem;
   }
   
+  .ingredient-emoji {
+    font-size: 1.2rem;
+  }
+  
+  .ingredient-name {
+    font-size: 0.85rem;
+  }
+  
+  .mode-buttons {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .mode-btn {
+    padding: 0.875rem 1rem;
+  }
+}
+
+@media (max-width: 480px) {
   .page-title {
-    font-size: 2rem;
-    margin-bottom: 2rem;
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .search-section {
+    margin-bottom: 1.5rem;
+    gap: 1rem;
+  }
+  
+  .ingredients-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 0.5rem;
+  }
+  
+  .ingredient-item {
+    padding: 0.5rem;
+  }
+  
+  .ingredient-emoji {
+    font-size: 1rem;
+  }
+  
+  .ingredient-name {
+    font-size: 0.8rem;
+  }
+  
+  .mode-description {
+    font-size: 0.9rem;
+  }
+  
+  .mode-explanation p {
+    font-size: 0.8rem;
   }
 }
 
@@ -1256,7 +1583,23 @@
 }
 
 /* Responsive para receitas */
+@media (max-width: 1024px) {
+  .recipes-grid {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+  
+  .recipes-section {
+    padding: 1.5rem;
+  }
+}
+
 @media (max-width: 768px) {
+  .recipes-section {
+    margin-top: 2rem;
+    padding: 1rem;
+  }
+  
   .recipes-grid {
     grid-template-columns: 1fr;
     gap: 1.5rem;
@@ -1270,6 +1613,70 @@
   
   .recipe-actions {
     justify-content: center;
+  }
+  
+  .recipe-card {
+    margin-bottom: 1rem;
+  }
+  
+  .recipe-image-container {
+    height: 200px;
+  }
+  
+  .recipe-content {
+    padding: 1rem;
+  }
+  
+  .recipe-title {
+    font-size: 1.1rem;
+  }
+  
+  .recipe-meta {
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+  
+  .recipe-category,
+  .recipe-area {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .recipes-section {
+    padding: 0.75rem;
+  }
+  
+  .recipes-header h2 {
+    font-size: 1.5rem;
+  }
+  
+  .recipe-image-container {
+    height: 180px;
+  }
+  
+  .recipe-content {
+    padding: 0.75rem;
+  }
+  
+  .recipe-title {
+    font-size: 1rem;
+  }
+  
+  .recipe-instructions {
+    font-size: 0.8rem;
+  }
+  
+  .recipe-actions {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .recipe-details-btn,
+  .recipe-video-btn {
+    width: 100%;
+    padding: 0.75rem;
   }
 }
 
@@ -1428,48 +1835,6 @@
   transform: rotate(-2deg);
 }
 
-/* Responsividade */
-@media (max-width: 1400px) {
-  .content-area {
-    margin-left: 260px;
-  }
-  
-  .main-content {
-    max-width: 100%;
-  }
-  
-  .sidebar {
-    width: 260px;
-  }
-}
-
-@media (max-width: 1200px) {
-  .recipe-cards {
-    grid-template-columns: 1fr 1fr;
-  }
-  
-  .content-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .hero-title {
-    font-size: 2rem;
-  }
-  
-  .hero-content {
-    max-width: 70%;
-  }
-}
-
-@media (max-width: 1024px) {
-  .main-content {
-    max-width: 100%;
-  }
-  
-  .recipe-cards {
-    grid-template-columns: 1fr;
-  }
-}
 
 /* Modal de Receita Detalhada */
 .recipe-modal-overlay {
@@ -1922,6 +2287,23 @@
 }
 
 /* Responsividade do Modal */
+@media (max-width: 1024px) {
+  .recipe-modal {
+    margin: 1rem;
+    max-width: calc(100vw - 2rem);
+  }
+  
+  .recipe-modal-image-section {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  
+  .recipe-modal-image {
+    width: 100%;
+    height: 250px;
+  }
+}
+
 @media (max-width: 768px) {
   .recipe-modal {
     margin: 0.5rem;
@@ -1932,6 +2314,7 @@
   .recipe-modal-image-section {
     flex-direction: column;
     gap: 1rem;
+    padding: 1.5rem;
   }
   
   .recipe-modal-image {
@@ -1953,10 +2336,22 @@
     word-wrap: break-word;
   }
   
+  .recipe-modal-details {
+    padding: 1.5rem;
+  }
+  
   .step-line,
   .tip-line,
   .instruction-line {
     font-size: 0.9rem;
+    padding: 0.6rem;
+  }
+  
+  .ingredients-list-simple {
+    gap: 0.5rem;
+  }
+  
+  .ingredient-item-simple {
     padding: 0.6rem;
   }
 }
@@ -1985,6 +2380,24 @@
   .recipe-modal-image-section,
   .recipe-modal-details {
     padding: 1rem;
+  }
+  
+  .recipe-info-item {
+    padding: 0.75rem;
+    font-size: 0.9rem;
+  }
+  
+  .ingredient-item-simple {
+    padding: 0.5rem;
+    gap: 0.5rem;
+  }
+  
+  .ingredient-bullet {
+    font-size: 1rem;
+  }
+  
+  .ingredient-text {
+    font-size: 0.9rem;
   }
 }
 
@@ -2226,15 +2639,54 @@
 }
 
 /* Responsividade para paginação */
+@media (max-width: 1024px) {
+  .pagination {
+    padding: 1rem;
+  }
+  
+  .pagination-controls {
+    gap: 0.5rem;
+  }
+}
+
 @media (max-width: 768px) {
+  .pagination {
+    padding: 1rem 0.75rem;
+  }
+  
   .pagination-controls {
     gap: 0.25rem;
+    flex-wrap: wrap;
   }
   
   .pagination-btn {
     padding: 0.4rem 0.8rem;
     font-size: 0.8rem;
     min-width: 35px;
+  }
+  
+  .pagination-info {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .pagination {
+    padding: 0.75rem 0.5rem;
+  }
+  
+  .pagination-controls {
+    gap: 0.2rem;
+  }
+  
+  .pagination-btn {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.75rem;
+    min-width: 30px;
+  }
+  
+  .pagination-info {
+    font-size: 0.75rem;
   }
 }
 
@@ -2394,21 +2846,128 @@
 }
 
 /* Responsividade para modal de login */
+@media (max-width: 768px) {
+  .login-modal {
+    width: 90%;
+    margin: 1rem;
+    max-width: 400px;
+  }
+  
+  .login-header {
+    padding: 1.5rem 1.5rem 1rem 1.5rem;
+  }
+  
+  .login-body {
+    padding: 1.5rem;
+  }
+}
+
 @media (max-width: 480px) {
   .login-modal {
     width: 95%;
-    margin: 1rem;
+    margin: 0.5rem;
+    max-width: calc(100vw - 1rem);
   }
   
   .login-header {
     padding: 1rem;
   }
   
+  .login-header h2 {
+    font-size: 1.3rem;
+  }
+  
   .login-body {
-    padding: 1.5rem;
+    padding: 1rem;
   }
   
   .login-actions {
     flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .login-submit-btn,
+  .login-cancel-btn {
+    width: 100%;
+  }
+}
+
+/* Melhorias gerais de responsividade */
+@media (max-width: 768px) {
+  /* Garantir que elementos não transbordem */
+  * {
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  
+  /* Melhorar legibilidade em telas pequenas */
+  body {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  
+  /* Ajustar espaçamentos */
+  .main-content > * {
+    margin-bottom: 1rem;
+  }
+  
+  /* Melhorar botões em mobile */
+  button, .btn, .cta-btn {
+    min-height: 44px; /* Tamanho mínimo recomendado para touch */
+    touch-action: manipulation;
+  }
+  
+  /* Melhorar inputs em mobile */
+  input, textarea, select {
+    min-height: 44px;
+    font-size: 16px; /* Evita zoom no iOS */
+  }
+  
+  /* Melhorar links em mobile */
+  a {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+}
+
+@media (max-width: 480px) {
+  body {
+    font-size: 13px;
+  }
+  
+  /* Reduzir ainda mais os espaçamentos */
+  .main-content {
+    padding: 0.5rem;
+  }
+  
+  .main-content > * {
+    margin-bottom: 0.75rem;
+  }
+  
+  /* Ajustar tamanhos de fonte */
+  h1 { font-size: 1.5rem; }
+  h2 { font-size: 1.3rem; }
+  h3 { font-size: 1.1rem; }
+  h4 { font-size: 1rem; }
+  h5 { font-size: 0.9rem; }
+  h6 { font-size: 0.8rem; }
+}
+
+/* Melhorias de acessibilidade */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Melhorias para telas de alta densidade */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .recipe-image,
+  .hero-illustrations {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
   }
 }
