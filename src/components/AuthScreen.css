@@ -9,10 +9,12 @@
   background-size: 400% 400%;
   animation: gradientShift 15s ease infinite;
   display: flex;
-  align-items: center;
+  align-items: flex-start; /* Mobile-first: alinhar ao topo */
   justify-content: center;
   z-index: 9999;
-  overflow: hidden;
+  overflow-y: auto; /* Permitir scroll vertical */
+  overflow-x: hidden; /* Evitar scroll horizontal */
+  padding: 1rem; /* Adicionar padding para mobile */
 }
 
 @keyframes gradientShift {
@@ -209,9 +211,9 @@
   max-width: 1200px;
   padding: 1rem;
   display: flex;
-  align-items: center;
+  align-items: flex-start; /* Mobile-first: alinhar ao topo */
   justify-content: center;
-  min-height: 100vh;
+  min-height: auto; /* Mobile-first: altura automática */
   box-sizing: border-box;
 }
 
@@ -593,6 +595,18 @@
   
   .feature-card {
     padding: 1.25rem;
+  }
+}
+
+/* Desktop: 1024px+ */
+@media (min-width: 1024px) {
+  .auth-screen {
+    align-items: center; /* Desktop: centralizar verticalmente */
+  }
+  
+  .auth-content {
+    align-items: center; /* Desktop: centralizar verticalmente */
+    min-height: 100vh; /* Desktop: altura total da tela */
   }
 }
 
