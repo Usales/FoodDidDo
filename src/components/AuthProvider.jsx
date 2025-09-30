@@ -186,7 +186,6 @@ export const AuthProvider = ({ children }) => {
     return (
       <div className="auth-loading">
         <div className="auth-loading-content">
-          <img src="/images_/logo.png" alt="FoodDidDo" className="auth-loading-logo" />
           <div className="auth-loading-spinner"></div>
           <p className="auth-loading-text">Carregando...</p>
         </div>

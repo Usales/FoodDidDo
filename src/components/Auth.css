@@ -394,7 +394,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 50%, #991b1b 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -406,22 +406,6 @@
   color: white;
 }
 
-.auth-loading-logo {
-  height: 80px;
-  width: auto;
-  margin-bottom: 2rem;
-  filter: brightness(0) invert(1);
-  animation: logoFloat 2s ease-in-out infinite;
-}
-
-@keyframes logoFloat {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
 
 .auth-loading-spinner {
   width: 50px;
