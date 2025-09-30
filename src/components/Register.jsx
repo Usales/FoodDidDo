@@ -12,27 +12,6 @@ const Register = ({ onRegister, onSwitchToLogin, onClose }) => {
   const [errors, setErrors] = useState({})
   const [isLoading, setIsLoading] = useState(false)
 
-  // Função de teste para verificar se email existe
-  const testEmailExists = async () => {
-    const testEmail = 'gabrielhenriquessales1@gmail.com'
-    console.log('🧪 Testando se email existe:', testEmail)
-    
-    try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email: testEmail,
-        password: 'dummy_password_123456789'
-      })
-      
-      console.log('🧪 Resultado do teste:', {
-        email: testEmail,
-        error: error?.message,
-        code: error?.code,
-        emailExists: error?.message?.includes('Invalid login credentials')
-      })
-    } catch (error) {
-      console.error('🧪 Erro no teste:', error)
-    }
-  }
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -305,23 +284,6 @@ const Register = ({ onRegister, onSwitchToLogin, onClose }) => {
                 disabled={isLoading}
               >
                 {isLoading ? 'Criando conta...' : 'Criar conta'}
-              </button>
-              
-              {/* Botão de teste temporário */}
-              <button
-                type="button"
-                onClick={testEmailExists}
-                style={{
-                  marginTop: '10px',
-                  padding: '5px 10px',
-                  backgroundColor: '#ff6b6b',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer'
-                }}
-              >
-                🧪 Testar Email
               </button>
             </div>
           </form>
