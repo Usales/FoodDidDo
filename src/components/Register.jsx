@@ -59,35 +59,6 @@ const Register = ({ onRegister, onSwitchToLogin, onClose }) => {
     return Object.keys(newErrors).length === 0
   }
 
-  // Função para verificar se o email já existe usando a tabela auth.users
-  const checkEmailExists = async (email) => {
-    try {
-      // Tentar fazer login com uma senha dummy para verificar se o email existe
-      const { error } = await supabase.auth.signInWithPassword({
-        email: email,
-        password: 'dummy_password_123456789'
-      })
-      
-      // Se o erro for "Invalid login credentials", significa que o email existe mas a senha está errada
-      // Se o erro for "Email not confirmed" ou similar, significa que o email existe
-      // Se não houver erro, significa que o email existe (muito improvável com senha dummy)
-      if (!error) {
-        return true
-      }
-      
-      // Verificar se o erro indica que o email existe
-      const emailExists = error.message.includes('Invalid login credentials') || 
-                         error.message.includes('Email not confirmed') ||
-                         error.message.includes('Invalid email or password')
-      
-      console.log('Verificação de email:', { email, error: error.message, emailExists })
-      return emailExists
-      
-    } catch (error) {
-      console.error('Erro ao verificar email:', error)
-      return false
-    }
-  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -97,19 +68,7 @@ const Register = ({ onRegister, onSwitchToLogin, onClose }) => {
     setIsLoading(true)
 
     try {
-      // Verificar se o email já existe antes de tentar criar
-      console.log('Verificando se email existe:', formData.email)
-      const emailExists = await checkEmailExists(formData.email)
-      
-      if (emailExists) {
-        console.log('Email já existe, bloqueando cadastro')
-        setErrors({ general: 'O email já está em uso. Tente fazer login ou use outro email.' })
-        setIsLoading(false)
-        return
-      }
-
-      console.log('Email não existe, prosseguindo com cadastro')
-      // Criar usuário no Supabase Auth
+      // Criar usuário no Supabase Auth (deixar o Supabase validar duplicatas)
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -136,14 +95,16 @@ const Register = ({ onRegister, onSwitchToLogin, onClose }) => {
                    authError.message.includes('already exists') ||
                    authError.message.includes('email address is already registered') ||
                    authError.message.includes('already been registered') ||
-                   authError.message.includes('email already registered')) {
+                   authError.message.includes('email already registered') ||
+                   authError.message.includes('Email already registered')) {
           setErrors({ general: 'O email já está em uso. Tente fazer login ou use outro email.' })
         } else if (authError.message.includes('Invalid email')) {
           setErrors({ general: 'Email inválido. Verifique se o email está correto.' })
         } else if (authError.message.includes('Password should be at least')) {
           setErrors({ general: 'A senha deve ter pelo menos 6 caracteres.' })
         } else {
-          setErrors({ general: `Erro ao criar conta: ${authError.message}` })
+          // Para outros erros, mostrar a mensagem original do Supabase
+          setErrors({ general: authError.message })
         }
         setIsLoading(false)
         return
