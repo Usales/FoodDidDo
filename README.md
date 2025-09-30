@@ -185,11 +185,11 @@ FoodDidDo/
 ## 📚 Desenvolvimento e Contexto Acadêmico
 
 ### ⚠️ Importante - Desenvolvimento Anterior
-Este projeto foi desenvolvido **anteriormente** à produção da atividade do professor **Ujverson** na faculdade **SENAI FATESG** (Faculdade de Tecnologia Senai de Desenvolvimento Gerencial do Estado de Goiás).
+Este projeto foi desenvolvido **anteriormente** à produção da atividade do professor **Ujverson** na faculdade **SENAI FATESG** (**Faculdade de Tecnologia SENAI de Desenvolvimento Gerencial**).
 
 ### 🎓 Contexto Educacional
 - **Instituição**: SENAI FATESG
-- **Curso**: Desenvolvimento Gerencial
+- **Curso**: Engenharia de Software 8* Período.
 - **Professor**: Ujverson
 - **Status**: Desenvolvimento independente anterior à atividade acadêmica
 
@@ -226,6 +226,6 @@ Este projeto é de uso pessoal e educacional.
 
 ## 👨‍💻 Desenvolvedor
 
-**Gabriel** - Desenvolvimento Frontend e Integração de APIs
+**Gabriel Henriques Sales** - Desenvolvimento completo
 
 ---
