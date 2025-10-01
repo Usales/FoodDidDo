@@ -5,8 +5,8 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 25%, #ef4444 50%, #f87171 75%, #fca5a5 100%);
-  background-size: 400% 400%;
+  background: linear-gradient(180deg, #dc2626 0%, #b91c1c 30%, #ef4444 60%, #f87171 85%, #fca5a5 100%);
+  background-size: 200% 200%;
   animation: gradientShift 15s ease infinite;
   display: flex;
   align-items: flex-start; /* Mobile-first: alinhar ao topo */
@@ -19,19 +19,19 @@
 
 @keyframes gradientShift {
   0% { 
-    background-position: 0% 50%; 
+    background-position: 0% 0%; 
   }
   25% { 
-    background-position: 50% 25%; 
+    background-position: 100% 0%; 
   }
   50% { 
-    background-position: 100% 50%; 
+    background-position: 100% 100%; 
   }
   75% { 
-    background-position: 50% 75%; 
+    background-position: 0% 100%; 
   }
   100% { 
-    background-position: 0% 50%; 
+    background-position: 0% 0%; 
   }
 }
 
