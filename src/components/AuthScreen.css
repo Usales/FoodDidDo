@@ -5,9 +5,9 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, #dc2626 0%, #c53030 20%, #ef4444 40%, #f87171 60%, #fca5a5 80%, #fecaca 100%);
-  background-size: 200% 200%;
-  animation: gradientShift 20s ease infinite;
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 25%, #ef4444 50%, #f87171 75%, #fca5a5 100%);
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
   display: flex;
   align-items: flex-start; /* Mobile-first: alinhar ao topo */
   justify-content: center;
@@ -42,10 +42,11 @@
   right: 0;
   bottom: 0;
   background: 
-    radial-gradient(ellipse at 20% 80%, rgba(255, 255, 255, 0.08) 0%, transparent 60%),
-    radial-gradient(ellipse at 80% 20%, rgba(255, 255, 255, 0.04) 0%, transparent 60%),
-    radial-gradient(ellipse at 40% 40%, rgba(255, 255, 255, 0.02) 0%, transparent 60%);
-  opacity: 0.8;
+    radial-gradient(ellipse at 20% 80%, rgba(255, 255, 255, 0.15) 0%, transparent 70%),
+    radial-gradient(ellipse at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 70%),
+    radial-gradient(ellipse at 40% 40%, rgba(255, 255, 255, 0.08) 0%, transparent 70%),
+    radial-gradient(ellipse at 60% 60%, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
+  opacity: 0.9;
 }
 
 .floating-elements {
@@ -61,9 +62,12 @@
 
 .floating-emoji {
   position: absolute;
-  font-size: 4rem;
-  opacity: 0.8;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  font-size: 3rem;
+  opacity: 0.9;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+  animation-duration: 20s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
 }
 
 /* Posicionamento e animação dinâmicos via JavaScript */
