@@ -75,7 +75,7 @@
   margin: 0;
   font-size: 1.5rem;
   font-weight: 700;
-  color: var(--primary-color);
+  color: #0F0F0F;
   text-align: center;
   padding-right: 2rem;
   max-width: calc(100% - 4rem);
