@@ -38,10 +38,12 @@ const AuthScreen = ({ onLogin, onRegister }) => {
             '🍦', '🍧', '🍨', '🍩', '🍪', '🍫', '🍬', '🍭', '🍮', '🍯',
             '🍎', '🍏', '🍐', '🍊', '🍋', '🍌', '🍉', '🍇', '🍓', '🫐',
             '🍒', '🍑', '🥭', '🍍', '🥥', '🥝', '🥑', '🥦', '🥬', '🥒',
-            '🌶️', '🌽', '🥕', '🧄', '🧅', '🥔', '🍠'
+            '🌶️', '🌽', '🥕', '🧄', '🧅', '🥔', '🍠', '🥜', '🌰', '🍄',
+            '🥯', '🍞', '🥖', '🥨', '🧀', '🥚', '🍯', '🥛', '☕', '🍵',
+            '🥤', '🧃', '🍺', '🍻', '🥂', '🍷', '🍸', '🍹', '🧊', '🥄'
           ].map((emoji, index) => {
-            const top = Math.random() * 90 + 5; // 5% a 95%
-            const left = Math.random() * 90 + 5; // 5% a 95%
+            const top = Math.random() * 100; // 0% a 100% - toda a altura
+            const left = Math.random() * 100; // 0% a 100% - toda a largura
             const animationType = ['floatAround1', 'floatAround2', 'floatAround3', 'floatAround4', 'floatAround5', 'floatAround6'][index % 6];
             const duration = 20 + Math.random() * 15; // 20s a 35s
             
