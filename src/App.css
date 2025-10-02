@@ -607,6 +607,9 @@
   border-radius: 16px;
   padding: 2rem;
   margin-bottom: 2rem;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
 }
 
 .form-grid {
@@ -615,6 +618,8 @@
   gap: 1.5rem;
   margin-bottom: 2rem;
   align-items: end;
+  width: 100%;
+  overflow-x: auto;
 }
 
 .form-group {
@@ -637,6 +642,9 @@
   background: white;
   font-family: inherit;
   transition: all 0.2s ease;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .form-input:focus,
@@ -848,6 +856,7 @@
   .form-grid {
     grid-template-columns: 1fr 1fr 1fr;
     gap: 1rem;
+    overflow-x: visible;
   }
 }
 
@@ -941,6 +950,8 @@
   .form-grid {
     grid-template-columns: 1fr;
     gap: 1rem;
+    overflow-x: visible;
+    min-width: 0;
   }
   
   .recipe-cards {
@@ -3340,6 +3351,77 @@
 
 .dark-theme .recipe-instructions {
   color: #cbd5e1;
+}
+
+/* Modo Escuro - Formulário de Refeições */
+.dark-theme .meal-form {
+  background: #0F172A;
+  border: 2px solid #00ff88;
+  box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+}
+
+.dark-theme .form-group label {
+  color: #ffffff;
+}
+
+.dark-theme .form-input,
+.dark-theme .form-select {
+  background: #1e293b;
+  border: 2px solid #00ff88;
+  color: #ffffff;
+  box-shadow: 0 0 5px rgba(0, 255, 136, 0.2);
+}
+
+.dark-theme .form-input:focus,
+.dark-theme .form-select:focus {
+  border-color: #00ff88;
+  box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+  outline: none;
+}
+
+.dark-theme .form-input::placeholder {
+  color: #94a3b8;
+}
+
+.dark-theme .save-btn {
+  background: #0F172A;
+  border: 2px solid #00ff88;
+  color: #ffffff;
+  box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+}
+
+.dark-theme .save-btn:hover {
+  background: #1e293b;
+  box-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
+  transform: translateY(-1px);
+}
+
+.dark-theme .add-meal-btn {
+  background: #0F172A;
+  border: 2px solid #00ff88;
+  color: #ffffff;
+  box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+}
+
+.dark-theme .add-meal-btn:hover {
+  background: #1e293b;
+  box-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
+  transform: translateY(-1px);
+}
+
+.dark-theme .meals-section {
+  background: #0F172A;
+  border: 2px solid #00ff88;
+  box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+}
+
+.dark-theme .section-title {
+  color: #ffffff;
+}
+
+.dark-theme .section-header::after {
+  background: #00ff88;
+  box-shadow: 0 0 5px rgba(0, 255, 136, 0.3);
 }
 
 /* Melhorias para telas de alta densidade */
