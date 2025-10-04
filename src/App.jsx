@@ -897,38 +897,7 @@ function App() {
     try {
       const allRecipes = []
       
-      // 1. Buscar receitas populares do TheMealDB
-      try {
-        const response = await fetch('https://www.themealdb.com/api/json/v1/1/random.php')
-        const data = await response.json()
-        
-        if (data.meals && data.meals.length > 0) {
-          // Buscar várias receitas aleatórias
-          for (let i = 0; i < 10; i++) {
-            const randomResponse = await fetch('https://www.themealdb.com/api/json/v1/1/random.php')
-            const randomData = await randomResponse.json()
-            
-            if (randomData.meals && randomData.meals[0]) {
-              const meal = randomData.meals[0]
-              allRecipes.push({
-                id: `mealdb-${meal.idMeal}`,
-                title: translateToPortuguese(meal.strMeal) || meal.strMeal,
-                image: meal.strMealThumb || 'https://via.placeholder.com/300x200?text=Receita',
-                category: meal.strCategory || 'Internacional',
-                area: translateToPortuguese(meal.strArea) || meal.strArea || 'Internacional',
-                source: 'TheMealDB',
-                apiType: 'themealdb'
-              })
-            }
-          }
-        }
-      } catch (error) {
-        console.log('⚠️ Erro ao buscar receitas do TheMealDB:', error)
-      }
-      
-      // 2. Spoonacular API desabilitada (erro 401 - API key inválida)
-      
-      // 3. Adicionar receitas locais
+      // 1. Adicionar receitas locais
       if (localRecipes.length > 0) {
         localRecipes.forEach(recipe => {
           allRecipes.push({
@@ -1011,322 +980,7 @@ function App() {
   }, [localRecipes])
   
 
-  // Função para buscar receitas no TheMealDB
-  const searchTheMealDB = async (selectedIngredients) => {
-    console.log('🍽️ searchTheMealDB chamada!')
-    const foundRecipes = []
-    
-    console.log('🍽️ Buscando no TheMealDB...')
-    console.log('📋 Ingredientes recebidos:', selectedIngredients.map(ing => ing.name))
-    
-    try {
-      // Filtrar ingredientes principais
-      const mainIngredients = selectedIngredients.filter(ing => 
-        !['Sal', 'Pimenta', 'Azeite', 'Açúcar'].includes(ing.name)
-      )
-      
-      console.log('🎯 Ingredientes principais:', mainIngredients.map(ing => ing.name))
-      
-      // Buscar por cada ingrediente individual
-      for (const ingredient of mainIngredients.slice(0, 4)) {
-        const englishName = translateToEnglish(ingredient.name)
-        const url = `https://www.themealdb.com/api/json/v1/1/filter.php?i=${encodeURIComponent(englishName)}`
-        
-        console.log(`🔍 Buscando receitas com ${ingredient.name} (${englishName})`)
-        console.log(`🌐 URL: ${url}`)
-        
-        try {
-          console.log(`📡 Fazendo requisição para TheMealDB...`)
-          const response = await fetch(url)
-          console.log(`📡 Response status: ${response.status}`)
-          
-          if (response.ok) {
-            const data = await response.json()
-            console.log(`✅ TheMealDB respondeu para ${ingredient.name}:`, data)
-            
-            if (data.meals && Array.isArray(data.meals)) {
-              // Pegar até 8 receitas de cada ingrediente para ter mais variedade
-              for (const meal of data.meals.slice(0, 8)) {
-                // Verificar se já existe essa receita
-                const exists = foundRecipes.some(existing => existing.id === `mealdb-${meal.idMeal}`)
-                if (exists) continue
-                
-                // Buscar detalhes completos da receita
-                try {
-                  const detailsUrl = `https://www.themealdb.com/api/json/v1/1/lookup.php?i=${meal.idMeal}`
-                  const detailsResponse = await fetch(detailsUrl)
-                  
-                  if (detailsResponse.ok) {
-                    const detailsData = await detailsResponse.json()
-                    const mealDetails = detailsData.meals?.[0]
-                    
-                    if (mealDetails) {
-                      // Extrair e traduzir ingredientes da receita
-                      const recipeIngredients = []
-                      const detailedIngredients = []
-                      for (let i = 1; i <= 20; i++) {
-                        const ingredientKey = `strIngredient${i}`
-                        const measureKey = `strMeasure${i}`
-                        if (mealDetails[ingredientKey] && mealDetails[ingredientKey].trim()) {
-                          const originalIngredient = mealDetails[ingredientKey].trim()
-                          const originalMeasure = mealDetails[measureKey]?.trim() || ''
-                          
-                          // Traduzir ingrediente e medida
-                          const translatedIngredient = translateToPortuguese(originalIngredient)
-                          const translatedMeasure = translateToPortuguese(originalMeasure)
-                          
-                          recipeIngredients.push(`${translatedMeasure} ${translatedIngredient}`.trim())
-                          detailedIngredients.push({
-                            name: translatedIngredient,
-                            measure: translatedMeasure,
-                            original: `${originalMeasure} ${originalIngredient}`.trim()
-                          })
-                        }
-                      }
-                      
-                      // Calcular relevância
-                      const relevanceScore = calculateRelevanceForMealDB(mealDetails, selectedIngredients)
-                      const translatedInstructions = translateToPortuguese(mealDetails.strInstructions) || 'Instruções não disponíveis'
-                      
-                      // Verificar se a receita tem instruções válidas antes de adicionar
-                      if (hasValidInstructions(translatedInstructions)) {
-                        foundRecipes.push({
-                          id: `mealdb-${meal.idMeal}`,
-                          title: translateToPortuguese(mealDetails.strMeal) || 'Receita sem título',
-                          image: mealDetails.strMealThumb || 'https://via.placeholder.com/300x200?text=Receita',
-                          instructions: translatedInstructions,
-                          ingredient: ingredient.name,
-                          category: translateToPortuguese(mealDetails.strCategory) || 'Internacional',
-                          area: translateToPortuguese(mealDetails.strArea) || 'Internacional',
-                          video: mealDetails.strYoutube || null,
-                          source: 'TheMealDB',
-                          ingredientsList: recipeIngredients.join(', '),
-                          relevanceScore: relevanceScore,
-                          tags: mealDetails.strTags || ''
-                        })
-                        
-                        console.log(`✅ Receita adicionada: ${mealDetails.strMeal} (score: ${relevanceScore})`)
-                      } else {
-                        console.log(`⚠️ Receita "${mealDetails.strMeal}" filtrada - instruções inadequadas`)
-                      }
-                    }
-                  }
-                } catch (detailError) {
-                  console.log(`⚠️ Erro ao buscar detalhes da receita ${meal.idMeal}:`, detailError.message)
-                }
-              }
-            } else {
-              console.log(`📭 Sem receitas no TheMealDB para ${ingredient.name}`)
-            }
-          }
-        } catch (error) {
-          console.log(`⚠️ Erro na busca TheMealDB para ${ingredient.name}:`, error.message)
-        }
-      }
-      
-    } catch (error) {
-      console.error('❌ Erro geral no TheMealDB:', error)
-    }
-    
-    console.log(`🍽️ Total de receitas do TheMealDB: ${foundRecipes.length}`)
-    return foundRecipes
-  }
 
-  // Função para validar se a receita tem instruções adequadas
-  const hasValidInstructions = (instructions) => {
-    if (!instructions || instructions.trim() === '') return false
-    
-    // Verificar se não é apenas texto genérico
-    const genericTexts = [
-      'instruções não disponíveis',
-      'instruções completas disponíveis no site original',
-      'receita do spoonacular',
-      'consulte livros de culinária',
-      'consulte sites especializados',
-      'instruções detalhadas que não estão disponíveis',
-      'não disponível',
-      'n/a',
-      'null',
-      'undefined'
-    ]
-    
-    const instructionsLower = instructions.toLowerCase().trim()
-    
-    // Se contém texto genérico, não é válida
-    if (genericTexts.some(text => instructionsLower.includes(text))) {
-      return false
-    }
-    
-    // Verificar se tem pelo menos 50 caracteres (instruções muito curtas)
-    if (instructions.length < 50) {
-      return false
-    }
-    
-    // Verificar se contém palavras-chave de instruções de cozinha
-    const cookingKeywords = [
-      'cozinhe', 'frite', 'asse', 'refogue', 'ferva', 'misture', 'adicione',
-      'tempere', 'corte', 'pique', 'bata', 'mexa', 'deixe', 'retire',
-      'preaqueça', 'pré-aqueça', 'pré aqueça', 'aquecer', 'aquecido',
-      'minutos', 'hora', 'temperatura', 'graus', 'fogo', 'panela',
-      'tigela', 'prato', 'sirva', 'decorar', 'finalizar'
-    ]
-    
-    const hasCookingKeywords = cookingKeywords.some(keyword => 
-      instructionsLower.includes(keyword)
-    )
-    
-    return hasCookingKeywords
-  }
-
-  // Função para calcular relevância no TheMealDB
-  const calculateRelevanceForMealDB = (meal, selectedIngredients) => {
-    let score = 0
-    const mealText = `${meal.strMeal} ${meal.strInstructions}`.toLowerCase()
-    
-    // Verificar ingredientes na receita
-    for (let i = 1; i <= 20; i++) {
-      const ingredientKey = `strIngredient${i}`
-      if (meal[ingredientKey]) {
-        const mealIngredient = meal[ingredientKey].toLowerCase()
-        
-        selectedIngredients.forEach(userIngredient => {
-          const englishName = translateToEnglish(userIngredient.name).toLowerCase()
-          const portugueseName = userIngredient.name.toLowerCase()
-          
-          if (mealIngredient.includes(englishName) || mealIngredient.includes(portugueseName)) {
-            score += 15
-          }
-        })
-      }
-    }
-    
-    // Verificar no título e instruções
-    selectedIngredients.forEach(userIngredient => {
-      const englishName = translateToEnglish(userIngredient.name).toLowerCase()
-      const portugueseName = userIngredient.name.toLowerCase()
-      
-      if (mealText.includes(englishName) || mealText.includes(portugueseName)) {
-        score += 5
-      }
-    })
-    
-    return score
-  }
-
-  // Função para processar instruções do TheMealDB em formato passo a passo
-  const processTheMealDBInstructions = (instructions) => {
-    if (!instructions) return 'Instruções não disponíveis'
-    
-    // Traduzir primeiro as instruções
-    const translatedInstructions = translateToPortuguese(instructions)
-    
-    // Limpar e dividir as instruções
-    let cleanInstructions = translatedInstructions
-      .replace(/\r\n/g, '\n')
-      .replace(/\r/g, '\n')
-      .replace(/\n\n+/g, '\n')
-      .trim()
-    
-    // Se já está numerado, manter
-    if (cleanInstructions.match(/^\d+[\.\)]/)) {
-      const steps = cleanInstructions
-        .split(/\n(?=\d+[\.\)])/g)
-        .filter(step => step.trim())
-        .map((step, index) => {
-          const cleanStep = step.trim().replace(/^\d+[\.\)\s]*/, '')
-          return `PASSO ${index + 1}: ${cleanStep}`
-        })
-      
-      return `
-👨‍🍳 MODO DE PREPARO PASSO A PASSO:
-${steps.join('\n')}
-
-💡 DICAS IMPORTANTES:
-💡 Siga os passos na ordem indicada
-💡 Leia toda a receita antes de começar
-💡 Tenha todos os ingredientes prontos antes de iniciar
-      `.trim()
-    }
-    
-    // Se não está numerado, dividir por sentenças e criar passos
-    const sentences = cleanInstructions
-      .split(/[.!]\s+/)
-      .filter(sentence => sentence.trim().length > 10)
-      .map(sentence => sentence.trim())
-    
-    if (sentences.length > 1) {
-      const steps = sentences.map((sentence, index) => {
-        let cleanSentence = sentence
-        if (!cleanSentence.endsWith('.') && !cleanSentence.endsWith('!')) {
-          cleanSentence += '.'
-        }
-        return `PASSO ${index + 1}: ${cleanSentence}`
-      })
-      
-      return `
-👨‍🍳 MODO DE PREPARO PASSO A PASSO:
-${steps.join('\n')}
-
-💡 DICAS IMPORTANTES:
-💡 Siga os passos na ordem indicada
-💡 Leia toda a receita antes de começar
-💡 Tenha todos os ingredientes prontos antes de iniciar
-      `.trim()
-    }
-    
-    // Se é um bloco único, tentar dividir por palavras-chave
-    const keywordSplit = cleanInstructions
-      .split(/(?=\b(?:Then|Next|After|Meanwhile|While|Finally|Lastly|First|Second|Third)\b)/gi)
-      .filter(part => part.trim().length > 5)
-    
-    if (keywordSplit.length > 1) {
-      const steps = keywordSplit.map((part, index) => {
-        const cleanPart = part.trim().replace(/^(Then|Next|After|Meanwhile|While|Finally|Lastly|First|Second|Third)\s*/gi, '')
-        return `PASSO ${index + 1}: ${cleanPart}`
-      })
-      
-      return `
-👨‍🍳 MODO DE PREPARO PASSO A PASSO:
-${steps.join('\n')}
-
-💡 DICAS IMPORTANTES:
-💡 Siga os passos na ordem indicada
-💡 Leia toda a receita antes de começar
-💡 Tenha todos os ingredientes prontos antes de iniciar
-      `.trim()
-    }
-    
-    // Como último recurso, dividir em parágrafos
-    const paragraphs = cleanInstructions
-      .split('\n')
-      .filter(para => para.trim().length > 10)
-    
-    if (paragraphs.length > 1) {
-      const steps = paragraphs.map((para, index) => {
-        return `PASSO ${index + 1}: ${para.trim()}`
-      })
-      
-      return `
-👨‍🍳 MODO DE PREPARO PASSO A PASSO:
-${steps.join('\n')}
-
-💡 DICAS IMPORTANTES:
-💡 Siga os passos na ordem indicada
-💡 Leia toda a receita antes de começar
-💡 Tenha todos os ingredientes prontos antes de iniciar
-      `.trim()
-    }
-    
-    // Se tudo falhar, retornar como um único passo formatado
-    return `
-👨‍🍳 MODO DE PREPARO:
-PASSO 1: ${cleanInstructions}
-
-💡 DICAS IMPORTANTES:
-💡 Leia toda a receita antes de começar
-💡 Tenha todos os ingredientes prontos antes de iniciar
-    `.trim()
-  }
 
   // Função para processar instruções do Spoonacular
   const processSpoonacularInstructions = (data) => {
@@ -1362,8 +1016,8 @@ PASSO 1: Esta receita requer instruções detalhadas que não estão disponívei
       `.trim()
     }
     
-    // Usar a função do TheMealDB para processar texto simples
-    return processTheMealDBInstructions(instructions)
+    // Retornar instruções simples formatadas
+    return instructions
   }
 
   // Função para buscar detalhes completos de uma receita
@@ -1380,144 +1034,6 @@ PASSO 1: Esta receita requer instruções detalhadas que não estão disponívei
     }
   }
 
-  // Função original comentada temporariamente para debug
-  const fetchRecipeDetailsOriginal = async (recipe) => {
-    console.log('🔍 Abrindo receita:', recipe.title)
-    
-    setLoadingRecipeDetails(true)
-    
-    try {
-      let detailedRecipe = { ...recipe }
-      
-      // Se for do TheMealDB, buscar detalhes completos
-      if (recipe.source === 'TheMealDB' && recipe.id.includes('mealdb-')) {
-        const mealId = recipe.id.replace('mealdb-', '')
-        const url = `https://www.themealdb.com/api/json/v1/1/lookup.php?i=${mealId}`
-        
-        console.log(`🔍 Buscando detalhes completos para receita ID: ${mealId}`)
-        
-        try {
-          const response = await fetch(url)
-          if (response.ok) {
-            const data = await response.json()
-            const mealDetails = data.meals?.[0]
-            
-            if (mealDetails) {
-              // Extrair todos os ingredientes com medidas
-              const detailedIngredients = []
-              for (let i = 1; i <= 20; i++) {
-                const ingredient = mealDetails[`strIngredient${i}`]
-                const measure = mealDetails[`strMeasure${i}`]
-                if (ingredient && ingredient.trim()) {
-                  detailedIngredients.push({
-                    name: ingredient.trim(),
-                    measure: measure?.trim() || ''
-                  })
-                }
-              }
-              
-              // Processar instruções do TheMealDB para formato passo a passo
-              const processedInstructions = processTheMealDBInstructions(mealDetails.strInstructions)
-              
-              detailedRecipe = {
-                ...detailedRecipe,
-                detailedIngredients,
-                fullInstructions: processedInstructions,
-                originalInstructions: mealDetails.strInstructions,
-                drinkAlternate: mealDetails.strDrinkAlternate,
-                tags: mealDetails.strTags?.split(',').map(tag => translateToPortuguese(tag.trim())) || [],
-                youtubeUrl: mealDetails.strYoutube,
-                sourceUrl: mealDetails.strSource,
-                imageSource: mealDetails.strImageSource,
-                creativeCommonsConfirmed: mealDetails.strCreativeCommonsConfirmed,
-                dateModified: mealDetails.dateModified,
-                // Traduzir informações básicas
-                title: translateToPortuguese(detailedRecipe.title),
-                category: translateToPortuguese(mealDetails.strCategory),
-                area: translateToPortuguese(mealDetails.strArea),
-                ingredientsList: recipeIngredients.join(', ')
-              }
-            }
-          }
-        } catch (error) {
-          console.log('⚠️ Erro ao buscar detalhes do TheMealDB:', error)
-        }
-      }
-      
-      // Se for do Spoonacular, tentar buscar mais detalhes
-      if (recipe.source === 'Spoonacular' && recipe.id.includes('spoonacular-')) {
-        const recipeId = recipe.id.replace('spoonacular-', '')
-        
-        // Tentar buscar instruções detalhadas (requer chave de API válida)
-        const apiKeys = ['94c70f8e3e414ac084d01e9d8b75b1cf', 'demo']
-        
-        for (const apiKey of apiKeys) {
-          try {
-            const url = `https://api.spoonacular.com/recipes/${recipeId}/information?apiKey=${apiKey}`
-          const response = await fetch(url)
-          
-          if (response.ok) {
-            const data = await response.json()
-            
-              // Processar instruções do Spoonacular
-              const spoonacularInstructions = processSpoonacularInstructions(data)
-              
-              detailedRecipe = {
-                ...detailedRecipe,
-                fullInstructions: spoonacularInstructions,
-                originalInstructions: data.instructions || data.summary || recipe.instructions,
-                cookingMinutes: data.cookingMinutes,
-                preparationMinutes: data.preparationMinutes,
-                servings: data.servings,
-                pricePerServing: data.pricePerServing,
-                healthScore: data.healthScore,
-                spoonacularScore: data.spoonacularScore,
-                readyInMinutes: data.readyInMinutes,
-                sourceUrl: data.sourceUrl,
-                creditsText: translateToPortuguese(data.creditsText),
-                license: data.license,
-                // Traduzir arrays de informações
-                cuisines: data.cuisines?.map(cuisine => translateToPortuguese(cuisine)) || [],
-                dishTypes: data.dishTypes?.map(type => translateToPortuguese(type)) || [],
-                diets: data.diets?.map(diet => translateToPortuguese(diet)) || [],
-                occasions: data.occasions?.map(occasion => translateToPortuguese(occasion)) || [],
-                // Traduzir ingredientes detalhados
-                detailedIngredients: data.extendedIngredients?.map(ing => ({
-                  name: translateToPortuguese(ing.name),
-                  measure: translateToPortuguese(`${ing.amount} ${ing.unit}`),
-                  original: translateToPortuguese(ing.original)
-                })) || [],
-                // Traduzir informações básicas
-                title: translateToPortuguese(detailedRecipe.title),
-                category: translateToPortuguese(detailedRecipe.category),
-                area: translateToPortuguese(detailedRecipe.area)
-              }
-              break // Sair do loop se conseguiu buscar
-            }
-          } catch (error) {
-            console.log(`⚠️ Erro ao buscar detalhes do Spoonacular com chave ${apiKey}:`, error)
-          }
-        }
-      }
-      
-      // Para receitas locais, adicionar detalhes creativos
-      if (false) {
-        const creativeDetails = generateCreativeDetails(recipe)
-        detailedRecipe = { ...detailedRecipe, ...creativeDetails }
-      }
-      
-      setSelectedRecipe(detailedRecipe)
-      setShowRecipeModal(true)
-      
-    } catch (error) {
-      console.error('❌ Erro ao buscar detalhes da receita:', error)
-      // Mostrar receita básica mesmo com erro
-      setSelectedRecipe(recipe)
-      setShowRecipeModal(true)
-    } finally {
-      setLoadingRecipeDetails(false)
-    }
-  }
 
   // Função para gerar detalhes creativos para receitas locais
   const generateCreativeDetails = (recipe) => {
@@ -1721,6 +1237,18 @@ ${template.tips.join('\n')}
     return foundRecipes
   }
 
+  // Função para busca precisa de ingredientes (evita falsos positivos)
+  const hasPreciseIngredientMatch = (recipeIngredients, userIngredient) => {
+    const recipeText = recipeIngredients.toLowerCase()
+    const userIng = userIngredient.toLowerCase()
+    
+    // Dividir em palavras e verificar cada uma
+    const words = recipeText.split(/[,\s]+/).filter(word => word.length > 0)
+    
+    // Verificar se o ingrediente do usuário está presente como palavra completa
+    return words.some(word => word === userIng)
+  }
+
   // Função para calcular relevância da receita (legada)
   const calculateRelevance = (recipe, selectedIngredients) => {
     const recipeText = `${recipe.receita} ${recipe.ingredientes}`.toLowerCase()
@@ -1746,19 +1274,13 @@ ${template.tips.join('\n')}
     let allRecipes = []
     
     try {
-      // 1. Buscar no TheMealDB (API principal)
-      console.log('🍽️ Buscando no TheMealDB...')
-      const mealDbRecipes = await searchTheMealDB(selectedIngredients)
-      console.log(`🍽️ TheMealDB retornou ${mealDbRecipes.length} receitas`)
-      allRecipes = [...allRecipes, ...mealDbRecipes]
-      
-      // 2. SEMPRE tentar Spoonacular para ter mais variedade (mesmo que TheMealDB tenha resultados)
-      console.log('🥄 Buscando no Spoonacular para complementar...')
+      // 1. Buscar no Spoonacular (API principal)
+      console.log('🥄 Buscando no Spoonacular...')
       const spoonacularRecipes = await searchSpoonacular(selectedIngredients)
       console.log(`🥄 Spoonacular retornou ${spoonacularRecipes.length} receitas`)
       allRecipes = [...allRecipes, ...spoonacularRecipes]
       
-      // 3. Adicionar receitas locais (sempre incluir)
+      // 2. Adicionar receitas locais (sempre incluir)
       console.log('🏠 Adicionando receitas locais...')
       console.log('🏠 Total de receitas locais disponíveis:', localRecipes.length)
       console.log('🏠 Ingredientes selecionados pelo usuário:', selectedIngredients.map(ing => ing.name))
@@ -1779,19 +1301,23 @@ ${template.tips.join('\n')}
         console.log(`🏠 Ingredientes da receita: ${recipeIngredients}`)
         console.log(`🏠 Ingredientes do usuário: ${userIngredients}`)
         
-        // Verificar se pelo menos um ingrediente corresponde
+        // Verificar se pelo menos um ingrediente corresponde (busca precisa)
         const hasMatch = userIngredients.some(userIng => {
           const englishName = translateToEnglish(userIng)
-          const matches = recipeIngredients.includes(userIng) || recipeIngredients.includes(englishName)
+          const matches = hasPreciseIngredientMatch(recipeIngredients, userIng) || 
+                         hasPreciseIngredientMatch(recipeIngredients, englishName)
           console.log(`🏠 ${userIng} (${englishName}) -> ${matches}`)
-          console.log(`🏠 Verificando: "${userIng}" em "${recipeIngredients}"`)
-          console.log(`🏠 Verificando: "${englishName}" em "${recipeIngredients}"`)
+          console.log(`🏠 Verificando precisamente: "${userIng}" em "${recipeIngredients}"`)
+          console.log(`🏠 Verificando precisamente: "${englishName}" em "${recipeIngredients}"`)
           return matches
         })
         
         // Se não encontrou match, verificar se é uma receita de ovos e o usuário selecionou ovos
         if (!hasMatch && recipe.ingredient && recipe.ingredient.toLowerCase().includes('ovo')) {
-          const hasOvos = userIngredients.some(ing => ing.includes('ovo') || ing.includes('egg'))
+          const hasOvos = userIngredients.some(ing => 
+            hasPreciseIngredientMatch(recipeIngredients, ing) && 
+            (ing.includes('ovo') || ing.includes('egg'))
+          )
           console.log(`🏠 Receita de ovos sem match direto, mas usuário tem ovos: ${hasOvos}`)
           if (hasOvos) {
             console.log(`🏠 ${recipe.title} -> INCLUÍDA (receita de ovos)`)
@@ -1801,7 +1327,10 @@ ${template.tips.join('\n')}
         
         // Se não encontrou match, verificar se é uma receita de milho e o usuário selecionou milho
         if (!hasMatch && recipe.ingredient && recipe.ingredient === 'Milho') {
-          const hasMilho = userIngredients.some(ing => ing.toLowerCase().includes('milho') || ing.toLowerCase().includes('corn'))
+          const hasMilho = userIngredients.some(ing => 
+            hasPreciseIngredientMatch(recipeIngredients, ing) && 
+            (ing.toLowerCase().includes('milho') || ing.toLowerCase().includes('corn'))
+          )
           console.log(`🏠 Receita de milho sem match direto, mas usuário tem milho: ${hasMilho}`)
           if (hasMilho) {
             console.log(`🏠 ${recipe.title} -> INCLUÍDA (receita de milho)`)
@@ -1812,9 +1341,10 @@ ${template.tips.join('\n')}
         // Se não encontrou match, verificar se é uma receita de carne bovina e o usuário selecionou carne bovina
         if (!hasMatch && recipe.ingredient && recipe.ingredient === 'Carne Bovina') {
           const hasCarneBovina = userIngredients.some(ing => 
-            ing.toLowerCase().includes('carne bovina') || 
-            ing.toLowerCase().includes('beef') || 
-            ing.toLowerCase().includes('carne')
+            hasPreciseIngredientMatch(recipeIngredients, ing) && 
+            (ing.toLowerCase().includes('carne bovina') || 
+             ing.toLowerCase().includes('beef') || 
+             ing.toLowerCase().includes('carne'))
           )
           console.log(`🏠 Receita de carne bovina sem match direto, mas usuário tem carne bovina: ${hasCarneBovina}`)
           console.log(`🏠 Ingrediente da receita: ${recipe.ingredient}`)
@@ -1828,9 +1358,10 @@ ${template.tips.join('\n')}
         // Se não encontrou match, verificar se é uma receita de pimentão e o usuário selecionou pimentão
         if (!hasMatch && recipe.ingredient && recipe.ingredient === 'Pimentão') {
           const hasPimentao = userIngredients.some(ing => 
-            ing.toLowerCase().includes('pimentão') || 
-            ing.toLowerCase().includes('bell pepper') || 
-            ing.toLowerCase().includes('pimenta')
+            hasPreciseIngredientMatch(recipeIngredients, ing) && 
+            (ing.toLowerCase().includes('pimentão') || 
+             ing.toLowerCase().includes('bell pepper') || 
+             ing.toLowerCase().includes('pimenta'))
           )
           console.log(`🏠 Receita de pimentão sem match direto, mas usuário tem pimentão: ${hasPimentao}`)
           console.log(`🏠 Ingrediente da receita: ${recipe.ingredient}`)
@@ -1844,8 +1375,9 @@ ${template.tips.join('\n')}
         // Se não encontrou match, verificar se é uma receita de pepino e o usuário selecionou pepino
         if (!hasMatch && recipe.ingredient && recipe.ingredient === 'Pepino') {
           const hasPepino = userIngredients.some(ing => 
-            ing.toLowerCase().includes('pepino') || 
-            ing.toLowerCase().includes('cucumber')
+            hasPreciseIngredientMatch(recipeIngredients, ing) && 
+            (ing.toLowerCase().includes('pepino') || 
+             ing.toLowerCase().includes('cucumber'))
           )
           console.log(`🏠 Receita de pepino sem match direto, mas usuário tem pepino: ${hasPepino}`)
           console.log(`🏠 Ingrediente da receita: ${recipe.ingredient}`)
@@ -1859,14 +1391,31 @@ ${template.tips.join('\n')}
         // Se não encontrou match, verificar se é uma receita de alface e o usuário selecionou alface
         if (!hasMatch && recipe.ingredient && recipe.ingredient === 'Alface') {
           const hasAlface = userIngredients.some(ing => 
-            ing.toLowerCase().includes('alface') || 
-            ing.toLowerCase().includes('lettuce')
+            hasPreciseIngredientMatch(recipeIngredients, ing) && 
+            (ing.toLowerCase().includes('alface') || 
+             ing.toLowerCase().includes('lettuce'))
           )
           console.log(`🏠 Receita de alface sem match direto, mas usuário tem alface: ${hasAlface}`)
           console.log(`🏠 Ingrediente da receita: ${recipe.ingredient}`)
           console.log(`🏠 Ingredientes do usuário: ${userIngredients}`)
           if (hasAlface) {
             console.log(`🏠 ${recipe.title} -> INCLUÍDA (receita de alface)`)
+            return true
+          }
+        }
+        
+        // Se não encontrou match, verificar se é uma receita de tomate e o usuário selecionou tomate
+        if (!hasMatch && recipe.ingredient && recipe.ingredient === 'Tomate') {
+          const hasTomate = userIngredients.some(ing => 
+            hasPreciseIngredientMatch(recipeIngredients, ing) && 
+            (ing.toLowerCase().includes('tomate') || 
+             ing.toLowerCase().includes('tomato'))
+          )
+          console.log(`🏠 Receita de tomate sem match direto, mas usuário tem tomate: ${hasTomate}`)
+          console.log(`🏠 Ingrediente da receita: ${recipe.ingredient}`)
+          console.log(`🏠 Ingredientes do usuário: ${userIngredients}`)
+          if (hasTomate) {
+            console.log(`🏠 ${recipe.title} -> INCLUÍDA (receita de tomate)`)
             return true
           }
         }
@@ -1888,12 +1437,13 @@ ${template.tips.join('\n')}
           const recipeIngredients = recipe.ingredientsList.toLowerCase()
           const userIngredients = selectedIngredients.map(ing => ing.name.toLowerCase())
           
-          // Contar ingredientes correspondentes
+          // Contar ingredientes correspondentes (busca precisa)
           let matchCount = 0
           userIngredients.forEach(userIng => {
             if (!['sal', 'pimenta', 'azeite', 'açúcar'].includes(userIng)) {
               const englishName = translateToEnglish(userIng)
-              if (recipeIngredients.includes(userIng) || recipeIngredients.includes(englishName)) {
+              if (hasPreciseIngredientMatch(recipeIngredients, userIng) || 
+                  hasPreciseIngredientMatch(recipeIngredients, englishName)) {
                 matchCount++
               }
             }
@@ -2305,11 +1855,6 @@ ${template.tips.join('\n')}
                           {selectedIngredients.length} ingrediente{selectedIngredients.length !== 1 ? 's' : ''} selecionado{selectedIngredients.length !== 1 ? 's' : ''}
                         </p>
                         <div className="api-stats">
-                          {recipes.filter(r => r.source === 'TheMealDB').length > 0 && (
-                            <span className="api-stat themealdb">
-                              🍽️ {recipes.filter(r => r.source === 'TheMealDB').length} do TheMealDB
-                          </span>
-                          )}
                           {recipes.filter(r => r.source === 'Spoonacular').length > 0 && (
                             <span className="api-stat spoonacular">
                               🥄 {recipes.filter(r => r.source === 'Spoonacular').length} do Spoonacular
@@ -2345,7 +1890,6 @@ ${template.tips.join('\n')}
                             />
                               <div className="recipe-overlay">
                                 <span className={`recipe-source source-${recipe.source?.toLowerCase().replace(/\s+/g, '-')}`}>
-                                  {recipe.source === 'TheMealDB' && '🍽️ MDB'}
                                   {recipe.source === 'Spoonacular' && '🥄 SP'}
                                   {recipe.source === 'Receita Local' && '🏠 LOC'}
                                   {!recipe.source && '❓ N/A'}
@@ -2463,7 +2007,6 @@ ${template.tips.join('\n')}
                             />
                             <div className="recipe-overlay">
                               <span className={`recipe-source source-${recipe.apiType}`}>
-                                {recipe.apiType === 'themealdb' && '🍽️ MDB'}
                                 {recipe.apiType === 'spoonacular' && '🥄 SP'}
                                 {recipe.apiType === 'local' && '🏠 LOC'}
                               </span>
