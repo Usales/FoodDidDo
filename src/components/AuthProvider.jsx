@@ -155,12 +155,15 @@ export const AuthProvider = ({ children }) => {
   }, [])
 
   const login = (userData) => {
+    console.log('🔐 AuthProvider: Fazendo login...')
     setUser(userData)
+    setIsLoading(false) // Garantir que não fique em loading
     localStorage.setItem('fooddiddo_current_user', JSON.stringify({
       id: userData.id,
       name: userData.name,
       email: userData.email
     }))
+    console.log('✅ AuthProvider: Login concluído')
   }
 
   const logout = async () => {
@@ -170,6 +173,10 @@ export const AuthProvider = ({ children }) => {
     console.log('🧹 AuthProvider: Limpando dados locais...')
     setUser(null)
     localStorage.removeItem('fooddiddo_current_user')
+    
+    // IMPORTANTE: Resetar o estado de loading para evitar tela de carregamento infinita
+    setIsLoading(false)
+    
     console.log('✅ AuthProvider: Logout finalizado')
   }
 

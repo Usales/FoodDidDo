@@ -1340,7 +1340,7 @@ ${template.tips.join('\n')}
           const hasCarneBovina = userIngredients.some(ing => 
             hasPreciseIngredientMatch(recipeIngredients, ing) && 
             (ing.toLowerCase().includes('carne bovina') || 
-             ing.toLowerCase().includes('beef') || 
+            ing.toLowerCase().includes('beef') || 
              ing.toLowerCase().includes('carne'))
           )
           console.log(`🏠 Receita de carne bovina sem match direto, mas usuário tem carne bovina: ${hasCarneBovina}`)
@@ -1357,7 +1357,7 @@ ${template.tips.join('\n')}
           const hasPimentao = userIngredients.some(ing => 
             hasPreciseIngredientMatch(recipeIngredients, ing) && 
             (ing.toLowerCase().includes('pimentão') || 
-             ing.toLowerCase().includes('bell pepper') || 
+            ing.toLowerCase().includes('bell pepper') || 
              ing.toLowerCase().includes('pimenta'))
           )
           console.log(`🏠 Receita de pimentão sem match direto, mas usuário tem pimentão: ${hasPimentao}`)
