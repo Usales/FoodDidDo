@@ -358,7 +358,6 @@ function App() {
   const [recipes, setRecipes] = useState([])
   const [localRecipes, setLocalRecipes] = useState([])
   const [showRecipes, setShowRecipes] = useState(false)
-  const [searchMode, setSearchMode] = useState('relevante') // 'estrito' ou 'relevante'
 
   // Estado para todas as receitas das APIs (para sidebar)
   const [allApiRecipes, setAllApiRecipes] = useState([])
@@ -1264,12 +1263,10 @@ ${template.tips.join('\n')}
   }
 
   // Função principal de busca - usando múltiplas APIs
-  const searchRecipesFromAPI = async (selectedIngredients, isStrictMode = false) => {
+  const searchRecipesFromAPI = async (selectedIngredients) => {
     console.log('🔍 searchRecipesFromAPI chamada!')
     console.log('📊 selectedIngredients recebidos:', selectedIngredients)
-    console.log('📊 isStrictMode:', isStrictMode)
     console.log('🔍 Iniciando busca em múltiplas APIs...')
-    console.log('📊 Modo:', isStrictMode ? 'Estrito' : 'Relevante')
     
     let allRecipes = []
     
@@ -1429,49 +1426,10 @@ ${template.tips.join('\n')}
       allRecipes = [...allRecipes, ...localRecipesToAdd]
       
       
-      // Aplicar filtro de modo estrito se necessário
-      if (isStrictMode && allRecipes.length > 0) {
-        const filteredRecipes = allRecipes.filter(recipe => {
-          if (!recipe.ingredientsList) return true
-          
-          const recipeIngredients = recipe.ingredientsList.toLowerCase()
-          const userIngredients = selectedIngredients.map(ing => ing.name.toLowerCase())
-          
-          // Contar ingredientes correspondentes (busca precisa)
-          let matchCount = 0
-          userIngredients.forEach(userIng => {
-            if (!['sal', 'pimenta', 'azeite', 'açúcar'].includes(userIng)) {
-              const englishName = translateToEnglish(userIng)
-              if (hasPreciseIngredientMatch(recipeIngredients, userIng) || 
-                  hasPreciseIngredientMatch(recipeIngredients, englishName)) {
-                matchCount++
-              }
-            }
-          })
-          
-          // Modo estrito: pelo menos 40% dos ingredientes principais
-          const mainUserIngredients = userIngredients.filter(ing => 
-            !['sal', 'pimenta', 'azeite', 'açúcar'].includes(ing)
-          )
-          
-          const minimumMatches = mainUserIngredients.length <= 2 ? 1 : Math.ceil(mainUserIngredients.length * 0.4)
-          
-          return matchCount >= minimumMatches
-        })
-        
-        console.log(`🎯 Modo estrito: ${filteredRecipes.length} de ${allRecipes.length} receitas aprovadas`)
-        
-        // Ordenar receitas do modo estrito (SEM TRADUÇÃO)
-        const sortedFilteredRecipes = filteredRecipes.sort((a, b) => (b.relevanceScore || 0) - (a.relevanceScore || 0))
-        console.log(`✅ ${sortedFilteredRecipes.length} receitas ordenadas (modo estrito)`)
-        
-        return sortedFilteredRecipes
-      }
-      
-      // Modo relevante: ordenar por relevância
+      // Ordenar receitas por relevância
       console.log(`✅ Total de receitas encontradas: ${allRecipes.length}`)
       
-      // 5. ORDENAR RECEITAS (SEM TRADUÇÃO)
+      // Ordenar receitas por relevância
       console.log('📋 Ordenando receitas por relevância...')
       const sortedRecipes = allRecipes.sort((a, b) => (b.relevanceScore || 0) - (a.relevanceScore || 0))
       console.log(`✅ ${sortedRecipes.length} receitas ordenadas`)
@@ -1499,11 +1457,9 @@ ${template.tips.join('\n')}
     
     console.log('✅ Iniciando busca de receitas...')
     const selected = ingredients.filter(ing => selectedIngredients.includes(ing.id))
-    const isStrictMode = searchMode === 'estrito'
     
     console.log('🔍 Iniciando busca:', {
       ingredientes: selected.map(ing => ing.name),
-      modo: isStrictMode ? 'Estrito' : 'Relevante',
       totalSelecionados: selectedIngredients.length
     })
     
@@ -1511,7 +1467,7 @@ ${template.tips.join('\n')}
     console.log('🔄 Buscando receitas das APIs...')
     
     try {
-      const foundRecipes = await searchRecipesFromAPI(selected, isStrictMode)
+      const foundRecipes = await searchRecipesFromAPI(selected)
       
       console.log('✅ Resultado da busca:', {
         total: foundRecipes.length,
@@ -1532,7 +1488,6 @@ ${template.tips.join('\n')}
       if (foundRecipes.length === 0) {
         console.warn('⚠️ Nenhuma receita encontrada. Verifique:', {
           ingredientesSelecionados: selected.map(ing => ing.name),
-          modoEstrito: isStrictMode,
           apiTentada: 'API Brasileira'
         })
       }
@@ -1817,31 +1772,6 @@ ${template.tips.join('\n')}
                     </button>
                   </div>
                   
-                  {/* Botões de Modo de Busca */}
-                  <div className="search-mode-buttons">
-                    <p className="mode-description">Tipo de busca:</p>
-                    <div className="mode-buttons">
-                      <button 
-                        className={`mode-btn ${searchMode === 'relevante' ? 'active' : ''}`}
-                        onClick={() => setSearchMode('relevante')}
-                      >
-                        🔍 Relevante
-                      </button>
-                      <button 
-                        className={`mode-btn ${searchMode === 'estrito' ? 'active' : ''}`}
-                        onClick={() => setSearchMode('estrito')}
-                      >
-                        🎯 Estrito
-                      </button>
-                    </div>
-                    <div className="mode-explanation">
-                      {searchMode === 'estrito' ? (
-                        <p>📋 <strong>Modo Estrito:</strong> Mostra apenas receitas que podem ser feitas completamente com os ingredientes selecionados.</p>
-                      ) : (
-                        <p>🌟 <strong>Modo Relevante:</strong> Mostra todas as receitas que contêm pelo menos um dos ingredientes selecionados.</p>
-                      )}
-                    </div>
-                  </div>
                 </div>
 
                 {/* Receitas Encontradas */}
@@ -1851,7 +1781,6 @@ ${template.tips.join('\n')}
                       <div className="recipes-title-section">
                         <h2>🍽️ Receitas Encontradas ({recipes.length})</h2>
                         <p className="search-mode-indicator">
-                          {searchMode === 'estrito' ? '🎯 Busca Estrita' : '🔍 Busca Relevante'} • 
                           {selectedIngredients.length} ingrediente{selectedIngredients.length !== 1 ? 's' : ''} selecionado{selectedIngredients.length !== 1 ? 's' : ''}
                         </p>
                         <div className="api-stats">
@@ -1942,14 +1871,10 @@ ${template.tips.join('\n')}
                         <p>
                           <strong>Ingredientes selecionados:</strong> {ingredients.filter(ing => selectedIngredients.includes(ing.id)).map(ing => ing.name).join(', ')}
                         </p>
-                        <p>
-                          <strong>Modo de busca:</strong> {searchMode === 'estrito' ? '🎯 Estrito' : '🔍 Relevante'}
-                        </p>
                         <div className="suggestions">
                           <h4>💡 Sugestões:</h4>
                           <ul>
                             <li>Tente selecionar ingredientes mais comuns (arroz, feijão, frango, tomate)</li>
-                            <li>Use o modo "Relevante" em vez de "Estrito"</li>
                             <li>Selecione menos ingredientes para ter mais opções</li>
                             <li>Verifique sua conexão com a internet</li>
                           </ul>
