@@ -20,9 +20,10 @@ O **FoodDidDo** é uma aplicação web moderna desenvolvida em React que combina
 - **Armazenamento Local**: Dados salvos no localStorage do navegador
 
 ### 🥘 Busca Inteligente de Receitas
-- **Modo Relevante**: Busca receitas que contenham pelo menos um dos ingredientes selecionados
-- **Modo Estrito**: Busca receitas que contenham todos os ingredientes selecionados
-- **Integração Multi-API**: Consome dados de TheMealDB para variedade de receitas
+- **Busca Precisa**: Sistema inteligente que evita falsos positivos (ex: milho não encontra tomilho)
+- **Integração Multi-API**: Consome dados do Spoonacular para receitas internacionais
+- **Receitas Locais**: Base de dados própria com receitas brasileiras específicas
+- **Busca por Relevância**: Ordenação automática por relevância dos ingredientes
 
 ### 🧾 Gerenciamento de Ingredientes
 - **Seleção Visual**: Interface intuitiva com mais de 100 ingredientes disponíveis
@@ -50,7 +51,8 @@ O **FoodDidDo** é uma aplicação web moderna desenvolvida em React que combina
 - **Context API** - Gerenciamento de estado global
 
 ### APIs Integradas
-- **TheMealDB** - API gratuita com receitas internacionais
+- **Spoonacular** - API principal com receitas internacionais
+- **Receitas Locais** - Base de dados própria com receitas brasileiras
 - **MyMemory** - API de tradução para localização
 
 ### Funcionalidades Avançadas
@@ -99,8 +101,8 @@ Abra seu navegador e acesse: `http://localhost:5173`
 
 ### 3. Buscar Receitas
 - Na seção "Minha Geladeira", clique nos ingredientes disponíveis
-- Escolha entre "Relevante" ou "Estrito" para o tipo de busca
 - Clique em "Buscar Receitas" para encontrar opções
+- O sistema busca automaticamente receitas relevantes aos ingredientes selecionados
 
 ### 4. Explorar Receitas
 - Acesse a seção "Receitas" na sidebar
@@ -209,6 +211,12 @@ O FoodDidDo representa um projeto pessoal de desenvolvimento web que demonstra:
 - **Animações Suaves**: Emojis flutuantes e transições
 - **Cards Responsivos**: Layout adaptável para todos os dispositivos
 - **Modais Elegantes**: Interface de login/registro profissional
+
+### 🔧 Melhorias Recentes
+- **Busca Precisa**: Sistema inteligente que evita falsos positivos na busca de ingredientes
+- **Interface Simplificada**: Remoção do sistema de modos de busca para maior clareza
+- **Otimização de Performance**: Remoção de APIs desnecessárias e código simplificado
+- **Suporte Específico**: Verificações especiais para ingredientes como tomate, milho, ovos, etc.
 
 ### 🔧 Sistema Robusto
 - **Funcionamento Offline**: Dados salvos localmente
