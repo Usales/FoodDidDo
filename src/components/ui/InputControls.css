@@ -1,0 +1,36 @@
+.input-control {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  font-size: 0.92rem;
+  color: rgba(71, 85, 105, 0.9);
+}
+
+.input-control span {
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.input-control input,
+.input-control select,
+.input-control textarea {
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 0.85rem;
+  padding: 0.75rem 0.95rem;
+  font-size: 1rem;
+  color: rgba(17, 24, 39, 0.92);
+  background: rgba(255, 255, 255, 0.85);
+  transition: border 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+  box-shadow: inset 0 1px 4px rgba(15, 23, 42, 0.05);
+  backdrop-filter: blur(8px);
+}
+
+.input-control input:focus,
+.input-control select:focus,
+.input-control textarea:focus {
+  outline: none;
+  border-color: rgba(254, 112, 95, 0.65);
+  box-shadow: 0 12px 24px rgba(254, 112, 95, 0.18);
+  transform: translateY(-1px);
+}
+

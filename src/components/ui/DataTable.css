@@ -1,0 +1,49 @@
+.data-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 1.05rem;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  background:
+    linear-gradient(160deg, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.6)),
+    radial-gradient(circle at -10% -20%, rgba(254, 112, 95, 0.18), transparent 50%);
+  box-shadow: var(--shadow-sm);
+  backdrop-filter: blur(12px);
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.data-table thead tr {
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.data-table th {
+  text-align: left;
+  padding: 0.95rem 1.2rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(79, 70, 229, 0.9);
+  font-weight: 700;
+}
+
+.data-table td {
+  padding: 1rem 1.2rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.18);
+  color: rgba(17, 24, 39, 0.9);
+  font-size: 0.98rem;
+}
+
+.data-table tbody tr:hover {
+  background: rgba(111, 107, 255, 0.08);
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.data-table-empty {
+  text-align: center;
+  padding: 1.8rem;
+  color: rgba(71, 85, 105, 0.75);
+}
+

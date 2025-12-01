@@ -5,7 +5,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: #dc2626;
+  background: var(--bg-primary);
   display: flex;
   align-items: flex-start; /* Mobile-first: alinhar ao topo */
   justify-content: center;
@@ -297,7 +297,7 @@
 
 .auth-subtitle {
   font-size: 1.1rem;
-  color: var(--text-secondary);
+  color: var(--text-inverse);
   line-height: 1.5;
   margin: 0;
   max-width: 400px;

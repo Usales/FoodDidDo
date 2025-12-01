@@ -1,0 +1,72 @@
+.chart-placeholder {
+  background:
+    linear-gradient(150deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.65)),
+    radial-gradient(circle at 10% -20%, rgba(254, 112, 95, 0.18), transparent 55%);
+  border-radius: 1.2rem;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  padding: 1.8rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  box-shadow: var(--shadow-sm);
+  backdrop-filter: blur(12px);
+}
+
+.chart-placeholder header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  color: rgba(17, 24, 39, 0.92);
+  letter-spacing: -0.01em;
+}
+
+.chart-type {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: rgba(79, 70, 229, 0.85);
+}
+
+.chart-placeholder-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.chart-placeholder-visual {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.95rem;
+  align-items: flex-end;
+  height: 170px;
+}
+
+.chart-bar {
+  border-radius: 0.55rem;
+  background: linear-gradient(180deg, rgba(254, 112, 95, 0.75), rgba(111, 107, 255, 0.75));
+  box-shadow: 0 14px 20px rgba(254, 112, 95, 0.22);
+}
+
+.chart-bar.bar-1 {
+  height: 38%;
+}
+
+.chart-bar.bar-2 {
+  height: 66%;
+}
+
+.chart-bar.bar-3 {
+  height: 90%;
+}
+
+.chart-bar.bar-4 {
+  height: 58%;
+}
+
+.chart-placeholder p {
+  font-size: 0.9rem;
+  color: rgba(75, 85, 99, 0.82);
+  margin: 0;
+}
+
