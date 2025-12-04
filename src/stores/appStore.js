@@ -137,12 +137,7 @@ const createInitialState = () => ({
       allocationMethod: 'por lote'
     }
   ],
-  cashflow: [
-    { id: 'cf-1', type: 'entrada', description: 'Venda - Bolo de milho', amount: 540, date: '2025-11-07' },
-    { id: 'cf-2', type: 'entrada', description: 'Venda - Coxinha', amount: 880, date: '2025-11-06' },
-    { id: 'cf-3', type: 'saída', description: 'Compra - Farinha', amount: 320, date: '2025-11-05' },
-    { id: 'cf-4', type: 'saída', description: 'Conta de luz', amount: 220, date: '2025-11-02' }
-  ],
+  cashflow: [],
   stockMovements: [
     {
       id: 'move-1',
@@ -180,6 +175,14 @@ export const useAppStore = create(devtools((set, get) => ({
       meals: state.meals.filter((meal) => meal.id !== id)
     })),
   addCashflowEntry: (entry) => set((state) => ({ cashflow: [entry, ...state.cashflow] })),
+  updateCashflowEntry: (id, updates) =>
+    set((state) => ({
+      cashflow: state.cashflow.map((entry) => (entry.id === id ? { ...entry, ...updates } : entry))
+    })),
+  deleteCashflowEntry: (id) =>
+    set((state) => ({
+      cashflow: state.cashflow.filter((entry) => entry.id !== id)
+    })),
   addFixedCost: (cost) => set((state) => ({ fixedCosts: [cost, ...state.fixedCosts] })),
   addPricing: (pricing) => set((state) => ({ pricing: [pricing, ...state.pricing] })),
   addStockMovement: (movement) => set((state) => ({ stockMovements: [movement, ...state.stockMovements] })),

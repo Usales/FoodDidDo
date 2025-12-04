@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types'
 import './InputControls.css'
 
-export function CurrencyInput({ label, value, onChange, name, placeholder }) {
+export function CurrencyInput({ label, value, onChange, name, placeholder, disabled }) {
   const handleChange = (event) => {
     const rawValue = event.target.value
     if (rawValue === '') {
@@ -26,6 +26,7 @@ export function CurrencyInput({ label, value, onChange, name, placeholder }) {
         value={value}
         onChange={handleChange}
         step="0.01"
+        disabled={disabled}
       />
     </label>
   )
@@ -36,12 +37,14 @@ CurrencyInput.propTypes = {
   value: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   onChange: PropTypes.func.isRequired,
   name: PropTypes.string,
-  placeholder: PropTypes.string
+  placeholder: PropTypes.string,
+  disabled: PropTypes.bool
 }
 
 CurrencyInput.defaultProps = {
   value: '',
   name: undefined,
-  placeholder: undefined
+  placeholder: undefined,
+  disabled: false
 }
 
