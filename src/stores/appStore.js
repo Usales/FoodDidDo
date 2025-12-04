@@ -2,15 +2,7 @@ import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
 
 const createInitialState = () => ({
-  budgets: [
-    {
-      id: 'budget-1',
-      period: 'Novembro/2025',
-      amount: 2500,
-      spent: 1180,
-      createdAt: new Date().toISOString()
-    }
-  ],
+  budgets: [],
   ingredients: [
     {
       id: 'ingredient-1',
