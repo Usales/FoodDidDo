@@ -1,11 +1,15 @@
 import { useState } from 'react'
 import Login from './Login'
 import Register from './Register'
+import { getEmojisForDate } from '../utils/dateEmojis'
 import './AuthScreen.css'
 
 const AuthScreen = ({ onLogin, onRegister }) => {
   const [showLogin, setShowLogin] = useState(false)
   const [showRegister, setShowRegister] = useState(false)
+  
+  // Obtém os emojis baseados na data atual
+  const backgroundEmojis = getEmojisForDate()
 
   const handleShowLogin = () => {
     setShowLogin(true)
@@ -32,16 +36,7 @@ const AuthScreen = ({ onLogin, onRegister }) => {
       {/* Background com gradiente e elementos flutuantes */}
       <div className="auth-background">
         <div className="floating-elements">
-          {[
-            '🍕', '🍔', '🍟', '🌭', '🍿', '🥗', '🥩', '🍗', '🍖', '🍤',
-            '🍣', '🍙', '🍚', '🍜', '🍝', '🍲', '🥘', '🍛', '🍱', '🍳',
-            '🍦', '🍧', '🍨', '🍩', '🍪', '🍫', '🍬', '🍭', '🍮', '🍯',
-            '🍎', '🍏', '🍐', '🍊', '🍋', '🍌', '🍉', '🍇', '🍓', '🫐',
-            '🍒', '🍑', '🥭', '🍍', '🥥', '🥝', '🥑', '🥦', '🥬', '🥒',
-            '🌶️', '🌽', '🥕', '🧄', '🧅', '🥔', '🍠', '🥜', '🌰', '🍄',
-            '🥯', '🍞', '🥖', '🥨', '🧀', '🥚', '🍯', '🥛', '☕', '🍵',
-            '🥤', '🧃', '🍺', '🍻', '🥂', '🍷', '🍸', '🍹', '🧊', '🥄'
-          ].map((emoji, index) => {
+          {backgroundEmojis.map((emoji, index) => {
             const top = Math.random() * 100; // 0% a 100% - toda a altura
             const left = Math.random() * 100; // 0% a 100% - toda a largura
             const animationType = ['floatAround1', 'floatAround2', 'floatAround3', 'floatAround4', 'floatAround5', 'floatAround6'][index % 6];
