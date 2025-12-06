@@ -44,11 +44,13 @@ export function RecipesPage() {
 
   const filteredRecipes = useMemo(() => {
     if (!selectedIngredients.length) return recipes
-    return recipes.filter((recipe) =>
-      selectedIngredients.some((ingredient) =>
-        (recipe.ingredientsList || '').toLowerCase().includes(ingredient.toLowerCase())
-      )
-    )
+    return recipes.filter((recipe) => {
+      const recipeIngredients = (recipe.ingredientsList || '').toLowerCase()
+      return selectedIngredients.some((ingredient) => {
+        const searchIngredient = ingredient.toLowerCase().trim()
+        return recipeIngredients.includes(searchIngredient)
+      })
+    })
   }, [recipes, selectedIngredients])
 
   const handleOpenRecipe = (recipe) => {

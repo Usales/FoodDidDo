@@ -56,7 +56,7 @@ export function IngredientsPage() {
     const names = pantryIngredients
       .filter((ingredient) => selected.includes(ingredient.id))
       .map((ingredient) => ingredient.name)
-    navigate('/recipes', { state: { ingredients: names } })
+    navigate('/receitas', { state: { ingredients: names } })
   }
 
   return (
