@@ -17,7 +17,8 @@ import {
   AiOutlineSetting,
   AiOutlineRise
 } from 'react-icons/ai'
-import { FiLogOut } from 'react-icons/fi'
+import { FiLogOut, FiSearch, FiChevronDown } from 'react-icons/fi'
+import { useState } from 'react'
 import ThemeToggle from '../ThemeToggle'
 import './MainLayout.css'
 
@@ -55,6 +56,9 @@ const navigation = [
 ]
 
 export function MainLayout({ onLogout, user }) {
+  const [searchQuery, setSearchQuery] = useState('')
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false)
+
   return (
     <div className="main-shell">
       <aside className="main-shell-sidebar">
@@ -85,15 +89,43 @@ export function MainLayout({ onLogout, user }) {
       </aside>
       <div className="main-shell-content">
         <header className="topbar">
-          <div>
+          <div className="topbar-left">
             <h1>Bem-vinda, {user?.name ?? 'GabrielSales'}</h1>
             <span className="topbar-subtitle">Organize suas receitas favoritas e gerencie sua geladeira.</span>
           </div>
           <div className="topbar-actions">
-            <ThemeToggle className="theme-toggle" />
-            <div className="user-chip">
-              <span>Olá, {user?.name ?? 'gabrielsales012345'}</span>
-              <div className="user-avatar">{(user?.name ?? 'G').charAt(0).toUpperCase()}</div>
+            <div className="search-box-wrapper">
+              <FiSearch className="search-icon" />
+              <input
+                type="text"
+                className="global-search"
+                placeholder="Buscar receitas, ingredientes, custos..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+            <ThemeToggle className="theme-toggle-compact" />
+            <div className="user-dropdown-wrapper">
+              <button
+                type="button"
+                className="user-chip"
+                onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+              >
+                <div className="user-avatar">{(user?.name ?? 'G').charAt(0).toUpperCase()}</div>
+                <span className="user-name">{user?.name ?? 'gabrielsales012345'}</span>
+                <FiChevronDown className={`dropdown-chevron ${userDropdownOpen ? 'open' : ''}`} />
+              </button>
+              {userDropdownOpen && (
+                <div className="user-dropdown">
+                  <button type="button" className="dropdown-item">
+                    Configurações
+                  </button>
+                  <button type="button" className="dropdown-item" onClick={onLogout}>
+                    <FiLogOut size={16} />
+                    Sair
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </header>

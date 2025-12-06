@@ -51,17 +51,17 @@
 /* Tema Escuro */
 .dark-theme {
   /* Cores principais (mantém o vermelho) */
-  --primary-color: #dc2626;
-  --primary-dark: #b91c1c;
-  --primary-light: #ef4444;
-  --primary-lighter: #f87171;
-  --primary-lightest: #fca5a5;
+  --primary-color: #ff3b30;
+  --primary-dark: #dc2626;
+  --primary-light: #ff5757;
+  --primary-lighter: #ff7575;
+  --primary-lightest: #ff9a9a;
 
   /* Cores de fundo - mais escuras */
-  --bg-primary: #0a0a0a;
+  --bg-primary: #0e0e0e;
   --bg-secondary: #111111;
   --bg-tertiary: #1a1a1a;
-  --bg-card: #0f0f0f;
+  --bg-card: #181818;
   --bg-overlay: rgba(0, 0, 0, 0.9);
 
   /* Cores de texto - mais contrastantes */
@@ -69,12 +69,12 @@
   --text-secondary: #e2e8f0;
   --text-tertiary: #a0aec0;
   --text-inverse: #000000;
-  --text-muted: #718096;
+  --text-muted: #9a9a9a;
 
   /* Cores de borda - mais visíveis */
-  --border-primary: #2d3748;
-  --border-secondary: #4a5568;
-  --border-focus: #dc2626;
+  --border-primary: rgba(255, 255, 255, 0.05);
+  --border-secondary: rgba(255, 255, 255, 0.1);
+  --border-focus: #ff3b30;
 
   /* Cores de sombra */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);

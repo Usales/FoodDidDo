@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useAppStore } from '../stores/appStore'
+import { FiEdit3, FiTrash2 } from 'react-icons/fi'
 import './PageCommon.css'
 import './DashboardPage.css'
 
@@ -226,6 +227,21 @@ export function DashboardPage() {
               </label>
             </div>
             <div className="meal-form-actions">
+              {editingId && (
+                <button
+                  type="button"
+                  className="delete-meal-btn"
+                  onClick={() => {
+                    handleDelete(editingId)
+                    setShowForm(false)
+                    setEditingId(null)
+                    setFormData(initialForm)
+                  }}
+                  title="Excluir refeição"
+                >
+                  <FiTrash2 size={18} />
+                </button>
+              )}
               <button type="button" className="primary-btn" onClick={handleSubmit}>
                 {editingId ? 'Atualizar refeição' : 'Salvar refeição'}
               </button>
@@ -248,11 +264,13 @@ export function DashboardPage() {
                 <p>{meal.ingredients}</p>
               </div>
               <footer>
-                <button type="button" onClick={() => handleEdit(meal)}>
-                  Editar
-                </button>
-                <button type="button" onClick={() => handleDelete(meal.id)}>
-                  Excluir
+                <button
+                  type="button"
+                  className="meal-action-btn"
+                  onClick={() => handleEdit(meal)}
+                  title="Editar"
+                >
+                  <FiEdit3 size={18} />
                 </button>
               </footer>
             </article>
