@@ -43,7 +43,8 @@ const createInitialState = () => ({
       prepTime: 120,
       totalCost: 88,
       unitCost: 1.76,
-      contributionMargin: 0.45
+      contributionMargin: 0.45,
+      ingredients: []
     }
   ],
   meals: [

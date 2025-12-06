@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useAppStore } from '../stores/appStore'
 import './PageCommon.css'
 import './DashboardPage.css'
 
@@ -38,6 +39,7 @@ const initialForm = {
 }
 
 export function DashboardPage() {
+  const recipes = useAppStore((state) => state.recipes)
   const [meals, setMeals] = useState(defaultMeals)
   const [showForm, setShowForm] = useState(false)
   const [formData, setFormData] = useState(initialForm)
@@ -70,6 +72,28 @@ export function DashboardPage() {
       percent: Math.round((completed / total) * 100)
     }
   }, [meals])
+
+  const businessInsights = useMemo(() => {
+    if (!recipes.length) return null
+
+    const bestRecipe = recipes.reduce((best, recipe) => {
+      const profitPerUnit = recipe.unitCost * recipe.contributionMargin
+      const bestProfit = best.unitCost * best.contributionMargin
+      return profitPerUnit > bestProfit ? recipe : best
+    }, recipes[0])
+
+    const suggestedPrice = bestRecipe.unitCost / (1 - bestRecipe.contributionMargin)
+    const profitPerUnit = suggestedPrice - bestRecipe.unitCost
+    const profitPerBatch = profitPerUnit * bestRecipe.yield
+
+    return {
+      recipeName: bestRecipe.name,
+      suggestedPrice: suggestedPrice.toFixed(2),
+      profitPerUnit: profitPerUnit.toFixed(2),
+      profitPerBatch: profitPerBatch.toFixed(2),
+      yield: bestRecipe.yield
+    }
+  }, [recipes])
 
   const handleEdit = (meal) => {
     setEditingId(meal.id)
@@ -117,6 +141,23 @@ export function DashboardPage() {
           <p>Explore novas receitas, planeje a semana e acompanhe suas refeições favoritas.</p>
         </div>
       </section>
+
+      {businessInsights && (
+        <section className="page-stack business-insights">
+          <div className="insights-content">
+            <h2>💡 Oportunidade de Negócio</h2>
+            <p className="insights-text">
+              Com a receita <strong>{businessInsights.recipeName}</strong>, você poderia vender cada unidade a{' '}
+              <strong className="highlight-price">R$ {businessInsights.suggestedPrice}</strong> e lucrar{' '}
+              <strong className="highlight-profit">R$ {businessInsights.profitPerUnit}</strong> por unidade.
+            </p>
+            <p className="insights-text">
+              Em um lote de <strong>{businessInsights.yield} unidades</strong>, seu lucro total seria de{' '}
+              <strong className="highlight-profit">R$ {businessInsights.profitPerBatch}</strong>.
+            </p>
+          </div>
+        </section>
+      )}
 
       <section className="page-stack meal-section">
         <header className="meal-section-header">

@@ -26,9 +26,11 @@
 }
 
 .page h2 {
-  font-size: 1.35rem;
+  font-size: 1.5rem;
   margin: 0;
   color: var(--text-primary);
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
 .page-header {
@@ -152,11 +154,16 @@
 .summary-card span {
   color: var(--text-muted);
   font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .summary-card strong {
-  font-size: 1.45rem;
+  font-size: 1.8rem;
   letter-spacing: -0.02em;
+  font-weight: 700;
+  color: var(--text-primary);
 }
 
 .summary-card small {
@@ -211,6 +218,13 @@
   display: flex;
   flex-direction: column;
   gap: 0.65rem;
+  min-height: 180px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card-tile:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 24px 32px rgba(0, 0, 0, 0.15);
 }
 
 .card-tile header {
@@ -221,7 +235,10 @@
 
 .card-tile h3 {
   margin: 0;
-  font-size: 1.1rem;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
 }
 
 .card-tile span {
