@@ -19,10 +19,9 @@
   padding: 0.75rem 0.95rem;
   font-size: 1rem;
   color: rgba(17, 24, 39, 0.92);
-  background: rgba(255, 255, 255, 0.85);
+  background: #ffffff;
   transition: border 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
   box-shadow: inset 0 1px 4px rgba(15, 23, 42, 0.05);
-  backdrop-filter: blur(8px);
 }
 
 .input-control input:focus,

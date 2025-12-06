@@ -52,7 +52,8 @@
 
 .primary-btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 20px 30px rgba(13, 168, 149, 0.22);
+  box-shadow: 0 20px 30px rgba(220, 38, 38, 0.3);
+  background: var(--primary-dark);
 }
 
 .ghost-btn {

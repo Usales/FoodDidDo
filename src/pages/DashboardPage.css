@@ -164,6 +164,15 @@
   color: var(--brand-red);
 }
 
+.dark-theme .meal-card footer button {
+  color: #ffffff;
+}
+
+.dark-theme .meal-card footer button:hover {
+  color: #ffffff;
+  opacity: 0.8;
+}
+
 .status-pill {
   border-radius: 999px;
   padding: 0.25rem 0.75rem;

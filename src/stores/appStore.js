@@ -37,24 +37,6 @@ const createInitialState = () => ({
   ],
   recipes: [
     {
-      id: 'recipe-1',
-      name: 'Bolo de Milho',
-      yield: 18,
-      prepTime: 45,
-      totalCost: 36.4,
-      unitCost: 2.02,
-      contributionMargin: 0.38
-    },
-    {
-      id: 'recipe-2',
-      name: 'Pão Caseiro',
-      yield: 24,
-      prepTime: 180,
-      totalCost: 42.5,
-      unitCost: 1.77,
-      contributionMargin: 0.31
-    },
-    {
       id: 'recipe-3',
       name: 'Coxinha de Frango',
       yield: 50,
@@ -98,22 +80,7 @@ const createInitialState = () => ({
       status: 'A fazer'
     }
   ],
-  pricing: [
-    {
-      id: 'pricing-1',
-      recipeId: 'recipe-1',
-      desiredMargin: 0.45,
-      suggestedPrice: 3.7,
-      currentPrice: 3.5
-    },
-    {
-      id: 'pricing-2',
-      recipeId: 'recipe-2',
-      desiredMargin: 0.5,
-      suggestedPrice: 3.55,
-      currentPrice: 3.2
-    }
-  ],
+  pricing: [],
   fixedCosts: [
     {
       id: 'fixed-1',
@@ -140,14 +107,6 @@ const createInitialState = () => ({
   cashflow: [],
   stockMovements: [
     {
-      id: 'move-1',
-      ingredientId: 'ingredient-1',
-      type: 'saida',
-      quantity: 4_000,
-      reference: 'Produção Bolo de Milho',
-      createdAt: '2025-11-09T08:35:00Z'
-    },
-    {
       id: 'move-2',
       ingredientId: 'ingredient-3',
       type: 'entrada',
@@ -165,6 +124,10 @@ export const useAppStore = create(devtools((set, get) => ({
     ingredients: [{ ...ingredient, unitCost: ingredient.packagePrice / ingredient.packageQty }, ...state.ingredients]
   })),
   addRecipe: (recipe) => set((state) => ({ recipes: [recipe, ...state.recipes] })),
+  updateRecipe: (id, updates) =>
+    set((state) => ({
+      recipes: state.recipes.map((recipe) => (recipe.id === id ? { ...recipe, ...updates } : recipe))
+    })),
   addMeal: (meal) => set((state) => ({ meals: [meal, ...state.meals] })),
   updateMeal: (id, updates) =>
     set((state) => ({

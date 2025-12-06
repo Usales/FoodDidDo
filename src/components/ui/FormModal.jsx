@@ -19,7 +19,7 @@ export function FormModal({ isOpen, title, description, onClose, children, foote
             {description ? <p>{description}</p> : null}
           </div>
           <button className="form-modal-close" type="button" onClick={onClose}>
-            ✕
+            <span>✕</span>
           </button>
         </header>
         <section className="form-modal-body">{children}</section>
