@@ -1,6 +1,9 @@
 import { useState, useRef } from 'react'
 import { useTheme } from '../contexts/ThemeContext'
 import { useAppStore } from '../stores/appStore'
+import { Tooltip } from '../components/ui/Tooltip'
+import { ToggleSwitch } from '../components/ui/ToggleSwitch'
+import ThemeToggle from '../components/ThemeToggle'
 import './PageCommon.css'
 import './ConfigPage.css'
 
@@ -17,16 +20,16 @@ export function ConfigPage() {
   })
 
   const handleChange = (field) => (event) => {
-    setSettings((prev) => ({ ...prev, [field]: event.target.value }))
+    if (field === 'theme') {
+      setTheme(event.target.value)
+    } else {
+      setSettings((prev) => ({ ...prev, [field]: event.target.value }))
+    }
   }
 
   const handleThemeChange = (event) => {
     const newTheme = event.target.value
     setTheme(newTheme)
-  }
-
-  const handleToggleAutoBackup = () => {
-    setSettings((prev) => ({ ...prev, autoBackup: !prev.autoBackup }))
   }
 
   const handleBackup = () => {
@@ -104,6 +107,10 @@ export function ConfigPage() {
     reader.readAsText(file)
   }
 
+  const handleAutoBackupToggle = () => {
+    setSettings((prev) => ({ ...prev, autoBackup: !prev.autoBackup }))
+  }
+
   const handleActivateAutoBackup = () => {
     setSettings((prev) => ({ ...prev, autoBackup: true }))
     alert('Backup automático ativado! Você receberá backups semanais no e-mail cadastrado.')
@@ -126,55 +133,65 @@ export function ConfigPage() {
   }
 
   return (
-    <div className="config-page">
+    <div className="page config-page">
       {/* Seção 1: Estado Atual */}
-      <section className="config-current-state">
-        <h2>Estado Atual</h2>
+      <section className="config-section">
+        <h2 className="config-section-title">Estado Atual</h2>
         <div className="config-state-grid">
           <div className="config-state-card">
-            <span>Moeda padrão</span>
-            <strong>{getCurrencyLabel(settings.currency)}</strong>
+            <span className="config-state-card-label">
+              Moeda padrão
+              <Tooltip content="Moeda utilizada para exibir valores financeiros no sistema">
+                <span className="tooltip-icon">ⓘ</span>
+              </Tooltip>
+            </span>
+            <strong className="config-state-card-value">{getCurrencyLabel(settings.currency)}</strong>
           </div>
           <div className="config-state-card">
-            <span>Idioma</span>
-            <strong>{getLanguageLabel(settings.language)}</strong>
+            <span className="config-state-card-label">
+              Idioma
+              <Tooltip content="Idioma da interface do sistema">
+                <span className="tooltip-icon">ⓘ</span>
+              </Tooltip>
+            </span>
+            <strong className="config-state-card-value">{getLanguageLabel(settings.language)}</strong>
           </div>
           <div className="config-state-card">
-            <span>Tema atual</span>
-            <strong>{theme === 'light' ? 'Claro' : 'Escuro'}</strong>
+            <span className="config-state-card-label">
+              Tema atual
+              <Tooltip content="Tema visual da interface (claro ou escuro)">
+                <span className="tooltip-icon">ⓘ</span>
+              </Tooltip>
+            </span>
+            <strong className="config-state-card-value">{theme === 'light' ? 'Claro' : 'Escuro'}</strong>
           </div>
         </div>
       </section>
 
       {/* Seção 2: Preferências Gerais */}
-      <section className="config-preferences">
-        <h2>Preferências Gerais</h2>
+      <section className="config-section">
+        <h2 className="config-section-title">Preferências Gerais</h2>
         <div className="config-preferences-grid">
-          <div className="config-input-wrapper">
+          <div className="config-input-group">
             <label className="config-input-label">
               Moeda
-              <span className="config-tooltip">
-                ⓘ
-                <span className="config-tooltip-content">
-                  Selecione a moeda padrão para exibição de valores monetários
-                </span>
-              </span>
+              <Tooltip content="Selecione a moeda padrão para exibição de valores">
+                <span className="tooltip-icon">ⓘ</span>
+              </Tooltip>
             </label>
             <select value={settings.currency} onChange={handleChange('currency')}>
               <option value="BRL">Real (R$)</option>
               <option value="USD">Dólar (US$)</option>
+              <option value="EUR">Euro (€)</option>
             </select>
           </div>
 
-          <div className="config-input-wrapper">
+          <div className="config-input-group">
             <label className="config-input-label">
               Idioma
-              <span className="config-tooltip">
-                ⓘ
-                <span className="config-tooltip-content">
-                  Escolha o idioma de interface do sistema
-                </span>
-              </span>
+              <Tooltip content="Selecione o idioma da interface">
+                <span className="tooltip-icon">ⓘ</span>
+              </Tooltip>
             </label>
             <select value={settings.language} onChange={handleChange('language')}>
               <option value="pt-BR">Português</option>
@@ -182,31 +199,28 @@ export function ConfigPage() {
             </select>
           </div>
 
-          <div className="config-input-wrapper">
+          <div className="config-input-group">
             <label className="config-input-label">
               Tema
-              <span className="config-tooltip">
-                ⓘ
-                <span className="config-tooltip-content">
-                  Escolha entre tema claro ou escuro para melhor conforto visual
-                </span>
-              </span>
+              <Tooltip content="Escolha entre tema claro ou escuro">
+                <span className="tooltip-icon">ⓘ</span>
+              </Tooltip>
             </label>
-            <select value={theme} onChange={handleThemeChange}>
-              <option value="light">Claro</option>
-              <option value="dark">Escuro</option>
-            </select>
+            <div className="config-theme-toggle-wrapper">
+              <select value={theme} onChange={handleThemeChange}>
+                <option value="light">Claro</option>
+                <option value="dark">Escuro</option>
+              </select>
+              <ThemeToggle className="theme-toggle" />
+            </div>
           </div>
 
-          <div className="config-input-wrapper">
+          <div className="config-input-group">
             <label className="config-input-label">
               E-mail para backup
-              <span className="config-tooltip">
-                ⓘ
-                <span className="config-tooltip-content">
-                  E-mail onde você receberá os backups automáticos dos seus dados
-                </span>
-              </span>
+              <Tooltip content="E-mail onde você receberá os backups automáticos">
+                <span className="tooltip-icon">ⓘ</span>
+              </Tooltip>
             </label>
             <input
               type="email"
@@ -217,12 +231,12 @@ export function ConfigPage() {
           </div>
         </div>
 
-        <div className="config-backup-actions">
-          <button className="config-backup-btn" type="button" onClick={handleBackup}>
-            Fazer backup
+        <div className="config-actions-row">
+          <button className="config-btn-primary" type="button" onClick={handleBackup}>
+            🔴 Fazer backup
           </button>
-          <button className="config-restore-btn" type="button" onClick={handleRestore}>
-            Restaurar arquivo
+          <button className="config-btn-secondary" type="button" onClick={handleRestore}>
+            ⚫ Restaurar arquivo
           </button>
           <input
             ref={fileInputRef}
@@ -235,31 +249,30 @@ export function ConfigPage() {
         </div>
       </section>
 
-      {/* Seção 3: Backup Automático */}
-      <section className="config-backup-section">
+      {/* Seção 3: Automação / Informações Importantes */}
+      <section className="config-section">
         <div className="config-backup-banner">
           <div className="config-backup-icon">📦</div>
           <div className="config-backup-content">
-            <h3>Backup automático</h3>
-            <p>Habilite o envio semanal para proteger seus dados financeiros.</p>
-          </div>
-          <div className="config-backup-action">
-            {settings.autoBackup ? (
-              <div className="config-toggle-wrapper">
-                <div className="config-toggle active" onClick={handleToggleAutoBackup}>
-                  <div className="config-toggle-handle"></div>
-                </div>
-                <span className="config-toggle-label">Ativado</span>
-              </div>
-            ) : (
-              <button className="config-backup-activate-btn" type="button" onClick={handleActivateAutoBackup}>
-                Ativar automação
-              </button>
-            )}
+            <h3 className="config-backup-title">Backup automático</h3>
+            <p className="config-backup-description">
+              Habilite o envio semanal para proteger seus dados financeiros.
+            </p>
+            <div className="config-backup-action">
+              <ToggleSwitch
+                checked={settings.autoBackup}
+                onChange={handleAutoBackupToggle}
+                label={settings.autoBackup ? 'Ativado' : 'Desativado'}
+              />
+              {!settings.autoBackup && (
+                <button className="config-btn-primary" type="button" onClick={handleActivateAutoBackup}>
+                  Ativar automação
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </section>
     </div>
   )
 }
-
