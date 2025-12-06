@@ -51,11 +51,29 @@ export function CostPage() {
   const handleOpenModal = (recipe = null) => {
     if (recipe) {
       setEditingId(recipe.id)
+      // Converter ingredientes antigos (com ingredientId) para novo formato (com name, totalValue, quantity)
+      const convertedIngredients = (recipe.ingredients || []).map((ing) => {
+        if (ing.ingredientId) {
+          // Formato antigo: buscar o ingrediente
+          const ingredient = ingredients.find((i) => i.id === ing.ingredientId)
+          return {
+            name: ingredient?.name || '',
+            totalValue: ingredient ? (ingredient.unitCost * (ing.quantity || 0)).toString() : '',
+            quantity: ing.quantity?.toString() || ''
+          }
+        }
+        // Formato novo: já tem name, totalValue, quantity
+        return {
+          name: ing.name || '',
+          totalValue: ing.totalValue?.toString() || '',
+          quantity: ing.quantity?.toString() || ''
+        }
+      })
       setFormState({
         name: recipe.name,
         yield: recipe.yield.toString(),
         prepTime: recipe.prepTime.toString(),
-        recipeIngredients: recipe.ingredients || []
+        recipeIngredients: convertedIngredients
       })
     } else {
       setEditingId(null)
@@ -76,11 +94,29 @@ export function CostPage() {
       const recipe = recipes.find((r) => r.id === editRecipeId)
       if (recipe) {
         setEditingId(recipe.id)
+        // Converter ingredientes antigos (com ingredientId) para novo formato (com name, totalValue, quantity)
+        const convertedIngredients = (recipe.ingredients || []).map((ing) => {
+          if (ing.ingredientId) {
+            // Formato antigo: buscar o ingrediente
+            const ingredient = ingredients.find((i) => i.id === ing.ingredientId)
+            return {
+              name: ingredient?.name || '',
+              totalValue: ingredient ? (ingredient.unitCost * (ing.quantity || 0)).toString() : '',
+              quantity: ing.quantity?.toString() || ''
+            }
+          }
+          // Formato novo: já tem name, totalValue, quantity
+          return {
+            name: ing.name || '',
+            totalValue: ing.totalValue?.toString() || '',
+            quantity: ing.quantity?.toString() || ''
+          }
+        })
         setFormState({
           name: recipe.name,
           yield: recipe.yield.toString(),
           prepTime: recipe.prepTime.toString(),
-          recipeIngredients: recipe.ingredients || []
+          recipeIngredients: convertedIngredients
         })
         setIsModalOpen(true)
         // Limpar o state para não abrir novamente
@@ -111,7 +147,7 @@ export function CostPage() {
       ...prev,
       recipeIngredients: [
         ...prev.recipeIngredients,
-        { ingredientId: ingredients[0]?.id || '', quantity: 0 }
+        { name: '', totalValue: '', quantity: '' }
       ]
     }))
   }
@@ -132,16 +168,17 @@ export function CostPage() {
     }))
   }
 
-  // Calcular custos automaticamente
+    // Calcular custos automaticamente
   const calculatedCosts = useMemo(() => {
     if (!formState.yield || Number(formState.yield) <= 0) {
       return { totalCost: 0, unitCost: 0, suggestedPrice: 0, suggestedProfit: 0 }
     }
 
     const totalCost = formState.recipeIngredients.reduce((acc, item) => {
-      const ingredient = ingredients.find((ing) => ing.id === item.ingredientId)
-      if (!ingredient || !item.quantity) return acc
-      return acc + ingredient.unitCost * item.quantity
+      const totalValue = Number(item.totalValue) || 0
+      if (totalValue <= 0) return acc
+      // O valor total representa o custo do ingrediente na receita
+      return acc + totalValue
     }, 0)
 
     const yieldNum = Number(formState.yield)
@@ -156,7 +193,7 @@ export function CostPage() {
       suggestedPrice,
       suggestedProfit
     }
-  }, [formState.recipeIngredients, formState.yield, ingredients])
+  }, [formState.recipeIngredients, formState.yield])
 
   const handleSubmit = () => {
     const yieldNum = Number(formState.yield)
@@ -346,45 +383,48 @@ export function CostPage() {
             <div className="empty-ingredients">Adicione ingredientes para calcular os custos</div>
           ) : (
             <div className="ingredients-list">
-              {formState.recipeIngredients.map((item, index) => {
-                const ingredient = ingredients.find((ing) => ing.id === item.ingredientId)
-                return (
-                  <div key={index} className="ingredient-item">
-                    <select
-                      value={item.ingredientId}
-                      onChange={(e) =>
-                        handleUpdateIngredient(index, 'ingredientId', e.target.value)
-                      }
-                      className="ingredient-select"
-                    >
-                      <option value="">Selecione um ingrediente</option>
-                      {ingredients.map((ing) => (
-                        <option key={ing.id} value={ing.id}>
-                          {ing.name} (R$ {ing.unitCost.toFixed(4)}/un)
-                        </option>
-                      ))}
-                    </select>
-                    <input
-                      type="number"
-                      value={item.quantity || ''}
-                      onChange={(e) =>
-                        handleUpdateIngredient(index, 'quantity', Number(e.target.value))
-                      }
-                      placeholder="Quantidade"
-                      min="0"
-                      step="0.01"
-                      className="ingredient-quantity"
-                    />
-                    <button
-                      type="button"
-                      className="remove-ingredient-btn"
-                      onClick={() => handleRemoveIngredient(index)}
-                    >
-                      ✕
-                    </button>
-                  </div>
-                )
-              })}
+              {formState.recipeIngredients.map((item, index) => (
+                <div key={index} className="ingredient-item">
+                  <input
+                    type="text"
+                    value={item.name || ''}
+                    onChange={(e) =>
+                      handleUpdateIngredient(index, 'name', e.target.value)
+                    }
+                    placeholder="Nome do ingrediente"
+                    className="ingredient-name"
+                  />
+                  <input
+                    type="number"
+                    value={item.totalValue || ''}
+                    onChange={(e) =>
+                      handleUpdateIngredient(index, 'totalValue', e.target.value)
+                    }
+                    placeholder="Valor total (R$)"
+                    min="0"
+                    step="0.01"
+                    className="ingredient-value"
+                  />
+                  <input
+                    type="number"
+                    value={item.quantity || ''}
+                    onChange={(e) =>
+                      handleUpdateIngredient(index, 'quantity', e.target.value)
+                    }
+                    placeholder="Quantidade usada"
+                    min="0"
+                    step="0.01"
+                    className="ingredient-quantity"
+                  />
+                  <button
+                    type="button"
+                    className="remove-ingredient-btn"
+                    onClick={() => handleRemoveIngredient(index)}
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
             </div>
           )}
         </div>
