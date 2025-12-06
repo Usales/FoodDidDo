@@ -1,0 +1,376 @@
+.simulator-page {
+  gap: 2rem;
+}
+
+.simulator-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.2rem;
+}
+
+.simulator-kpi-card {
+  background: var(--bg-card);
+  border-radius: 18px;
+  padding: 1.5rem;
+  border: 1px solid var(--border-primary);
+  box-shadow: var(--shadow-xl);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.simulator-kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 24px 32px rgba(0, 0, 0, 0.15);
+}
+
+.kpi-icon-wrapper {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.kpi-budget .kpi-icon-wrapper {
+  background: rgba(59, 130, 246, 0.15);
+  color: #3b82f6;
+}
+
+.kpi-revenue .kpi-icon-wrapper {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+}
+
+.kpi-profit .kpi-icon-wrapper {
+  background: rgba(251, 191, 36, 0.15);
+  color: #fbbf24;
+}
+
+.kpi-units .kpi-icon-wrapper {
+  background: rgba(139, 92, 246, 0.15);
+  color: #8b5cf6;
+}
+
+.kpi-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  flex: 1;
+}
+
+.kpi-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.kpi-value {
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.simulator-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.simulator-header-content h2 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.simulator-subtitle {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.simulator-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.simulator-header-actions button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.budget-input-wrapper {
+  display: flex;
+  justify-content: center;
+  margin: 2rem 0;
+}
+
+.budget-input-container {
+  position: relative;
+  max-width: 300px;
+  width: 100%;
+}
+
+.budget-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.budget-input {
+  width: 100%;
+  padding: 1rem 1rem 1rem 3rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+}
+
+.budget-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(255, 59, 48, 0.1);
+  background: var(--bg-card);
+}
+
+.budget-input::placeholder {
+  color: var(--text-muted);
+}
+
+.empty-simulation {
+  text-align: center;
+  padding: 3rem 2rem;
+  color: var(--text-muted);
+  font-size: 1rem;
+}
+
+.simulation-results {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.simulation-card {
+  background: var(--bg-card);
+  border-radius: 18px;
+  padding: 2rem;
+  border: 1px solid var(--border-primary);
+  box-shadow: var(--shadow-xl);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.simulation-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 24px 40px rgba(0, 0, 0, 0.2);
+}
+
+.simulation-card-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.recipe-icon {
+  font-size: 2.5rem;
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-secondary);
+  border-radius: 14px;
+  flex-shrink: 0;
+}
+
+.recipe-header-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.recipe-header-info h3 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+}
+
+.simulation-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: var(--bg-secondary);
+  color: var(--text-muted);
+  width: fit-content;
+}
+
+.simulation-main-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+.main-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.stat-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+.stat-value.revenue {
+  color: #10b981;
+}
+
+.stat-value.profit {
+  color: #fbbf24;
+}
+
+.stat-value.units {
+  color: var(--text-primary);
+}
+
+.simulation-divider {
+  height: 1px;
+  width: 100%;
+  background: var(--border-primary);
+}
+
+.simulation-details {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.detail-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.detail-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.detail-label {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.detail-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.detail-value.margin {
+  color: var(--primary-color);
+}
+
+.simulation-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border-primary);
+}
+
+.simulation-actions button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+@media (max-width: 960px) {
+  .simulator-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .simulator-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .simulator-header-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .simulation-main-stats,
+  .simulation-details {
+    grid-template-columns: 1fr;
+  }
+
+  .simulation-actions {
+    flex-direction: column;
+  }
+
+  .simulation-actions button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+

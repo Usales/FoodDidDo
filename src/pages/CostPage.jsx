@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useAppStore } from '../stores/appStore'
 import { FormModal } from '../components/ui/FormModal'
 import { CurrencyInput } from '../components/ui/CurrencyInput'
@@ -6,6 +7,8 @@ import './PageCommon.css'
 import './CostPage.css'
 
 export function CostPage() {
+  const location = useLocation()
+  const navigate = useNavigate()
   const recipes = useAppStore((state) => state.recipes)
   const ingredients = useAppStore((state) => state.ingredients)
   const addRecipe = useAppStore((state) => state.addRecipe)
@@ -66,6 +69,27 @@ export function CostPage() {
     setIsModalOpen(true)
   }
 
+  // Abrir modal automaticamente se vier navegação do simulador
+  useEffect(() => {
+    const editRecipeId = location.state?.editRecipeId
+    if (editRecipeId && !isModalOpen) {
+      const recipe = recipes.find((r) => r.id === editRecipeId)
+      if (recipe) {
+        setEditingId(recipe.id)
+        setFormState({
+          name: recipe.name,
+          yield: recipe.yield.toString(),
+          prepTime: recipe.prepTime.toString(),
+          recipeIngredients: recipe.ingredients || []
+        })
+        setIsModalOpen(true)
+        // Limpar o state para não abrir novamente
+        window.history.replaceState({}, document.title)
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.state?.editRecipeId, recipes])
+
   const handleCloseModal = () => {
     setIsModalOpen(false)
     setEditingId(null)
@@ -75,6 +99,11 @@ export function CostPage() {
       prepTime: '',
       recipeIngredients: []
     })
+    
+    // Se veio do simulador, voltar para lá ao cancelar
+    if (location.state?.editRecipeId) {
+      navigate('/simulador')
+    }
   }
 
   const handleAddIngredient = () => {
