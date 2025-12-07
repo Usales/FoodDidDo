@@ -1,19 +1,5 @@
 [
   {
-    "id": "local-1",
-    "title": "Arroz Brasileiro Tradicional",
-    "image": "/local-recipes/images/arroz-brasileiro.jpeg",
-    "instructions": "1. Refogue a cebola e o alho no óleo até ficarem dourados.\n2. Adicione o arroz e mexa por alguns minutos.\n3. Adicione água quente, sal e pimenta a gosto.\n4. Deixe cozinhar em fogo baixo com a panela tampada por 15-20 minutos.\n5. Desligue o fogo e deixe descansar por 5 minutos antes de servir.",
-    "ingredient": "Arroz",
-    "category": "Prato Principal",
-    "area": "Brasil",
-    "video": null,
-    "source": "Receita Local",
-    "ingredientsList": "2 xícaras de arroz, 1 cebola média, 2 dentes de alho, 3 colheres de óleo, sal, pimenta, água",
-    "relevanceScore": 100,
-    "apiType": "local"
-  },
-  {
     "id": "local-2",
     "title": "Omelete Simples",
     "image": "/local-recipes/images/omelete-simples.jpeg",
