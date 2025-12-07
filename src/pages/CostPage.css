@@ -165,7 +165,7 @@
   flex-direction: column;
   gap: 1rem;
   padding: 1.2rem;
-  background: #ffffff;
+  background: #E1E2E3;
   border-radius: 12px;
   border: 1px solid var(--border-primary);
 }
@@ -186,13 +186,24 @@
 .ingredient-name,
 .ingredient-value,
 .ingredient-quantity {
-  color: var(--text-primary);
+  color: rgba(17, 24, 39, 0.92) !important;
+  background: #ffffff !important;
+  border: 1px solid rgba(148, 163, 184, 0.4) !important;
 }
 
 .ingredient-name::placeholder,
 .ingredient-value::placeholder,
 .ingredient-quantity::placeholder {
-  color: var(--text-muted);
+  color: rgba(148, 163, 184, 0.7) !important;
+}
+
+.ingredient-name:focus,
+.ingredient-value:focus,
+.ingredient-quantity:focus {
+  outline: none;
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1) !important;
+  color: rgba(17, 24, 39, 0.92) !important;
 }
 
 .add-ingredient-btn {
@@ -223,6 +234,8 @@
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  width: 100%;
+  overflow: visible;
 }
 
 .ingredient-item {
@@ -230,6 +243,20 @@
   gap: 0.75rem;
   align-items: center;
   animation: slideIn 0.3s ease;
+  flex-wrap: nowrap;
+  width: 100%;
+}
+
+.ingredient-item input {
+  box-sizing: border-box;
+  -webkit-appearance: none;
+  -moz-appearance: textfield;
+}
+
+.ingredient-item input[type="number"]::-webkit-inner-spin-button,
+.ingredient-item input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 @keyframes slideIn {
@@ -245,32 +272,55 @@
 
 .ingredient-name {
   flex: 1;
-  border: 1px solid var(--border-primary);
+  min-width: 0;
+  border: 1px solid rgba(148, 163, 184, 0.4) !important;
   border-radius: 8px;
   padding: 0.65rem 0.9rem;
   font-size: 0.95rem;
-  background: #ffffff;
-  color: var(--text-primary);
+  background: #ffffff !important;
+  color: rgba(17, 24, 39, 0.92) !important;
+  transition: all 0.2s ease;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.ingredient-name:hover {
+  border-color: rgba(148, 163, 184, 0.6) !important;
 }
 
 .ingredient-value {
   width: 140px;
-  border: 1px solid var(--border-primary);
+  min-width: 140px;
+  flex-shrink: 0;
+  border: 1px solid rgba(148, 163, 184, 0.4) !important;
   border-radius: 8px;
   padding: 0.65rem 0.9rem;
   font-size: 0.95rem;
-  background: #ffffff;
-  color: var(--text-primary);
+  background: #ffffff !important;
+  color: rgba(17, 24, 39, 0.92) !important;
+  transition: all 0.2s ease;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.ingredient-value:hover {
+  border-color: rgba(148, 163, 184, 0.6) !important;
 }
 
 .ingredient-quantity {
   width: 140px;
-  border: 1px solid var(--border-primary);
+  min-width: 140px;
+  flex-shrink: 0;
+  border: 1px solid rgba(148, 163, 184, 0.4) !important;
   border-radius: 8px;
   padding: 0.65rem 0.9rem;
   font-size: 0.95rem;
-  background: #ffffff;
-  color: var(--text-primary);
+  background: #ffffff !important;
+  color: rgba(17, 24, 39, 0.92) !important;
+  transition: all 0.2s ease;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.ingredient-quantity:hover {
+  border-color: rgba(148, 163, 184, 0.6) !important;
 }
 
 .remove-ingredient-btn {
@@ -303,7 +353,7 @@
 .cost-summary {
   margin-top: 1rem;
   padding: 1.2rem;
-  background: var(--bg-secondary);
+  background: #E1E2E3;
   border-radius: 12px;
   border: 1px solid var(--border-primary);
 }
@@ -312,7 +362,7 @@
   margin: 0 0 1rem 0;
   font-size: 1.1rem;
   font-weight: 600;
-  color: var(--text-primary);
+  color: rgba(17, 24, 39, 0.9);
 }
 
 .summary-grid {
@@ -329,23 +379,23 @@
 
 .summary-label {
   font-size: 0.85rem;
-  color: var(--text-muted);
+  color: rgba(71, 85, 105, 0.8);
   font-weight: 500;
 }
 
 .summary-value {
   font-size: 1.3rem;
   font-weight: 700;
-  color: var(--text-primary);
+  color: rgba(17, 24, 39, 0.95);
   letter-spacing: -0.01em;
 }
 
 .summary-value.profit {
-  color: var(--success);
+  color: #059669;
 }
 
 .summary-value.price {
-  color: var(--primary-color);
+  color: #dc2626;
 }
 
 /* Mensagens de erro */
@@ -382,12 +432,18 @@
 
   .ingredient-item {
     flex-wrap: wrap;
+    gap: 0.5rem;
   }
 
   .ingredient-name,
   .ingredient-value,
   .ingredient-quantity {
-    width: 100%;
+    width: 100% !important;
+    min-width: 100% !important;
+  }
+
+  .remove-ingredient-btn {
+    align-self: flex-start;
   }
 }
 
