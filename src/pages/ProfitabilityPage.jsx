@@ -61,7 +61,10 @@ export function ProfitabilityPage() {
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (openTooltip && tooltipRefs.current[openTooltip]) {
-        if (!tooltipRefs.current[openTooltip].contains(event.target)) {
+        const cardElement = tooltipRefs.current[openTooltip]
+        const tooltipElement = cardElement?.querySelector('.metric-tooltip')
+        // Não fechar se o clique foi dentro do card ou do tooltip
+        if (!cardElement.contains(event.target)) {
           setOpenTooltip(null)
         }
       }
@@ -101,7 +104,10 @@ export function ProfitabilityPage() {
       <section className="profitability-metrics-section">
         <div className="profitability-metrics-grid">
           {/* Card 1: Custo Unitário */}
-          <div className="profitability-metric-card" ref={el => tooltipRefs.current['cost'] = el}>
+          <div 
+            className={`profitability-metric-card ${openTooltip === 'cost' ? 'tooltip-open' : ''}`}
+            ref={el => tooltipRefs.current['cost'] = el}
+          >
             <button 
               className="metric-info-btn"
               onClick={(e) => toggleTooltip('cost', e)}
@@ -142,7 +148,10 @@ export function ProfitabilityPage() {
           </div>
 
           {/* Card 2: Lucro por Unidade */}
-          <div className="profitability-metric-card" ref={el => tooltipRefs.current['profit'] = el}>
+          <div 
+            className={`profitability-metric-card ${openTooltip === 'profit' ? 'tooltip-open' : ''}`}
+            ref={el => tooltipRefs.current['profit'] = el}
+          >
             <button 
               className="metric-info-btn"
               onClick={(e) => toggleTooltip('profit', e)}
@@ -176,7 +185,10 @@ export function ProfitabilityPage() {
           </div>
 
           {/* Card 3: Margem de Contribuição */}
-          <div className="profitability-metric-card" ref={el => tooltipRefs.current['margin'] = el}>
+          <div 
+            className={`profitability-metric-card ${openTooltip === 'margin' ? 'tooltip-open' : ''}`}
+            ref={el => tooltipRefs.current['margin'] = el}
+          >
             <button 
               className="metric-info-btn"
               onClick={(e) => toggleTooltip('margin', e)}
@@ -211,7 +223,10 @@ export function ProfitabilityPage() {
           </div>
 
           {/* Card 4: Lucro por Lote */}
-          <div className="profitability-metric-card" ref={el => tooltipRefs.current['batch'] = el}>
+          <div 
+            className={`profitability-metric-card ${openTooltip === 'batch' ? 'tooltip-open' : ''}`}
+            ref={el => tooltipRefs.current['batch'] = el}
+          >
             <button 
               className="metric-info-btn"
               onClick={(e) => toggleTooltip('batch', e)}

@@ -64,15 +64,22 @@
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, z-index 0s;
   min-height: 180px;
   justify-content: center;
   position: relative;
+  z-index: 1;
 }
 
 .profitability-metric-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 20px 32px rgba(0, 0, 0, 0.15);
+}
+
+/* Quando o tooltip está aberto, o card deve ficar acima dos outros */
+.profitability-metric-card.tooltip-open {
+  z-index: 1000;
+  position: relative;
 }
 
 /* Botão de informação */
@@ -136,10 +143,11 @@
   border: 1px solid var(--border-primary);
   border-radius: 12px;
   padding: 1.25rem;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-  z-index: 100;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(0, 0, 0, 0.1);
+  z-index: 1001;
   animation: tooltipFadeIn 0.2s ease;
   margin-top: 0.5rem;
+  pointer-events: auto;
 }
 
 @keyframes tooltipFadeIn {
