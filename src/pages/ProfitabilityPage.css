@@ -1,0 +1,672 @@
+/* ProfitabilityPage Styles */
+
+.profitability-page {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+  padding: 2rem 0;
+}
+
+/* Header Interno */
+.profitability-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.profitability-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.breadcrumb-separator {
+  color: var(--text-muted);
+  opacity: 0.5;
+}
+
+.breadcrumb-current {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.profitability-title {
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+/* Bloco 1: Dados da Receita - Grid 2x2 */
+.profitability-metrics-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.profitability-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+.profitability-metric-card {
+  background: var(--bg-card);
+  border-radius: 16px;
+  padding: 2rem;
+  border: 1px solid var(--border-primary);
+  box-shadow: var(--shadow-xl);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  min-height: 180px;
+  justify-content: center;
+  position: relative;
+}
+
+.profitability-metric-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 32px rgba(0, 0, 0, 0.15);
+}
+
+/* Botão de informação */
+.metric-info-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  min-height: 28px;
+  max-width: 28px;
+  max-height: 28px;
+  border-radius: 50%;
+  border: 2px solid #dc2626;
+  background: transparent;
+  color: #dc2626;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 10;
+  font-size: 1rem;
+  padding: 0;
+  margin: 0;
+  line-height: 1;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.metric-info-btn svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  color: inherit;
+}
+
+.metric-info-btn:hover {
+  background: #dc2626;
+  color: #000000;
+  border-color: #dc2626;
+  transform: scale(1.1);
+}
+
+.metric-info-btn:hover svg {
+  color: #000000;
+}
+
+.metric-info-btn:active {
+  transform: scale(0.95);
+}
+
+/* Tooltip */
+.metric-tooltip {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 0;
+  right: 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border-primary);
+  border-radius: 12px;
+  padding: 1.25rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  z-index: 100;
+  animation: tooltipFadeIn 0.2s ease;
+  margin-top: 0.5rem;
+}
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.metric-tooltip h4 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 1rem 0;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border-primary);
+}
+
+.tooltip-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.tooltip-list li {
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  line-height: 1.5;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border-primary);
+}
+
+.tooltip-list li:last-child {
+  border-bottom: none;
+}
+
+.tooltip-list li strong {
+  color: var(--text-primary);
+  font-weight: 600;
+  margin-right: 0.5rem;
+}
+
+.tooltip-close {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  min-height: 28px;
+  max-width: 28px;
+  max-height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--border-primary);
+  background: var(--bg-secondary);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+  padding: 0;
+  margin: 0;
+  line-height: 1;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.tooltip-close svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  color: inherit;
+}
+
+.tooltip-close:hover {
+  background: var(--primary-color);
+  color: #ffffff;
+  border-color: var(--primary-color);
+  transform: scale(1.1);
+}
+
+.tooltip-close:active {
+  transform: scale(0.95);
+}
+
+.metric-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(220, 38, 38, 0.1), rgba(220, 38, 38, 0.05));
+  color: var(--primary-color);
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.metric-icon--profit {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(34, 197, 94, 0.05));
+  color: #22c55e;
+}
+
+.metric-icon--margin {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.05));
+  color: #3b82f6;
+}
+
+.metric-icon--batch {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.1), rgba(168, 85, 247, 0.05));
+  color: #a855f7;
+}
+
+.metric-label {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.metric-value {
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.metric-description {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+/* Bloco 2: Calculadora de Margem */
+.profitability-calculator-section {
+  background: var(--bg-card);
+  border-radius: 18px;
+  padding: 2.5rem;
+  box-shadow: var(--shadow-xl);
+  border: 1px solid var(--border-primary);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.profitability-calculator-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.calculator-title-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.calculator-icon {
+  font-size: 1.5rem;
+  color: var(--primary-color);
+}
+
+.profitability-calculator-section h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.calculator-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(34, 197, 94, 0.05));
+  border: 1px solid rgba(34, 197, 94, 0.2);
+  border-radius: 999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #22c55e;
+}
+
+.badge-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #22c55e;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.profitability-calculator-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+.profitability-input-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.profitability-input-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.profitability-select {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  border: 1px solid var(--border-primary);
+  background: var(--input-bg, var(--bg-card));
+  color: var(--input-text, var(--text-primary));
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.profitability-select:hover {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+.profitability-select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
+}
+
+/* Bloco 3: Resumo Financeiro */
+.profitability-summary-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.profitability-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+/* Composição custo x lucro */
+.profitability-composition-card {
+  background: var(--bg-card);
+  border-radius: 18px;
+  padding: 2rem;
+  border: 1px solid var(--border-primary);
+  box-shadow: var(--shadow-xl);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.composition-header h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.composition-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.composition-bar {
+  display: flex;
+  width: 100%;
+  height: 60px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.composition-bar-segment {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 0.25rem;
+  transition: all 0.3s ease;
+  position: relative;
+  min-width: 80px;
+}
+
+.composition-bar-segment--cost {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: #ffffff;
+}
+
+.composition-bar-segment--profit {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: #ffffff;
+}
+
+.bar-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.bar-value {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.composition-details {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.composition-detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 1rem;
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  border: 1px solid var(--border-primary);
+}
+
+.detail-label {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.detail-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+
+.detail-text {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* Dica de margem */
+.profitability-tip-card {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.05));
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 18px;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  box-shadow: var(--shadow-xl);
+}
+
+.tip-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(59, 130, 246, 0.1));
+  color: #3b82f6;
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.profitability-tip-card h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.tip-text {
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.tip-text strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.tip-recommendation {
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  line-height: 1.6;
+  margin: 0;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 12px;
+  border-left: 4px solid #3b82f6;
+}
+
+.tip-recommendation strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.tip-highlight {
+  color: #3b82f6;
+  font-weight: 700;
+  font-size: 1.1em;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .profitability-page {
+    gap: 2rem;
+    padding: 1.5rem 0;
+  }
+
+  .profitability-title {
+    font-size: 1.75rem;
+  }
+
+  .profitability-metrics-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  .profitability-metric-card {
+    padding: 1.5rem;
+    min-height: auto;
+  }
+
+  .metric-tooltip {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: calc(100% - 2rem);
+    max-width: 400px;
+    max-height: 80vh;
+    overflow-y: auto;
+    margin-top: 0;
+  }
+
+  .profitability-calculator-section {
+    padding: 1.5rem;
+  }
+
+  .profitability-calculator-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  .profitability-calculator-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .profitability-summary-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  .composition-bar {
+    height: 80px;
+    flex-direction: column;
+  }
+
+  .composition-bar-segment {
+    width: 100% !important;
+    min-height: 40px;
+  }
+}
+
+@media (max-width: 480px) {
+  .profitability-header {
+    gap: 0.5rem;
+  }
+
+  .profitability-title {
+    font-size: 1.5rem;
+  }
+
+  .profitability-metric-card {
+    padding: 1.25rem;
+  }
+
+  .metric-value {
+    font-size: 1.75rem;
+  }
+
+  .profitability-calculator-section {
+    padding: 1.25rem;
+  }
+
+  .profitability-composition-card,
+  .profitability-tip-card {
+    padding: 1.5rem;
+  }
+}
+
