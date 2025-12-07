@@ -348,6 +348,25 @@
   color: var(--primary-color);
 }
 
+/* Mensagens de erro */
+.error-message {
+  display: block;
+  color: var(--error, #dc2626);
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+  font-weight: 500;
+}
+
+.input-error {
+  border-color: var(--error, #dc2626) !important;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1) !important;
+}
+
+.input-error:focus {
+  border-color: var(--error, #dc2626) !important;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15) !important;
+}
+
 @media (max-width: 768px) {
   .kpi-grid {
     grid-template-columns: 1fr;

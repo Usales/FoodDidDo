@@ -15,6 +15,7 @@ export function CostPage() {
   const updateRecipe = useAppStore((state) => state.updateRecipe)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingId, setEditingId] = useState(null)
+  const [formErrors, setFormErrors] = useState({})
   const [formState, setFormState] = useState({
     name: '',
     yield: '',
@@ -129,6 +130,7 @@ export function CostPage() {
   const handleCloseModal = () => {
     setIsModalOpen(false)
     setEditingId(null)
+    setFormErrors({})
     setFormState({
       name: '',
       yield: '',
@@ -153,12 +155,28 @@ export function CostPage() {
   }
 
   const handleUpdateIngredient = (index, field, value) => {
-    setFormState((prev) => ({
-      ...prev,
-      recipeIngredients: prev.recipeIngredients.map((item, i) =>
-        i === index ? { ...item, [field]: value } : item
-      )
-    }))
+    setFormState((prev) => {
+      const updatedIngredients = prev.recipeIngredients.map((item, i) => {
+        if (i === index) {
+          const updated = { ...item, [field]: value }
+          // Se atualizou totalValue ou quantity, recalcular se necessário
+          if (field === 'totalValue' || field === 'quantity') {
+            // Manter os valores como string para permitir edição
+            return updated
+          }
+          return updated
+        }
+        return item
+      })
+      return {
+        ...prev,
+        recipeIngredients: updatedIngredients
+      }
+    })
+    // Limpar erro de ingredientes quando atualizar
+    if (formErrors.ingredients) {
+      setFormErrors((prev) => ({ ...prev, ingredients: '' }))
+    }
   }
 
   const handleRemoveIngredient = (index) => {
@@ -168,15 +186,19 @@ export function CostPage() {
     }))
   }
 
-    // Calcular custos automaticamente
+  // Calcular custos automaticamente
   const calculatedCosts = useMemo(() => {
     if (!formState.yield || Number(formState.yield) <= 0) {
       return { totalCost: 0, unitCost: 0, suggestedPrice: 0, suggestedProfit: 0 }
     }
 
     const totalCost = formState.recipeIngredients.reduce((acc, item) => {
-      const totalValue = Number(item.totalValue) || 0
-      if (totalValue <= 0) return acc
+      // Converter totalValue para número, permitindo strings vazias durante digitação
+      const totalValueStr = String(item.totalValue || '').trim()
+      if (!totalValueStr) return acc
+      
+      const totalValue = Number(totalValueStr)
+      if (isNaN(totalValue) || totalValue <= 0) return acc
       // O valor total representa o custo do ingrediente na receita
       return acc + totalValue
     }, 0)
@@ -184,7 +206,7 @@ export function CostPage() {
     const yieldNum = Number(formState.yield)
     const unitCost = yieldNum > 0 ? totalCost / yieldNum : 0
     const suggestedMargin = 0.45 // Margem padrão de 45%
-    const suggestedPrice = unitCost / (1 - suggestedMargin)
+    const suggestedPrice = unitCost > 0 ? unitCost / (1 - suggestedMargin) : 0
     const suggestedProfit = suggestedPrice - unitCost
 
     return {
@@ -198,39 +220,94 @@ export function CostPage() {
   const handleSubmit = () => {
     const yieldNum = Number(formState.yield)
     const prepTimeNum = Number(formState.prepTime)
+    const errors = {}
 
-    if (
-      !formState.name.trim() ||
-      Number.isNaN(yieldNum) ||
-      yieldNum <= 0 ||
-      Number.isNaN(prepTimeNum) ||
-      prepTimeNum <= 0 ||
-      formState.recipeIngredients.length === 0 ||
-      calculatedCosts.totalCost <= 0
-    ) {
+    // Validações
+    if (!formState.name.trim()) {
+      errors.name = 'Nome da receita é obrigatório'
+    }
+
+    if (!formState.yield || Number.isNaN(yieldNum) || yieldNum <= 0) {
+      errors.yield = 'Rendimento deve ser um número maior que zero'
+    }
+
+    if (!formState.prepTime || Number.isNaN(prepTimeNum) || prepTimeNum <= 0) {
+      errors.prepTime = 'Tempo de preparo deve ser um número maior que zero'
+    }
+
+    if (formState.recipeIngredients.length === 0) {
+      errors.ingredients = 'Adicione pelo menos um ingrediente'
+    }
+
+    // Validar ingredientes
+    const invalidIngredients = formState.recipeIngredients.filter(
+      (ing) => {
+        const nameValid = ing.name?.trim()
+        const totalValueStr = String(ing.totalValue || '').trim()
+        const totalValue = totalValueStr ? Number(totalValueStr) : 0
+        return !nameValid || !totalValueStr || isNaN(totalValue) || totalValue <= 0
+      }
+    )
+
+    if (invalidIngredients.length > 0) {
+      errors.ingredients = `Preencha todos os ingredientes com nome e valor total válidos (${invalidIngredients.length} inválido${invalidIngredients.length > 1 ? 's' : ''})`
+    }
+
+    if (calculatedCosts.totalCost <= 0) {
+      errors.cost = 'O custo total deve ser maior que zero'
+    }
+
+    setFormErrors(errors)
+
+    // Se houver erros, não submeter e mostrar feedback
+    if (Object.keys(errors).length > 0) {
+      // Scroll para o primeiro erro
+      const firstErrorField = Object.keys(errors)[0]
+      const errorElement = document.querySelector(`.input-error, .error-message`)
+      if (errorElement) {
+        errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }
       return
     }
 
+    // Preparar dados dos ingredientes
+    const ingredientsData = formState.recipeIngredients.map((ing) => ({
+      name: ing.name.trim(),
+      totalValue: Number(ing.totalValue) || 0,
+      quantity: Number(ing.quantity) || 0
+    }))
+
     const recipeData = {
-      name: formState.name,
+      name: formState.name.trim(),
       yield: yieldNum,
       prepTime: prepTimeNum,
       totalCost: calculatedCosts.totalCost,
       unitCost: calculatedCosts.unitCost,
       contributionMargin: 0.45, // Margem padrão
-      ingredients: formState.recipeIngredients
+      ingredients: ingredientsData
     }
 
-    if (editingId) {
-      updateRecipe(editingId, recipeData)
-    } else {
-      addRecipe({
-        id: crypto.randomUUID(),
-        ...recipeData
-      })
-    }
+    try {
+      if (editingId) {
+        updateRecipe(editingId, recipeData)
+        console.log('Receita atualizada:', recipeData)
+      } else {
+        const newRecipe = {
+          id: crypto.randomUUID(),
+          ...recipeData
+        }
+        addRecipe(newRecipe)
+        console.log('Receita adicionada:', newRecipe)
+      }
 
-    handleCloseModal()
+      // Limpar erros e fechar modal
+      setFormErrors({})
+      handleCloseModal()
+    } catch (error) {
+      console.error('Erro ao salvar receita:', error)
+      setFormErrors({ submit: 'Erro ao salvar receita. Tente novamente.' })
+      alert('Erro ao salvar receita. Verifique o console para mais detalhes.')
+    }
   }
 
   const getMarginColor = (margin) => {
@@ -336,36 +413,63 @@ export function CostPage() {
           </>
         }
       >
+        {formErrors.submit && (
+          <div className="error-message" style={{ 
+            display: 'block', 
+            marginBottom: '1rem', 
+            padding: '0.75rem', 
+            background: 'rgba(220, 38, 38, 0.1)', 
+            border: '1px solid rgba(220, 38, 38, 0.3)', 
+            borderRadius: '8px' 
+          }}>
+            {formErrors.submit}
+          </div>
+        )}
         <label className="input-control">
           <span>Nome da receita</span>
           <input
             type="text"
             value={formState.name}
-            onChange={(event) => setFormState((prev) => ({ ...prev, name: event.target.value }))}
+            onChange={(event) => {
+              setFormState((prev) => ({ ...prev, name: event.target.value }))
+              if (formErrors.name) setFormErrors((prev) => ({ ...prev, name: '' }))
+            }}
             placeholder="Ex.: Bolo de Chocolate"
+            className={formErrors.name ? 'input-error' : ''}
           />
+          {formErrors.name && <span className="error-message">{formErrors.name}</span>}
         </label>
         <label className="input-control">
           <span>Rendimento (unidades)</span>
           <input
             type="number"
             value={formState.yield}
-            onChange={(event) => setFormState((prev) => ({ ...prev, yield: event.target.value }))}
+            onChange={(event) => {
+              setFormState((prev) => ({ ...prev, yield: event.target.value }))
+              if (formErrors.yield) setFormErrors((prev) => ({ ...prev, yield: '' }))
+            }}
             placeholder="Ex.: 18"
             min="1"
+            step="1"
+            className={formErrors.yield ? 'input-error' : ''}
           />
+          {formErrors.yield && <span className="error-message">{formErrors.yield}</span>}
         </label>
         <label className="input-control">
           <span>Tempo de preparo (minutos)</span>
           <input
             type="number"
             value={formState.prepTime}
-            onChange={(event) =>
+            onChange={(event) => {
               setFormState((prev) => ({ ...prev, prepTime: event.target.value }))
-            }
+              if (formErrors.prepTime) setFormErrors((prev) => ({ ...prev, prepTime: '' }))
+            }}
             placeholder="Ex.: 45"
             min="1"
+            step="1"
+            className={formErrors.prepTime ? 'input-error' : ''}
           />
+          {formErrors.prepTime && <span className="error-message">{formErrors.prepTime}</span>}
         </label>
 
         <div className="ingredients-section">
@@ -379,6 +483,16 @@ export function CostPage() {
               + Adicionar ingrediente
             </button>
           </div>
+          {formErrors.ingredients && (
+            <span className="error-message" style={{ display: 'block', marginBottom: '0.5rem' }}>
+              {formErrors.ingredients}
+            </span>
+          )}
+          {formErrors.cost && (
+            <span className="error-message" style={{ display: 'block', marginBottom: '0.5rem' }}>
+              {formErrors.cost}
+            </span>
+          )}
           {formState.recipeIngredients.length === 0 ? (
             <div className="empty-ingredients">Adicione ingredientes para calcular os custos</div>
           ) : (
@@ -397,9 +511,17 @@ export function CostPage() {
                   <input
                     type="number"
                     value={item.totalValue || ''}
-                    onChange={(e) =>
-                      handleUpdateIngredient(index, 'totalValue', e.target.value)
-                    }
+                    onChange={(e) => {
+                      const value = e.target.value
+                      handleUpdateIngredient(index, 'totalValue', value)
+                    }}
+                    onBlur={(e) => {
+                      // Garantir que o valor seja válido ao sair do campo
+                      const value = e.target.value
+                      if (value && (isNaN(Number(value)) || Number(value) <= 0)) {
+                        handleUpdateIngredient(index, 'totalValue', '')
+                      }
+                    }}
                     placeholder="Valor total (R$)"
                     min="0"
                     step="0.01"
@@ -408,9 +530,17 @@ export function CostPage() {
                   <input
                     type="number"
                     value={item.quantity || ''}
-                    onChange={(e) =>
-                      handleUpdateIngredient(index, 'quantity', e.target.value)
-                    }
+                    onChange={(e) => {
+                      const value = e.target.value
+                      handleUpdateIngredient(index, 'quantity', value)
+                    }}
+                    onBlur={(e) => {
+                      // Garantir que o valor seja válido ao sair do campo
+                      const value = e.target.value
+                      if (value && (isNaN(Number(value)) || Number(value) < 0)) {
+                        handleUpdateIngredient(index, 'quantity', '')
+                      }
+                    }}
                     placeholder="Quantidade usada"
                     min="0"
                     step="0.01"
