@@ -39,13 +39,15 @@ export function ProfitabilityPage() {
       }
     }
     const totalCost = selectedRecipe.totalCost || 0
-    const baseUnitCost = selectedRecipe.unitCost || 0
+    const recipeYield = selectedRecipe.yield || 1
+    // Calcular custo unitário base a partir do totalCost para garantir consistência
+    const baseUnitCost = recipeYield > 0 ? totalCost / recipeYield : (selectedRecipe.unitCost || 0)
     const fixedCostRateado = fixedCostPerUnit
     // Custo unitário final = custo base + custo fixo rateado
     const finalUnitCost = baseUnitCost + fixedCostRateado
     const grossProfit = priceNumber - finalUnitCost
     const margin = priceNumber > 0 ? (grossProfit / priceNumber) * 100 : 0
-    const batchProfit = grossProfit * (selectedRecipe.yield || 0)
+    const batchProfit = grossProfit * recipeYield
     return { 
       unitCost: finalUnitCost, 
       grossProfit, 
