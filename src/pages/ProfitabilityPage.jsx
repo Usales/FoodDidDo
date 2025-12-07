@@ -303,6 +303,38 @@ export function ProfitabilityPage() {
             />
           </div>
         </div>
+        {selectedRecipe && (
+          <div className="profitability-unit-calculation">
+            <div className="unit-calculation-item">
+              <span className="unit-calculation-label">Custo Total do Lote:</span>
+              <strong className="unit-calculation-value">{formatCurrency(metrics.totalCost)}</strong>
+            </div>
+            <div className="unit-calculation-separator">÷</div>
+            <div className="unit-calculation-item">
+              <span className="unit-calculation-label">Quantidade de Unidades:</span>
+              <strong className="unit-calculation-value">{selectedRecipe.yield || 0}</strong>
+            </div>
+            <div className="unit-calculation-separator">=</div>
+            <div className="unit-calculation-item unit-calculation-result">
+              <span className="unit-calculation-label">Custo Unitário Base:</span>
+              <strong className="unit-calculation-value">{formatCurrency(metrics.baseUnitCost)}</strong>
+            </div>
+            {metrics.fixedCostRateado > 0 && (
+              <>
+                <div className="unit-calculation-separator">+</div>
+                <div className="unit-calculation-item">
+                  <span className="unit-calculation-label">Custo Fixo Rateado:</span>
+                  <strong className="unit-calculation-value">{formatCurrency(metrics.fixedCostRateado)}</strong>
+                </div>
+                <div className="unit-calculation-separator">=</div>
+                <div className="unit-calculation-item unit-calculation-result">
+                  <span className="unit-calculation-label">Custo Unitário Final:</span>
+                  <strong className="unit-calculation-value unit-calculation-final">{formatCurrency(metrics.unitCost)}</strong>
+                </div>
+              </>
+            )}
+          </div>
+        )}
       </section>
 
       {/* Bloco 3: Resumo Financeiro */}

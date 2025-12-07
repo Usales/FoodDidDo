@@ -367,6 +367,60 @@
   gap: 1.5rem;
 }
 
+/* Cálculo do Valor Unitário */
+.profitability-unit-calculation {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  border: 1px solid var(--border-primary);
+  margin-top: 1rem;
+}
+
+.unit-calculation-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 140px;
+}
+
+.unit-calculation-item.unit-calculation-result {
+  background: linear-gradient(135deg, rgba(220, 38, 38, 0.1), rgba(220, 38, 38, 0.05));
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(220, 38, 38, 0.2);
+}
+
+.unit-calculation-item.unit-calculation-result .unit-calculation-value.unit-calculation-final {
+  color: var(--primary-color);
+  font-size: 1.25rem;
+}
+
+.unit-calculation-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.unit-calculation-value {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.unit-calculation-separator {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  padding: 0 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .profitability-input-wrapper {
   display: flex;
   flex-direction: column;
@@ -628,6 +682,21 @@
   .profitability-calculator-grid {
     grid-template-columns: 1fr;
     gap: 1.25rem;
+  }
+
+  .profitability-unit-calculation {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1.25rem;
+  }
+
+  .unit-calculation-separator {
+    padding: 0.5rem 0;
+    transform: rotate(90deg);
+  }
+
+  .unit-calculation-item {
+    min-width: 100%;
   }
 
   .profitability-calculator-header {
