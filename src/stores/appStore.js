@@ -115,6 +115,54 @@ const createInitialState = () => ({
       reference: 'Compra ovos',
       createdAt: '2025-11-08T13:10:00Z'
     }
+  ],
+  warehouses: [
+    {
+      id: 'warehouse-1',
+      name: 'Armazém Principal',
+      capacity: 120, // kg (opcional)
+      capacityUnit: 'kg',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      items: [
+        {
+          id: 'item-1',
+          emoji: '🍞',
+          name: 'Farinha de Trigo',
+          quantity: 12500,
+          unit: 'g',
+          minIdeal: 5000,
+          unitCost: 0.0048,
+          category: 'Farinhas',
+          notes: '',
+          warehouseId: 'warehouse-1'
+        },
+        {
+          id: 'item-2',
+          emoji: '🥚',
+          name: 'Ovos',
+          quantity: 300,
+          unit: 'un',
+          minIdeal: 600,
+          unitCost: 0.8,
+          category: 'Ovos',
+          notes: '',
+          warehouseId: 'warehouse-1'
+        },
+        {
+          id: 'item-3',
+          emoji: '🥛',
+          name: 'Leite Condensado',
+          quantity: 1200,
+          unit: 'ml',
+          minIdeal: 395,
+          unitCost: 0.0165,
+          category: 'Laticínios',
+          notes: '',
+          warehouseId: 'warehouse-1'
+        }
+      ]
+    }
   ]
 })
 
@@ -148,8 +196,69 @@ export const useAppStore = create(devtools((set, get) => ({
       cashflow: state.cashflow.filter((entry) => entry.id !== id)
     })),
   addFixedCost: (cost) => set((state) => ({ fixedCosts: [cost, ...state.fixedCosts] })),
+  updateFixedCost: (id, updates) =>
+    set((state) => ({
+      fixedCosts: state.fixedCosts.map((cost) => (cost.id === id ? { ...cost, ...updates } : cost))
+    })),
+  deleteFixedCost: (id) =>
+    set((state) => ({
+      fixedCosts: state.fixedCosts.filter((cost) => cost.id !== id)
+    })),
   addPricing: (pricing) => set((state) => ({ pricing: [pricing, ...state.pricing] })),
+  updatePricing: (id, updates) =>
+    set((state) => ({
+      pricing: state.pricing.map((p) => (p.id === id ? { ...p, ...updates } : p))
+    })),
+  deletePricing: (id) =>
+    set((state) => ({
+      pricing: state.pricing.filter((p) => p.id !== id)
+    })),
   addStockMovement: (movement) => set((state) => ({ stockMovements: [movement, ...state.stockMovements] })),
+  addWarehouse: (warehouse) => set((state) => ({ 
+    warehouses: [{ ...warehouse, id: crypto.randomUUID(), createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), items: [] }, ...state.warehouses] 
+  })),
+  updateWarehouse: (id, updates) =>
+    set((state) => ({
+      warehouses: state.warehouses.map((w) => (w.id === id ? { ...w, ...updates, updatedAt: new Date().toISOString() } : w))
+    })),
+  deleteWarehouse: (id) =>
+    set((state) => ({
+      warehouses: state.warehouses.filter((w) => w.id !== id)
+    })),
+  addWarehouseItem: (warehouseId, item) => {
+    const newItem = { ...item, id: crypto.randomUUID(), warehouseId }
+    return set((state) => ({
+      warehouses: state.warehouses.map((w) =>
+        w.id === warehouseId
+          ? { ...w, items: [...w.items, newItem], updatedAt: new Date().toISOString() }
+          : w
+      )
+    }))
+  },
+  updateWarehouseItem: (warehouseId, itemId, updates) =>
+    set((state) => ({
+      warehouses: state.warehouses.map((w) =>
+        w.id === warehouseId
+          ? {
+              ...w,
+              items: w.items.map((item) => (item.id === itemId ? { ...item, ...updates } : item)),
+              updatedAt: new Date().toISOString()
+            }
+          : w
+      )
+    })),
+  deleteWarehouseItem: (warehouseId, itemId) =>
+    set((state) => ({
+      warehouses: state.warehouses.map((w) =>
+        w.id === warehouseId
+          ? {
+              ...w,
+              items: w.items.filter((item) => item.id !== itemId),
+              updatedAt: new Date().toISOString()
+            }
+          : w
+      )
+    })),
   getBudgetBalance: () => {
     const { budgets } = get()
     const totalAmount = budgets.reduce((acc, budget) => acc + budget.amount, 0)
@@ -170,7 +279,8 @@ export const useAppStore = create(devtools((set, get) => ({
         pricing: state.pricing,
         fixedCosts: state.fixedCosts,
         cashflow: state.cashflow,
-        stockMovements: state.stockMovements
+        stockMovements: state.stockMovements,
+        warehouses: state.warehouses
       }
     }
   },
@@ -187,7 +297,8 @@ export const useAppStore = create(devtools((set, get) => ({
       pricing: backupData.data.pricing || [],
       fixedCosts: backupData.data.fixedCosts || [],
       cashflow: backupData.data.cashflow || [],
-      stockMovements: backupData.data.stockMovements || []
+      stockMovements: backupData.data.stockMovements || [],
+      warehouses: backupData.data.warehouses || []
     })
   }
 })))

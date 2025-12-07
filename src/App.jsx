@@ -13,7 +13,6 @@ import {
   ProfitabilityPage,
   FixedCostsPage,
   PricingPage,
-  BreakEvenPage,
   SensitivityPage,
   StockPage,
   CashflowPage,
@@ -42,7 +41,6 @@ function AppRoutes() {
           <Route path="/lucratividade" element={<ProfitabilityPage />} />
           <Route path="/custos-fixos" element={<FixedCostsPage />} />
           <Route path="/pricing" element={<PricingPage />} />
-          <Route path="/ponto-equilibrio" element={<BreakEvenPage />} />
           <Route path="/simulacao" element={<SensitivityPage />} />
           <Route path="/estoque" element={<StockPage />} />
           <Route path="/financeiro" element={<CashflowPage />} />

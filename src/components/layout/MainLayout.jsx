@@ -9,7 +9,6 @@ import {
   AiOutlinePieChart,
   AiOutlineCalculator,
   AiOutlineTag,
-  AiOutlineAreaChart,
   AiOutlineExperiment,
   AiOutlineInbox,
   AiOutlineLineChart,
@@ -39,7 +38,6 @@ const navigation = [
       { path: '/lucratividade', label: 'Lucratividade', icon: <AiOutlineRise /> },
       { path: '/custos-fixos', label: 'Custos Fixos', icon: <AiOutlineCalculator /> },
       { path: '/pricing', label: 'Pricing', icon: <AiOutlineTag /> },
-      { path: '/ponto-equilibrio', label: 'Ponto de Equilíbrio', icon: <AiOutlineAreaChart /> },
       { path: '/simulacao', label: 'Sensibilidade', icon: <AiOutlineExperiment /> }
     ]
   },

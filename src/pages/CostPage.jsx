@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from 'react'
+import { useMemo, useState, useEffect, useRef } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useAppStore } from '../stores/appStore'
 import { FormModal } from '../components/ui/FormModal'
@@ -16,12 +16,26 @@ export function CostPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingId, setEditingId] = useState(null)
   const [formErrors, setFormErrors] = useState({})
+  const [emojiPickerOpen, setEmojiPickerOpen] = useState(null) // index do ingrediente com picker aberto
   const [formState, setFormState] = useState({
     name: '',
     yield: '',
     prepTime: '',
     recipeIngredients: []
   })
+  const [openEmojiPicker, setOpenEmojiPicker] = useState(null) // index do ingrediente com picker aberto
+  
+  // Emojis comuns para picker
+  const commonEmojis = [
+    '📦', '🍞', '🥖', '🥐', '🥯', '🥨', '🧀', '🥚', '🥛', '🧈',
+    '🍯', '🧂', '🫙', '🥫', '🍅', '🥕', '🧅', '🧄', '🥔', '🌶️',
+    '🥬', '🥦', '🥒', '🥑', '🍄', '🌽', '🍋', '🍊', '🍌', '🍎',
+    '🍇', '🍓', '🫐', '🥝', '🍉', '🍑', '🥭', '🍍', '🥩', '🍗',
+    '🥓', '🌭', '🍖', '🐟', '🦐', '🦑', '🍤', '🥜', '🌰', '🍪',
+    '🍰', '🧁', '🍫', '🍬', '🍭', '☕', '🍵', '🧃', '🥤', '🧊',
+    '🍶', '🍺', '🍷', '🥂', '🍾', '🧉', '🥄', '🍴', '🍽️', '🥢',
+    '🌾', '🌱', '🌿', '🍃', '🍂', '🍁', '🌺', '🌻', '🌷', '🌹'
+  ]
 
   // KPIs calculados
   const kpis = useMemo(() => {
@@ -58,14 +72,18 @@ export function CostPage() {
           // Formato antigo: buscar o ingrediente
           const ingredient = ingredients.find((i) => i.id === ing.ingredientId)
           return {
+            emoji: ing.emoji || '📦',
             name: ingredient?.name || '',
+            packageQty: ingredient?.packageQty?.toString() || '',
             totalValue: ingredient ? (ingredient.unitCost * (ing.quantity || 0)).toString() : '',
             quantity: ing.quantity?.toString() || ''
           }
         }
         // Formato novo: já tem name, totalValue, quantity
         return {
+          emoji: ing.emoji || '📦',
           name: ing.name || '',
+          packageQty: ing.packageQty?.toString() || '',
           totalValue: ing.totalValue?.toString() || '',
           quantity: ing.quantity?.toString() || ''
         }
@@ -101,14 +119,18 @@ export function CostPage() {
             // Formato antigo: buscar o ingrediente
             const ingredient = ingredients.find((i) => i.id === ing.ingredientId)
             return {
+              emoji: ing.emoji || '📦',
               name: ingredient?.name || '',
+              packageQty: ingredient?.packageQty?.toString() || '',
               totalValue: ingredient ? (ingredient.unitCost * (ing.quantity || 0)).toString() : '',
               quantity: ing.quantity?.toString() || ''
             }
           }
           // Formato novo: já tem name, totalValue, quantity
           return {
+            emoji: ing.emoji || '📦',
             name: ing.name || '',
+            packageQty: ing.packageQty?.toString() || '',
             totalValue: ing.totalValue?.toString() || '',
             quantity: ing.quantity?.toString() || ''
           }
@@ -137,6 +159,7 @@ export function CostPage() {
       prepTime: '',
       recipeIngredients: []
     })
+    setOpenEmojiPicker(null)
     
     // Se veio do simulador, voltar para lá ao cancelar
     if (location.state?.editRecipeId) {
@@ -144,12 +167,29 @@ export function CostPage() {
     }
   }
 
+  // Fechar picker de emoji ao clicar fora
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (openEmojiPicker !== null && !event.target.closest('.ingredient-emoji-picker')) {
+        setOpenEmojiPicker(null)
+      }
+    }
+
+    if (openEmojiPicker !== null) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [openEmojiPicker])
+
   const handleAddIngredient = () => {
     setFormState((prev) => ({
       ...prev,
       recipeIngredients: [
         ...prev.recipeIngredients,
-        { name: '', totalValue: '', quantity: '' }
+        { emoji: '📦', name: '', packageQty: '', totalValue: '', quantity: '' }
       ]
     }))
   }
@@ -159,11 +199,38 @@ export function CostPage() {
       const updatedIngredients = prev.recipeIngredients.map((item, i) => {
         if (i === index) {
           const updated = { ...item, [field]: value }
-          // Se atualizou totalValue ou quantity, recalcular se necessário
-          if (field === 'totalValue' || field === 'quantity') {
-            // Manter os valores como string para permitir edição
-            return updated
+          
+          // Se atualizou o nome, verificar se corresponde a um ingrediente cadastrado
+          if (field === 'name') {
+            const foundIngredient = ingredients.find(
+              (ing) => ing.name.toLowerCase() === value.toLowerCase().trim()
+            )
+            if (foundIngredient) {
+              // Se encontrou ingrediente, preencher quantidade original do pacote
+              updated.packageQty = foundIngredient.packageQty?.toString() || ''
+              // Se tem quantidade usada, calcular valor total
+              if (updated.quantity) {
+                const quantity = Number(updated.quantity) || 0
+                updated.totalValue = (foundIngredient.unitCost * quantity).toFixed(2)
+              }
+              // Normalizar o nome para o nome exato do ingrediente cadastrado
+              updated.name = foundIngredient.name
+            }
           }
+          
+          // Se atualizou a quantidade original do pacote, não precisa recalcular
+          
+          // Se atualizou a quantidade usada e tem um ingrediente cadastrado, recalcular valor total
+          if (field === 'quantity') {
+            const foundIngredient = ingredients.find(
+              (ing) => ing.name.toLowerCase() === (updated.name || '').toLowerCase().trim()
+            )
+            if (foundIngredient) {
+              const quantity = Number(value) || 0
+              updated.totalValue = (foundIngredient.unitCost * quantity).toFixed(2)
+            }
+          }
+          
           return updated
         }
         return item
@@ -189,31 +256,50 @@ export function CostPage() {
   // Calcular custos automaticamente
   const calculatedCosts = useMemo(() => {
     if (!formState.yield || Number(formState.yield) <= 0) {
-      return { totalCost: 0, unitCost: 0, suggestedPrice: 0, suggestedProfit: 0 }
+      return { totalCost: 0, usageCost: 0, unitCost: 0, suggestedPrice: 0, suggestedProfit: 0 }
     }
 
+    // Custo total (valor total do pacote de cada ingrediente)
     const totalCost = formState.recipeIngredients.reduce((acc, item) => {
-      // Converter totalValue para número, permitindo strings vazias durante digitação
       const totalValueStr = String(item.totalValue || '').trim()
       if (!totalValueStr) return acc
       
       const totalValue = Number(totalValueStr)
       if (isNaN(totalValue) || totalValue <= 0) return acc
-      // O valor total representa o custo do ingrediente na receita
       return acc + totalValue
     }, 0)
 
+    // Custo de uso (calculado baseado na quantidade usada)
+    const usageCost = formState.recipeIngredients.reduce((acc, item) => {
+      const packageQty = Number(item.packageQty || 0)
+      const totalValue = Number(item.totalValue || 0)
+      const quantityUsed = Number(item.quantity || 0)
+      
+      // Se não tem quantidade original ou valor total, não calcular
+      if (packageQty <= 0 || totalValue <= 0 || quantityUsed <= 0) return acc
+      
+      // Preço por unidade (grama/ml/un) = valor total / quantidade original
+      const pricePerUnit = totalValue / packageQty
+      
+      // Custo de uso = preço por unidade × quantidade usada
+      const costOfUsage = pricePerUnit * quantityUsed
+      
+      return acc + costOfUsage
+    }, 0)
+
     const yieldNum = Number(formState.yield)
-    const unitCost = yieldNum > 0 ? totalCost / yieldNum : 0
+    // Calcular custo unitário com mais precisão
+    const unitCost = yieldNum > 0 ? usageCost / yieldNum : 0
     const suggestedMargin = 0.45 // Margem padrão de 45%
     const suggestedPrice = unitCost > 0 ? unitCost / (1 - suggestedMargin) : 0
     const suggestedProfit = suggestedPrice - unitCost
 
     return {
-      totalCost,
-      unitCost,
-      suggestedPrice,
-      suggestedProfit
+      totalCost: Number(totalCost.toFixed(2)),
+      usageCost: Number(usageCost.toFixed(2)),
+      unitCost: Number(unitCost.toFixed(4)), // Mais precisão no custo unitário
+      suggestedPrice: Number(suggestedPrice.toFixed(2)),
+      suggestedProfit: Number(suggestedProfit.toFixed(2))
     }
   }, [formState.recipeIngredients, formState.yield])
 
@@ -272,7 +358,9 @@ export function CostPage() {
 
     // Preparar dados dos ingredientes
     const ingredientsData = formState.recipeIngredients.map((ing) => ({
+      emoji: ing.emoji || '📦',
       name: ing.name.trim(),
+      packageQty: Number(ing.packageQty) || undefined,
       totalValue: Number(ing.totalValue) || 0,
       quantity: Number(ing.quantity) || 0
     }))
@@ -499,6 +587,45 @@ export function CostPage() {
             <div className="ingredients-list">
               {formState.recipeIngredients.map((item, index) => (
                 <div key={index} className="ingredient-item">
+                  {/* Emoji picker */}
+                  <div className="ingredient-emoji-wrapper">
+                    <div className="ingredient-emoji-picker" style={{ position: 'relative' }}>
+                      <button
+                        type="button"
+                        className="ingredient-emoji-btn"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setOpenEmojiPicker(openEmojiPicker === index ? null : index)
+                        }}
+                      >
+                        {item.emoji || '📦'}
+                      </button>
+                      {openEmojiPicker === index && (
+                        <div 
+                          className="emoji-picker-dropdown"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <div className="emoji-picker-grid">
+                            {commonEmojis.map((emoji) => (
+                              <button
+                                key={emoji}
+                                type="button"
+                                className="emoji-option"
+                                onClick={() => {
+                                  handleUpdateIngredient(index, 'emoji', emoji)
+                                  setOpenEmojiPicker(null)
+                                }}
+                              >
+                                {emoji}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {/* Linha 1: Nome do ingrediente (ocupa 2 colunas) */}
                   <input
                     type="text"
                     value={item.name || ''}
@@ -508,6 +635,27 @@ export function CostPage() {
                     placeholder="Nome do ingrediente"
                     className="ingredient-name"
                   />
+                  
+                  {/* Linha 2: Qtd. original do pacote | Valor total */}
+                  <input
+                    type="number"
+                    value={item.packageQty || ''}
+                    onChange={(e) => {
+                      const value = e.target.value
+                      handleUpdateIngredient(index, 'packageQty', value)
+                    }}
+                    onBlur={(e) => {
+                      const value = e.target.value
+                      if (value && (isNaN(Number(value)) || Number(value) < 0)) {
+                        handleUpdateIngredient(index, 'packageQty', '')
+                      }
+                    }}
+                    placeholder="Qtd. original do pacote"
+                    min="0"
+                    step="0.01"
+                    className="ingredient-package-qty"
+                  />
+                  
                   <input
                     type="number"
                     value={item.totalValue || ''}
@@ -527,6 +675,8 @@ export function CostPage() {
                     step="0.01"
                     className="ingredient-value"
                   />
+                  
+                  {/* Linha 3: Mg/Ml usados | Botão excluir */}
                   <input
                     type="number"
                     value={item.quantity || ''}
@@ -539,13 +689,26 @@ export function CostPage() {
                       const value = e.target.value
                       if (value && (isNaN(Number(value)) || Number(value) < 0)) {
                         handleUpdateIngredient(index, 'quantity', '')
+                      } else {
+                        // Recalcular valor total quando sair do campo de quantidade
+                        const currentItem = formState.recipeIngredients[index]
+                        if (currentItem && currentItem.name) {
+                          const foundIngredient = ingredients.find(
+                            (ing) => ing.name.toLowerCase() === currentItem.name.toLowerCase().trim()
+                          )
+                          if (foundIngredient && value) {
+                            const quantity = Number(value) || 0
+                            handleUpdateIngredient(index, 'totalValue', (foundIngredient.unitCost * quantity).toFixed(2))
+                          }
+                        }
                       }
                     }}
-                    placeholder="Quantidade usada"
+                    placeholder="Mg/Ml usados"
                     min="0"
                     step="0.01"
                     className="ingredient-quantity"
                   />
+                  
                   <button
                     type="button"
                     className="remove-ingredient-btn"
@@ -568,16 +731,8 @@ export function CostPage() {
                 <span className="summary-value">R$ {calculatedCosts.totalCost.toFixed(2)}</span>
               </div>
               <div className="summary-item">
-                <span className="summary-label">Custo unitário</span>
-                <span className="summary-value">R$ {calculatedCosts.unitCost.toFixed(2)}</span>
-              </div>
-              <div className="summary-item">
-                <span className="summary-label">Lucro sugerido</span>
-                <span className="summary-value profit">R$ {calculatedCosts.suggestedProfit.toFixed(2)}</span>
-              </div>
-              <div className="summary-item">
-                <span className="summary-label">Preço ideal de venda</span>
-                <span className="summary-value price">R$ {calculatedCosts.suggestedPrice.toFixed(2)}</span>
+                <span className="summary-label">Custo de Uso</span>
+                <span className="summary-value">R$ {calculatedCosts.usageCost.toFixed(2)}</span>
               </div>
             </div>
           </div>

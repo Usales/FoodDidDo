@@ -476,3 +476,207 @@
   font-size: 1.6rem;
 }
 
+.quick-add-menu {
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.cost-impact-section {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border-primary);
+}
+
+.cost-actions {
+  margin-top: 1rem;
+  display: flex;
+  gap: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border-primary);
+}
+
+.cost-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border-radius: 999px;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.cost-badge--fixo {
+  background: rgba(220, 38, 38, 0.15);
+  color: var(--primary-color);
+  border: 1px solid rgba(220, 38, 38, 0.3);
+}
+
+.cost-badge--indireto {
+  background: rgba(59, 130, 246, 0.15);
+  color: #3b82f6;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.info-icon {
+  cursor: help;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  transition: all 0.2s ease;
+}
+
+.info-icon:hover {
+  background: var(--primary-color);
+  color: var(--text-inverse);
+  border-color: var(--primary-color);
+}
+
+.margin-heatmap {
+  position: relative;
+  height: 8px;
+  background: linear-gradient(to right, #ef4444 0%, #fbbf24 30%, #10b981 50%, #fbbf24 70%, #ef4444 100%);
+  border-radius: 999px;
+  overflow: visible;
+}
+
+.margin-indicator {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 16px;
+  height: 16px;
+  background: var(--text-primary);
+  border: 2px solid var(--bg-card);
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  transition: left 0.3s ease;
+}
+
+.psychological-price-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0.75rem;
+  min-width: 140px;
+  transition: all 0.2s ease;
+}
+
+.psychological-price-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.pricing-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border-radius: 999px;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.status-updated {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.status-outdated {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.status-below {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.status-needs-review {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.margin-input-validated {
+  transition: all 0.3s ease;
+}
+
+.margin-input-validated:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px currentColor;
+}
+
+.warehouse-card {
+  margin-bottom: 1rem;
+  padding: 1.5rem;
+  transition: all 0.2s ease;
+}
+
+.warehouse-card:hover {
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.item-card {
+  padding: 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-primary);
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.item-card:hover {
+  border-color: var(--primary-color);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+}
+
+.emoji-picker {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 0.5rem;
+  padding: 1rem;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.emoji-picker button {
+  font-size: 1.5rem;
+  padding: 0.5rem;
+  background: transparent;
+  border: 2px solid var(--border-primary);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.emoji-picker button:hover {
+  transform: scale(1.1);
+  border-color: var(--primary-color);
+}
+
+.emoji-picker button.selected {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
