@@ -19,7 +19,6 @@ import {
 } from 'react-icons/ai'
 import { FiLogOut, FiSearch, FiChevronDown } from 'react-icons/fi'
 import { useState } from 'react'
-import ThemeToggle from '../ThemeToggle'
 import './MainLayout.css'
 
 const navigation = [
@@ -104,7 +103,6 @@ export function MainLayout({ onLogout, user }) {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <ThemeToggle className="theme-toggle-compact" />
             <div className="user-dropdown-wrapper">
               <button
                 type="button"

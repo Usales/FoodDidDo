@@ -155,6 +155,40 @@ export const useAppStore = create(devtools((set, get) => ({
     const totalAmount = budgets.reduce((acc, budget) => acc + budget.amount, 0)
     const totalSpent = budgets.reduce((acc, budget) => acc + (budget.spent || 0), 0)
     return totalAmount - totalSpent
+  },
+  // Métodos para backup e restauração
+  exportData: () => {
+    const state = get()
+    return {
+      version: '1.0.0',
+      exportDate: new Date().toISOString(),
+      data: {
+        budgets: state.budgets,
+        ingredients: state.ingredients,
+        recipes: state.recipes,
+        meals: state.meals,
+        pricing: state.pricing,
+        fixedCosts: state.fixedCosts,
+        cashflow: state.cashflow,
+        stockMovements: state.stockMovements
+      }
+    }
+  },
+  restoreData: (backupData) => {
+    if (!backupData || !backupData.data) {
+      throw new Error('Formato de backup inválido')
+    }
+    
+    set({
+      budgets: backupData.data.budgets || [],
+      ingredients: backupData.data.ingredients || [],
+      recipes: backupData.data.recipes || [],
+      meals: backupData.data.meals || [],
+      pricing: backupData.data.pricing || [],
+      fixedCosts: backupData.data.fixedCosts || [],
+      cashflow: backupData.data.cashflow || [],
+      stockMovements: backupData.data.stockMovements || []
+    })
   }
 })))
 

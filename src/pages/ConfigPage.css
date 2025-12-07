@@ -1,0 +1,433 @@
+/* ConfigPage Styles */
+
+.config-page {
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+  padding: 2rem 0;
+}
+
+/* Seção: Estado Atual */
+.config-current-state {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.config-current-state h2 {
+  font-size: 1.5rem;
+  margin: 0;
+  color: var(--text-primary);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.config-state-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  max-width: 900px;
+}
+
+.config-state-card {
+  background: var(--bg-card);
+  border-radius: 10px;
+  padding: 1.8rem 2rem;
+  border: 1px solid var(--border-primary);
+  box-shadow: var(--shadow-xl);
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.config-state-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 32px rgba(0, 0, 0, 0.15);
+}
+
+.config-state-card span {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.config-state-card strong {
+  font-size: 1.5rem;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* Seção: Preferências Gerais */
+.config-preferences {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  background: var(--bg-card);
+  border-radius: 18px;
+  padding: 2.5rem;
+  box-shadow: var(--shadow-xl);
+  border: 1px solid var(--border-primary);
+}
+
+.config-preferences h2 {
+  font-size: 1.5rem;
+  margin: 0;
+  color: var(--text-primary);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.config-preferences-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+.config-input-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  position: relative;
+}
+
+.config-input-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.config-tooltip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  cursor: help;
+  transition: background 0.2s ease, transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.config-tooltip:hover {
+  background: var(--primary-color);
+  transform: scale(1.1);
+}
+
+.config-tooltip-content {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-primary);
+  border-radius: 8px;
+  font-size: 0.8rem;
+  color: var(--text-primary);
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  box-shadow: var(--shadow-lg);
+  z-index: 1000;
+}
+
+.config-tooltip:hover .config-tooltip-content {
+  opacity: 1;
+}
+
+.config-tooltip-content::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: var(--bg-card);
+}
+
+.config-input-wrapper select,
+.config-input-wrapper input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 0.85rem;
+  border: 1px solid var(--border-primary);
+  background: #ffffff;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dark-theme .config-input-wrapper select,
+.dark-theme .config-input-wrapper input {
+  background: #1a1a1a;
+  color: var(--text-primary);
+  border-color: var(--border-primary);
+}
+
+.config-input-wrapper select:focus,
+.config-input-wrapper input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(255, 59, 48, 0.1);
+}
+
+.config-backup-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.config-backup-btn {
+  background: var(--primary-color);
+  color: var(--text-inverse);
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.85rem;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: var(--shadow-lg);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  font-size: 0.95rem;
+}
+
+.config-backup-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 20px 30px rgba(220, 38, 38, 0.3);
+  background: var(--primary-dark);
+}
+
+.config-restore-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border-primary);
+  border-radius: 0.85rem;
+  padding: 0.75rem 1.5rem;
+  font-weight: 500;
+  cursor: pointer;
+  color: var(--text-primary);
+  transition: all 0.3s ease;
+  font-size: 0.95rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.config-restore-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(64, 224, 208, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.config-restore-btn:hover::before {
+  left: 100%;
+}
+
+.config-restore-btn:hover {
+  border-color: rgba(64, 224, 208, 0.6);
+  box-shadow: 0 0 25px rgba(64, 224, 208, 0.4), 0 0 50px rgba(64, 224, 208, 0.2);
+  background: rgba(64, 224, 208, 0.05);
+}
+
+/* Seção: Backup Automático */
+.config-backup-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.config-backup-banner {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 2rem 2.5rem;
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.12), rgba(147, 51, 234, 0.08));
+  border: 1px solid var(--border-primary);
+  box-shadow: var(--shadow-xl);
+  position: relative;
+  overflow: hidden;
+}
+
+.dark-theme .config-backup-banner {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(147, 51, 234, 0.1));
+}
+
+.config-backup-banner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(147, 51, 234, 0.05));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.config-backup-banner:hover::before {
+  opacity: 1;
+}
+
+.config-backup-icon {
+  font-size: 3rem;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+  z-index: 1;
+}
+
+.config-backup-content {
+  flex: 1;
+  z-index: 1;
+}
+
+.config-backup-content h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+
+.config-backup-content p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.config-backup-action {
+  z-index: 1;
+}
+
+.config-backup-activate-btn {
+  background: var(--primary-color);
+  color: var(--text-inverse);
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.85rem;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: var(--shadow-lg);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  font-size: 0.95rem;
+}
+
+.config-backup-activate-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 20px 30px rgba(220, 38, 38, 0.3);
+  background: var(--primary-dark);
+}
+
+/* Toggle Switch */
+.config-toggle-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.config-toggle {
+  position: relative;
+  width: 52px;
+  height: 28px;
+  background: var(--bg-tertiary);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  border: 2px solid var(--border-primary);
+}
+
+.config-toggle.active {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.config-toggle-handle {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  background: #ffffff;
+  border-radius: 50%;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.config-toggle.active .config-toggle-handle {
+  transform: translateX(24px);
+}
+
+.config-toggle-label {
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+/* Theme Toggle dentro das preferências */
+.config-theme-toggle-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.config-theme-toggle-select {
+  flex: 1;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .config-page {
+    gap: 2rem;
+    padding: 1rem 0;
+  }
+
+  .config-state-grid {
+    grid-template-columns: 1fr;
+    max-width: 100%;
+  }
+
+  .config-preferences {
+    padding: 1.5rem;
+  }
+
+  .config-preferences-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .config-backup-actions {
+    flex-direction: column;
+  }
+
+  .config-backup-btn,
+  .config-restore-btn {
+    width: 100%;
+  }
+
+  .config-backup-banner {
+    flex-direction: column;
+    text-align: center;
+    padding: 1.5rem;
+  }
+
+  .config-backup-icon {
+    font-size: 2.5rem;
+  }
+}
+
