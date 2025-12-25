@@ -4,19 +4,22 @@ import { PrismaClient } from '@prisma/client'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { fileURLToPath as fileURLToPathUtil } from 'url'
+import dotenv from 'dotenv'
+
+// Carregar variáveis de ambiente
+dotenv.config()
 
 const __filename = fileURLToPathUtil(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-// Configurar Prisma com caminho absoluto do banco
-const dbPath = path.join(__dirname, '../prisma/dev.db')
-const prisma = new PrismaClient({
-  datasources: {
-    db: {
-      url: `file:${dbPath}`
-    }
-  }
-})
+// Configurar URL do banco de dados
+if (!process.env.DATABASE_URL) {
+  const dbPath = path.join(__dirname, '../prisma/dev.db')
+  process.env.DATABASE_URL = `file:${dbPath}`
+}
+
+// Configurar Prisma - a URL do banco é lida da variável de ambiente
+const prisma = new PrismaClient()
 
 const fastify = Fastify({
   logger: true

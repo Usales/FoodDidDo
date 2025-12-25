@@ -3,33 +3,105 @@
   flex-direction: column;
   gap: 0.45rem;
   font-size: 0.92rem;
-  color: rgba(71, 85, 105, 0.9);
+  color: var(--text-muted);
 }
 
 .input-control span {
   font-weight: 600;
   letter-spacing: 0.01em;
+  color: var(--text-primary);
+}
+
+/* Garantir que labels fiquem brancos no modo escuro */
+.dark-theme .input-control span {
+  color: #ffffff;
 }
 
 .input-control input,
 .input-control select,
 .input-control textarea {
-  border: 1px solid rgba(255, 255, 255, 0.55);
+  border: 1px solid var(--border-primary);
   border-radius: 0.85rem;
   padding: 0.75rem 0.95rem;
   font-size: 1rem;
-  color: rgba(17, 24, 39, 0.92);
-  background: #ffffff;
-  transition: border 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
-  box-shadow: inset 0 1px 4px rgba(15, 23, 42, 0.05);
+  color: var(--text-primary);
+  background: var(--bg-card);
+  transition: border 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease, background 0.2s ease;
+  box-shadow: var(--shadow-sm);
 }
 
 .input-control input:focus,
 .input-control select:focus,
 .input-control textarea:focus {
   outline: none;
-  border-color: rgba(254, 112, 95, 0.65);
-  box-shadow: 0 12px 24px rgba(254, 112, 95, 0.18);
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
   transform: translateY(-1px);
+}
+
+.input-control input::placeholder,
+.input-control textarea::placeholder {
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
+.input-control input:disabled,
+.input-control select:disabled,
+.input-control textarea:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: var(--bg-secondary);
+}
+
+/* Campos de período lado a lado */
+.period-inputs {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1rem;
+}
+
+.period-input-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.period-input-wrapper input,
+.period-input-wrapper select {
+  width: 100%;
+  border: 1px solid var(--border-primary);
+  border-radius: 0.85rem;
+  padding: 0.75rem 0.95rem;
+  font-size: 1rem;
+  color: var(--text-primary);
+  background: var(--bg-card);
+  transition: border 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+}
+
+.period-input-wrapper input:focus,
+.period-input-wrapper select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+  transform: translateY(-1px);
+}
+
+.period-input-wrapper select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.95rem center;
+  padding-right: 2.5rem;
+}
+
+.dark-theme .period-input-wrapper select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23fff' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+}
+
+@media (max-width: 768px) {
+  .period-inputs {
+    grid-template-columns: 1fr;
+  }
 }
 

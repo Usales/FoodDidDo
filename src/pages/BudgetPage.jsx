@@ -2,15 +2,57 @@ import { useMemo, useState } from 'react'
 import { CurrencyInput } from '../components/ui/CurrencyInput'
 import { FormModal } from '../components/ui/FormModal'
 import { useAppStore } from '../stores/appStore'
+import '../components/ui/InputControls.css'
 import './PageCommon.css'
 
 export function BudgetPage() {
   const budgets = useAppStore((state) => state.budgets)
   const addBudget = useAppStore((state) => state.addBudget)
+  const loadData = useAppStore((state) => state.loadData)
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [amount, setAmount] = useState('')
-  const [period, setPeriod] = useState('')
+  const [month, setMonth] = useState('')
+  const [year, setYear] = useState(new Date().getFullYear().toString())
+
+  // Lista de meses
+  const months = [
+    { value: 'Janeiro', label: 'Janeiro' },
+    { value: 'Fevereiro', label: 'Fevereiro' },
+    { value: 'Março', label: 'Março' },
+    { value: 'Abril', label: 'Abril' },
+    { value: 'Maio', label: 'Maio' },
+    { value: 'Junho', label: 'Junho' },
+    { value: 'Julho', label: 'Julho' },
+    { value: 'Agosto', label: 'Agosto' },
+    { value: 'Setembro', label: 'Setembro' },
+    { value: 'Outubro', label: 'Outubro' },
+    { value: 'Novembro', label: 'Novembro' },
+    { value: 'Dezembro', label: 'Dezembro' }
+  ]
+
+  // Gerar lista de anos (ano atual ± 5 anos)
+  const currentYear = new Date().getFullYear()
+  const years = Array.from({ length: 11 }, (_, i) => currentYear - 5 + i)
+
+  // Função para converter período (ex: "Dezembro/2025") para data ordenável
+  const parsePeriod = (period) => {
+    const [monthName, year] = period.split('/')
+    const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
+                        'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
+    const monthIndex = monthNames.indexOf(monthName.trim())
+    const yearNum = parseInt(year.trim(), 10)
+    return { year: yearNum, month: monthIndex, sortValue: yearNum * 12 + monthIndex }
+  }
+
+  // Ordenar orçamentos por mês/ano (do mais recente para o mais antigo)
+  const sortedBudgets = useMemo(() => {
+    return [...budgets].sort((a, b) => {
+      const aPeriod = parsePeriod(a.period)
+      const bPeriod = parsePeriod(b.period)
+      return bPeriod.sortValue - aPeriod.sortValue // Ordem decrescente (mais recente primeiro)
+    })
+  }, [budgets])
 
   const summary = useMemo(() => {
     const total = budgets.reduce((acc, budget) => acc + budget.amount, 0)
@@ -27,19 +69,30 @@ export function BudgetPage() {
     }
   }, [budgets])
 
-  const handleCreateBudget = () => {
+  const handleCreateBudget = async () => {
     const numericAmount = Number(amount)
-    if (!period.trim() || Number.isNaN(numericAmount) || numericAmount <= 0) return
-    addBudget({
-      id: crypto.randomUUID(),
-      period,
-      amount: numericAmount,
-      spent: 0,
-      createdAt: new Date().toISOString()
-    })
-    setAmount('')
-    setPeriod('')
-    setIsModalOpen(false)
+    const period = `${month}/${year}`
+    if (!month || !year || Number.isNaN(numericAmount) || numericAmount <= 0) {
+      alert('Por favor, preencha todos os campos corretamente.')
+      return
+    }
+    
+    try {
+      await addBudget({
+        period,
+        amount: numericAmount,
+        spent: 0
+      })
+      // Recarregar dados para garantir sincronização
+      await loadData()
+      setAmount('')
+      setMonth('')
+      setYear('')
+      setIsModalOpen(false)
+    } catch (error) {
+      console.error('Erro ao criar orçamento:', error)
+      alert('Erro ao criar orçamento. Verifique se o servidor está rodando.')
+    }
   }
 
   return (
@@ -76,34 +129,48 @@ export function BudgetPage() {
 
       <section className="page-stack">
         <div className="page-header">
-          <h2>Histórico de planejamentos</h2>
+          <h2>Histórico de Orçamentos</h2>
           <button className="primary-btn" type="button" onClick={() => setIsModalOpen(true)}>
             + Novo orçamento
           </button>
         </div>
-        <div className="card-grid">
-          {budgets.map((budget) => {
-            const remaining = budget.amount - budget.spent
-            const percentage = budget.amount > 0 ? Math.min(100, Math.round((budget.spent / budget.amount) * 100)) : 0
-            return (
-              <article key={budget.id} className="card-tile">
-                <header>
-                  <h3>{budget.period}</h3>
-                  <span className="pill">{percentage}% utilizado</span>
-                </header>
-                <div className="progress-track">
-                  <div className="progress-fill" style={{ width: `${percentage}%` }} />
-                </div>
-                <div className="divider" />
-                <div className="budget-meta">
-                  <span>Planejado: R$ {budget.amount.toFixed(2)}</span>
-                  <span>Gasto: R$ {budget.spent.toFixed(2)}</span>
-                  <span>Saldo: R$ {remaining.toFixed(2)}</span>
-                </div>
-              </article>
-            )
-          })}
-          {budgets.length === 0 ? <div className="card-tile">Cadastre seu primeiro orçamento.</div> : null}
+        <div className="budget-list">
+          {budgets.length === 0 ? (
+            <div className="budget-list-empty">Cadastre seu primeiro orçamento.</div>
+          ) : (
+            <table className="budget-table">
+              <thead>
+                <tr>
+                  <th>Período</th>
+                  <th>Investido</th>
+                  <th>Gasto</th>
+                  <th>Saldo</th>
+                  <th>Utilizado</th>
+                  <th>Progresso</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sortedBudgets.map((budget) => {
+                  const remaining = budget.amount - budget.spent
+                  const percentage = budget.amount > 0 ? Math.min(100, Math.round((budget.spent / budget.amount) * 100)) : 0
+                  return (
+                    <tr key={budget.id}>
+                      <td className="budget-period">{budget.period}</td>
+                      <td className="budget-amount">R$ {budget.amount.toFixed(2)}</td>
+                      <td className="budget-spent">R$ {budget.spent.toFixed(2)}</td>
+                      <td className="budget-remaining">R$ {remaining.toFixed(2)}</td>
+                      <td className="budget-percentage">{percentage}%</td>
+                      <td className="budget-progress-cell">
+                        <div className="progress-track">
+                          <div className="progress-fill" style={{ width: `${percentage}%` }} />
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          )}
         </div>
       </section>
 
@@ -123,10 +190,37 @@ export function BudgetPage() {
           </>
         }
       >
-        <label className="input-control">
+        <div className="input-control">
           <span>Período</span>
-          <input value={period} onChange={(event) => setPeriod(event.target.value)} placeholder="Ex.: Novembro/2025" />
-        </label>
+          <div className="period-inputs">
+            <div className="period-input-wrapper">
+              <select 
+                value={month} 
+                onChange={(event) => setMonth(event.target.value)}
+              >
+                <option value="">Selecione o mês</option>
+                {months.map((m) => (
+                  <option key={m.value} value={m.value}>
+                    {m.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="period-input-wrapper">
+              <select 
+                value={year} 
+                onChange={(event) => setYear(event.target.value)}
+              >
+                <option value="">Selecione o ano</option>
+                {years.map((y) => (
+                  <option key={y} value={y.toString()}>
+                    {y}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </div>
         <CurrencyInput label="Valor disponível" value={amount} onChange={setAmount} />
       </FormModal>
     </div>

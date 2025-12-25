@@ -7,11 +7,12 @@ generator client {
 
 datasource db {
   provider = "sqlite"
+  url      = env("DATABASE_URL")
 }
 
 model Budget {
   id          String   @id @default(uuid())
-  name        String
+  period      String
   amount      Float
   spent       Float    @default(0)
   createdAt   DateTime @default(now())
