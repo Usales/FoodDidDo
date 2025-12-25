@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { useAppStore } from '../stores/appStore'
 import { FormModal } from '../components/ui/FormModal'
 import { CurrencyInput } from '../components/ui/CurrencyInput'
+import { FiEdit2, FiTrash2, FiCheck, FiX } from 'react-icons/fi'
 import './PageCommon.css'
 import './CostPage.css'
 
@@ -14,6 +15,7 @@ export function CostPage() {
   const addRecipe = useAppStore((state) => state.addRecipe)
   const updateRecipe = useAppStore((state) => state.updateRecipe)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isModalExpanded, setIsModalExpanded] = useState(false)
   const [editingId, setEditingId] = useState(null)
   const [formErrors, setFormErrors] = useState({})
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(null) // index do ingrediente com picker aberto
@@ -23,6 +25,10 @@ export function CostPage() {
     prepTime: '',
     recipeIngredients: []
   })
+  const [editingIngredients, setEditingIngredients] = useState([]) // Ingredientes em edição (lado esquerdo)
+  const [confirmedIngredients, setConfirmedIngredients] = useState([]) // Ingredientes confirmados (lado direito)
+  const [editingConfirmedIndex, setEditingConfirmedIndex] = useState(null) // Índice do ingrediente confirmado sendo editado
+  const [editingConfirmedData, setEditingConfirmedData] = useState(null) // Dados temporários do ingrediente sendo editado
   const [openEmojiPicker, setOpenEmojiPicker] = useState(null) // index do ingrediente com picker aberto
   
   // Emojis comuns para picker
@@ -34,7 +40,7 @@ export function CostPage() {
     '🥓', '🌭', '🍖', '🐟', '🦐', '🦑', '🍤', '🥜', '🌰', '🍪',
     '🍰', '🧁', '🍫', '🍬', '🍭', '☕', '🍵', '🧃', '🥤', '🧊',
     '🍶', '🍺', '🍷', '🥂', '🍾', '🧉', '🥄', '🍴', '🍽️', '🥢',
-    '🌾', '🌱', '🌿', '🍃', '🍂', '🍁', '🌺', '🌻', '🌷', '🌹'
+    '🌾', '🌱', '🌿', '🍃', '🍂', '🍁', '🌺'
   ]
 
   // KPIs calculados
@@ -94,6 +100,8 @@ export function CostPage() {
         prepTime: recipe.prepTime.toString(),
         recipeIngredients: convertedIngredients
       })
+      setConfirmedIngredients(convertedIngredients)
+      setEditingIngredients([])
     } else {
       setEditingId(null)
       setFormState({
@@ -102,6 +110,8 @@ export function CostPage() {
         prepTime: '',
         recipeIngredients: []
       })
+      setConfirmedIngredients([])
+      setEditingIngredients([])
     }
     setIsModalOpen(true)
   }
@@ -151,6 +161,7 @@ export function CostPage() {
 
   const handleCloseModal = () => {
     setIsModalOpen(false)
+    setIsModalExpanded(false)
     setEditingId(null)
     setFormErrors({})
     setFormState({
@@ -159,6 +170,10 @@ export function CostPage() {
       prepTime: '',
       recipeIngredients: []
     })
+    setEditingIngredients([])
+    setConfirmedIngredients([])
+    setEditingConfirmedIndex(null)
+    setEditingConfirmedData(null)
     setOpenEmojiPicker(null)
     
     // Se veio do simulador, voltar para lá ao cancelar
@@ -185,18 +200,36 @@ export function CostPage() {
   }, [openEmojiPicker])
 
   const handleAddIngredient = () => {
-    setFormState((prev) => ({
+    setEditingIngredients((prev) => [
       ...prev,
-      recipeIngredients: [
-        ...prev.recipeIngredients,
-        { emoji: '📦', name: '', packageQty: '', totalValue: '', quantity: '' }
-      ]
-    }))
+      { emoji: '📦', name: '', packageQty: '', totalValue: '', quantity: '' }
+    ])
+  }
+
+  const handleConfirmIngredient = (index) => {
+    const ingredient = editingIngredients[index]
+    // Validar se o ingrediente tem nome
+    if (!ingredient.name || ingredient.name.trim() === '') {
+      setFormErrors((prev) => ({
+        ...prev,
+        ingredients: 'O nome do ingrediente é obrigatório'
+      }))
+      return
+    }
+    // Mover da lista de edição para a lista de confirmados
+    setConfirmedIngredients((prev) => [...prev, ingredient])
+    setEditingIngredients((prev) => prev.filter((_, i) => i !== index))
+    setOpenEmojiPicker(null)
+    setIsModalExpanded(true)
+    // Limpar erro de ingredientes se houver
+    if (formErrors.ingredients) {
+      setFormErrors((prev) => ({ ...prev, ingredients: '' }))
+    }
   }
 
   const handleUpdateIngredient = (index, field, value) => {
-    setFormState((prev) => {
-      const updatedIngredients = prev.recipeIngredients.map((item, i) => {
+    setEditingIngredients((prev) => {
+      const updatedIngredients = prev.map((item, i) => {
         if (i === index) {
           const updated = { ...item, [field]: value }
           
@@ -235,10 +268,7 @@ export function CostPage() {
         }
         return item
       })
-      return {
-        ...prev,
-        recipeIngredients: updatedIngredients
-      }
+      return updatedIngredients
     })
     // Limpar erro de ingredientes quando atualizar
     if (formErrors.ingredients) {
@@ -247,9 +277,41 @@ export function CostPage() {
   }
 
   const handleRemoveIngredient = (index) => {
-    setFormState((prev) => ({
+    setEditingIngredients((prev) => prev.filter((_, i) => i !== index))
+  }
+
+  const handleEditConfirmedIngredient = (index) => {
+    const ingredient = confirmedIngredients[index]
+    setEditingConfirmedIndex(index)
+    setEditingConfirmedData({ ...ingredient })
+  }
+
+  const handleSaveConfirmedIngredient = (index) => {
+    if (!editingConfirmedData || !editingConfirmedData.name || editingConfirmedData.name.trim() === '') {
+      return
+    }
+    setConfirmedIngredients((prev) => {
+      const updated = [...prev]
+      updated[index] = editingConfirmedData
+      return updated
+    })
+    setEditingConfirmedIndex(null)
+    setEditingConfirmedData(null)
+  }
+
+  const handleCancelEditConfirmed = () => {
+    setEditingConfirmedIndex(null)
+    setEditingConfirmedData(null)
+  }
+
+  const handleDeleteConfirmedIngredient = (index) => {
+    setConfirmedIngredients((prev) => prev.filter((_, i) => i !== index))
+  }
+
+  const handleUpdateConfirmedIngredient = (field, value) => {
+    setEditingConfirmedData((prev) => ({
       ...prev,
-      recipeIngredients: prev.recipeIngredients.filter((_, i) => i !== index)
+      [field]: value
     }))
   }
 
@@ -259,8 +321,11 @@ export function CostPage() {
       return { totalCost: 0, usageCost: 0, unitCost: 0, suggestedPrice: 0, suggestedProfit: 0 }
     }
 
+    // Usar ingredientes confirmados para calcular custos
+    const allIngredients = [...confirmedIngredients]
+
     // Custo total (valor total do pacote de cada ingrediente)
-    const totalCost = formState.recipeIngredients.reduce((acc, item) => {
+    const totalCost = allIngredients.reduce((acc, item) => {
       const totalValueStr = String(item.totalValue || '').trim()
       if (!totalValueStr) return acc
       
@@ -270,7 +335,7 @@ export function CostPage() {
     }, 0)
 
     // Custo de uso (calculado baseado na quantidade usada)
-    const usageCost = formState.recipeIngredients.reduce((acc, item) => {
+    const usageCost = allIngredients.reduce((acc, item) => {
       const packageQty = Number(item.packageQty || 0)
       const totalValue = Number(item.totalValue || 0)
       const quantityUsed = Number(item.quantity || 0)
@@ -301,9 +366,9 @@ export function CostPage() {
       suggestedPrice: Number(suggestedPrice.toFixed(2)),
       suggestedProfit: Number(suggestedProfit.toFixed(2))
     }
-  }, [formState.recipeIngredients, formState.yield])
+  }, [confirmedIngredients, formState.yield])
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const yieldNum = Number(formState.yield)
     const prepTimeNum = Number(formState.prepTime)
     const errors = {}
@@ -321,12 +386,12 @@ export function CostPage() {
       errors.prepTime = 'Tempo de preparo deve ser um número maior que zero'
     }
 
-    if (formState.recipeIngredients.length === 0) {
+    if (confirmedIngredients.length === 0) {
       errors.ingredients = 'Adicione pelo menos um ingrediente'
     }
 
     // Validar ingredientes
-    const invalidIngredients = formState.recipeIngredients.filter(
+    const invalidIngredients = confirmedIngredients.filter(
       (ing) => {
         const nameValid = ing.name?.trim()
         const totalValueStr = String(ing.totalValue || '').trim()
@@ -347,17 +412,22 @@ export function CostPage() {
 
     // Se houver erros, não submeter e mostrar feedback
     if (Object.keys(errors).length > 0) {
+      console.log('Erros de validação:', errors)
       // Scroll para o primeiro erro
       const firstErrorField = Object.keys(errors)[0]
       const errorElement = document.querySelector(`.input-error, .error-message`)
       if (errorElement) {
         errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
       }
+      // Mostrar alerta se houver erro de ingredientes
+      if (errors.ingredients) {
+        alert(errors.ingredients)
+      }
       return
     }
 
     // Preparar dados dos ingredientes
-    const ingredientsData = formState.recipeIngredients.map((ing) => ({
+    const ingredientsData = confirmedIngredients.map((ing) => ({
       emoji: ing.emoji || '📦',
       name: ing.name.trim(),
       packageQty: Number(ing.packageQty) || undefined,
@@ -376,25 +446,31 @@ export function CostPage() {
     }
 
     try {
+      console.log('Salvando receita com dados:', recipeData)
+      console.log('Ingredientes confirmados:', confirmedIngredients)
+      
       if (editingId) {
-        updateRecipe(editingId, recipeData)
+        await updateRecipe(editingId, recipeData)
         console.log('Receita atualizada:', recipeData)
       } else {
         const newRecipe = {
           id: crypto.randomUUID(),
           ...recipeData
         }
-        addRecipe(newRecipe)
+        await addRecipe(newRecipe)
         console.log('Receita adicionada:', newRecipe)
       }
 
       // Limpar erros e fechar modal
       setFormErrors({})
       handleCloseModal()
+      
+      // Mostrar feedback de sucesso
+      alert(editingId ? 'Receita atualizada com sucesso!' : 'Receita adicionada com sucesso!')
     } catch (error) {
       console.error('Erro ao salvar receita:', error)
       setFormErrors({ submit: 'Erro ao salvar receita. Tente novamente.' })
-      alert('Erro ao salvar receita. Verifique o console para mais detalhes.')
+      alert(`Erro ao salvar receita: ${error.message || 'Verifique o console para mais detalhes.'}`)
     }
   }
 
@@ -483,6 +559,7 @@ export function CostPage() {
 
       <FormModal
         isOpen={isModalOpen}
+        isExpanded={isModalExpanded}
         title={editingId ? 'Editar receita' : 'Adicionar receita'}
         description={
           editingId
@@ -501,242 +578,363 @@ export function CostPage() {
           </>
         }
       >
-        {formErrors.submit && (
-          <div className="error-message" style={{ 
-            display: 'block', 
-            marginBottom: '1rem', 
-            padding: '0.75rem', 
-            background: 'rgba(220, 38, 38, 0.1)', 
-            border: '1px solid rgba(220, 38, 38, 0.3)', 
-            borderRadius: '8px' 
-          }}>
-            {formErrors.submit}
-          </div>
-        )}
-        <label className="input-control">
-          <span>Nome da receita</span>
-          <input
-            type="text"
-            value={formState.name}
-            onChange={(event) => {
-              setFormState((prev) => ({ ...prev, name: event.target.value }))
-              if (formErrors.name) setFormErrors((prev) => ({ ...prev, name: '' }))
-            }}
-            placeholder="Ex.: Bolo de Chocolate"
-            className={formErrors.name ? 'input-error' : ''}
-          />
-          {formErrors.name && <span className="error-message">{formErrors.name}</span>}
-        </label>
-        <label className="input-control">
-          <span>Rendimento (unidades)</span>
-          <input
-            type="number"
-            value={formState.yield}
-            onChange={(event) => {
-              setFormState((prev) => ({ ...prev, yield: event.target.value }))
-              if (formErrors.yield) setFormErrors((prev) => ({ ...prev, yield: '' }))
-            }}
-            placeholder="Ex.: 18"
-            min="1"
-            step="1"
-            className={formErrors.yield ? 'input-error' : ''}
-          />
-          {formErrors.yield && <span className="error-message">{formErrors.yield}</span>}
-        </label>
-        <label className="input-control">
-          <span>Tempo de preparo (minutos)</span>
-          <input
-            type="number"
-            value={formState.prepTime}
-            onChange={(event) => {
-              setFormState((prev) => ({ ...prev, prepTime: event.target.value }))
-              if (formErrors.prepTime) setFormErrors((prev) => ({ ...prev, prepTime: '' }))
-            }}
-            placeholder="Ex.: 45"
-            min="1"
-            step="1"
-            className={formErrors.prepTime ? 'input-error' : ''}
-          />
-          {formErrors.prepTime && <span className="error-message">{formErrors.prepTime}</span>}
-        </label>
+        <div className={`modal-content-wrapper ${isModalExpanded ? 'modal-content-expanded' : ''}`}>
+          <div className="modal-form-column">
+            {formErrors.submit && (
+              <div className="error-message" style={{ 
+                display: 'block', 
+                marginBottom: '1rem', 
+                padding: '0.75rem', 
+                background: 'rgba(220, 38, 38, 0.1)', 
+                border: '1px solid rgba(220, 38, 38, 0.3)', 
+                borderRadius: '8px' 
+              }}>
+                {formErrors.submit}
+              </div>
+            )}
+            <label className="input-control">
+              <span>Nome da receita</span>
+              <input
+                type="text"
+                value={formState.name}
+                onChange={(event) => {
+                  setFormState((prev) => ({ ...prev, name: event.target.value }))
+                  if (formErrors.name) setFormErrors((prev) => ({ ...prev, name: '' }))
+                }}
+                placeholder="Ex.: Bolo de Chocolate"
+                className={formErrors.name ? 'input-error' : ''}
+              />
+              {formErrors.name && <span className="error-message">{formErrors.name}</span>}
+            </label>
+            <label className="input-control">
+              <span>Rendimento (unidades)</span>
+              <input
+                type="number"
+                value={formState.yield}
+                onChange={(event) => {
+                  setFormState((prev) => ({ ...prev, yield: event.target.value }))
+                  if (formErrors.yield) setFormErrors((prev) => ({ ...prev, yield: '' }))
+                }}
+                placeholder="Ex.: 18"
+                min="1"
+                step="1"
+                className={formErrors.yield ? 'input-error' : ''}
+              />
+              {formErrors.yield && <span className="error-message">{formErrors.yield}</span>}
+            </label>
+            <label className="input-control">
+              <span>Tempo de preparo (minutos)</span>
+              <input
+                type="number"
+                value={formState.prepTime}
+                onChange={(event) => {
+                  setFormState((prev) => ({ ...prev, prepTime: event.target.value }))
+                  if (formErrors.prepTime) setFormErrors((prev) => ({ ...prev, prepTime: '' }))
+                }}
+                placeholder="Ex.: 45"
+                min="1"
+                step="1"
+                className={formErrors.prepTime ? 'input-error' : ''}
+              />
+              {formErrors.prepTime && <span className="error-message">{formErrors.prepTime}</span>}
+            </label>
 
-        <div className="ingredients-section">
-          <div className="ingredients-header">
-            <span className="ingredients-label">Ingredientes</span>
-            <button
-              type="button"
-              className="add-ingredient-btn"
-              onClick={handleAddIngredient}
-            >
-              + Adicionar ingrediente
-            </button>
-          </div>
-          {formErrors.ingredients && (
-            <span className="error-message" style={{ display: 'block', marginBottom: '0.5rem' }}>
-              {formErrors.ingredients}
-            </span>
-          )}
-          {formErrors.cost && (
-            <span className="error-message" style={{ display: 'block', marginBottom: '0.5rem' }}>
-              {formErrors.cost}
-            </span>
-          )}
-          {formState.recipeIngredients.length === 0 ? (
-            <div className="empty-ingredients">Adicione ingredientes para calcular os custos</div>
-          ) : (
-            <div className="ingredients-list">
-              {formState.recipeIngredients.map((item, index) => (
-                <div key={index} className="ingredient-item">
-                  {/* Emoji picker */}
-                  <div className="ingredient-emoji-wrapper">
-                    <div className="ingredient-emoji-picker" style={{ position: 'relative' }}>
-                      <button
-                        type="button"
-                        className="ingredient-emoji-btn"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          setOpenEmojiPicker(openEmojiPicker === index ? null : index)
-                        }}
-                      >
-                        {item.emoji || '📦'}
-                      </button>
-                      {openEmojiPicker === index && (
-                        <div 
-                          className="emoji-picker-dropdown"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <div className="emoji-picker-grid">
-                            {commonEmojis.map((emoji) => (
-                              <button
-                                key={emoji}
-                                type="button"
-                                className="emoji-option"
-                                onClick={() => {
-                                  handleUpdateIngredient(index, 'emoji', emoji)
-                                  setOpenEmojiPicker(null)
-                                }}
-                              >
-                                {emoji}
-                              </button>
-                            ))}
-                          </div>
+            <div className="ingredients-section">
+              <div className="ingredients-header">
+                <span className="ingredients-label">Ingredientes</span>
+                <button
+                  type="button"
+                  className="add-ingredient-btn"
+                  onClick={handleAddIngredient}
+                >
+                  + Adicionar ingrediente
+                </button>
+              </div>
+              {formErrors.ingredients && (
+                <span className="error-message" style={{ display: 'block', marginBottom: '0.5rem' }}>
+                  {formErrors.ingredients}
+                </span>
+              )}
+              {formErrors.cost && (
+                <span className="error-message" style={{ display: 'block', marginBottom: '0.5rem' }}>
+                  {formErrors.cost}
+                </span>
+              )}
+              {editingIngredients.length === 0 ? (
+                <div className="empty-ingredients">Adicione ingredientes para calcular os custos</div>
+              ) : (
+                <div className="ingredients-list">
+                  {editingIngredients.map((item, index) => (
+                    <div key={index} className="ingredient-item">
+                      {/* Emoji picker */}
+                      <div className="ingredient-emoji-wrapper">
+                        <div className="ingredient-emoji-picker" style={{ position: 'relative' }}>
+                          <button
+                            type="button"
+                            className="ingredient-emoji-btn"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setOpenEmojiPicker(openEmojiPicker === index ? null : index)
+                            }}
+                          >
+                            {item.emoji || '📦'}
+                          </button>
+                          {openEmojiPicker === index && (
+                            <div 
+                              className="emoji-picker-dropdown"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <div className="emoji-picker-grid">
+                                {commonEmojis.map((emoji) => (
+                                  <button
+                                    key={emoji}
+                                    type="button"
+                                    className="emoji-option"
+                                    onClick={() => {
+                                      handleUpdateIngredient(index, 'emoji', emoji)
+                                      setOpenEmojiPicker(null)
+                                    }}
+                                  >
+                                    {emoji}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          )}
                         </div>
-                      )}
+                      </div>
+                      
+                      {/* Linha 1: Nome do ingrediente (ocupa 2 colunas) */}
+                      <input
+                        type="text"
+                        value={item.name || ''}
+                        onChange={(e) =>
+                          handleUpdateIngredient(index, 'name', e.target.value)
+                        }
+                        placeholder="Nome do ingrediente"
+                        className="ingredient-name"
+                      />
+                      
+                      {/* Linha 2: Qtd. original do pacote | Valor total */}
+                      <input
+                        type="number"
+                        value={item.packageQty || ''}
+                        onChange={(e) => {
+                          const value = e.target.value
+                          handleUpdateIngredient(index, 'packageQty', value)
+                        }}
+                        onBlur={(e) => {
+                          const value = e.target.value
+                          if (value && (isNaN(Number(value)) || Number(value) < 0)) {
+                            handleUpdateIngredient(index, 'packageQty', '')
+                          }
+                        }}
+                        placeholder="Qtd. original do pacote"
+                        min="0"
+                        step="0.01"
+                        className="ingredient-package-qty"
+                      />
+                      
+                      <input
+                        type="number"
+                        value={item.totalValue || ''}
+                        onChange={(e) => {
+                          const value = e.target.value
+                          handleUpdateIngredient(index, 'totalValue', value)
+                        }}
+                        onBlur={(e) => {
+                          // Garantir que o valor seja válido ao sair do campo
+                          const value = e.target.value
+                          if (value && (isNaN(Number(value)) || Number(value) <= 0)) {
+                            handleUpdateIngredient(index, 'totalValue', '')
+                          }
+                        }}
+                        placeholder="Valor total (R$)"
+                        min="0"
+                        step="0.01"
+                        className="ingredient-value"
+                      />
+                      
+                      {/* Linha 3: Mg/Ml usados | Botão excluir */}
+                      <input
+                        type="number"
+                        value={item.quantity || ''}
+                        onChange={(e) => {
+                          const value = e.target.value
+                          handleUpdateIngredient(index, 'quantity', value)
+                        }}
+                        onBlur={(e) => {
+                          // Garantir que o valor seja válido ao sair do campo
+                          const value = e.target.value
+                          if (value && (isNaN(Number(value)) || Number(value) < 0)) {
+                            handleUpdateIngredient(index, 'quantity', '')
+                          } else {
+                            // Recalcular valor total quando sair do campo de quantidade
+                            const currentItem = editingIngredients[index]
+                            if (currentItem && currentItem.name) {
+                              const foundIngredient = ingredients.find(
+                                (ing) => ing.name.toLowerCase() === currentItem.name.toLowerCase().trim()
+                              )
+                              if (foundIngredient && value) {
+                                const quantity = Number(value) || 0
+                                handleUpdateIngredient(index, 'totalValue', (foundIngredient.unitCost * quantity).toFixed(2))
+                              }
+                            }
+                          }
+                        }}
+                        placeholder="Mg/Ml usados"
+                        min="0"
+                        step="0.01"
+                        className="ingredient-quantity"
+                      />
+                      
+                      <div className="ingredient-action-buttons">
+                        <button
+                          type="button"
+                          className="cancel-ingredient-btn"
+                          onClick={() => handleRemoveIngredient(index)}
+                          title="Cancelar adição"
+                        >
+                          ✕
+                        </button>
+                        <button
+                          type="button"
+                          className="confirm-ingredient-btn"
+                          onClick={() => handleConfirmIngredient(index)}
+                          title="Confirmar ingrediente"
+                        >
+                          ✓
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {isModalExpanded && (
+            <div className="modal-ingredients-column">
+              <div className="ingredients-list-view">
+                <h3>Ingredientes Adicionados</h3>
+                {confirmedIngredients.length === 0 ? (
+                  <div className="empty-ingredients">Nenhum ingrediente adicionado</div>
+                ) : (
+                  <div className="ingredients-list-display">
+                    {confirmedIngredients.map((item, index) => (
+                      <div key={index} className="ingredient-display-item">
+                        {editingConfirmedIndex === index ? (
+                          // Modo de edição
+                          <div className="ingredient-edit-form">
+                            <input
+                              type="text"
+                              value={editingConfirmedData?.name || ''}
+                              onChange={(e) => handleUpdateConfirmedIngredient('name', e.target.value)}
+                              placeholder="Nome do ingrediente"
+                              className="ingredient-edit-input"
+                            />
+                            <input
+                              type="number"
+                              value={editingConfirmedData?.packageQty || ''}
+                              onChange={(e) => handleUpdateConfirmedIngredient('packageQty', e.target.value)}
+                              placeholder="Qtd. pacote"
+                              className="ingredient-edit-input"
+                              min="0"
+                              step="0.01"
+                            />
+                            <input
+                              type="number"
+                              value={editingConfirmedData?.quantity || ''}
+                              onChange={(e) => handleUpdateConfirmedIngredient('quantity', e.target.value)}
+                              placeholder="Qtd. usada"
+                              className="ingredient-edit-input"
+                              min="0"
+                              step="0.01"
+                            />
+                            <input
+                              type="number"
+                              value={editingConfirmedData?.totalValue || ''}
+                              onChange={(e) => handleUpdateConfirmedIngredient('totalValue', e.target.value)}
+                              placeholder="Valor total"
+                              className="ingredient-edit-input"
+                              min="0"
+                              step="0.01"
+                            />
+                            <div className="ingredient-edit-actions">
+                              <button
+                                type="button"
+                                className="ingredient-save-btn"
+                                onClick={() => handleSaveConfirmedIngredient(index)}
+                                title="Salvar"
+                              >
+                                <FiCheck />
+                              </button>
+                              <button
+                                type="button"
+                                className="ingredient-cancel-btn"
+                                onClick={handleCancelEditConfirmed}
+                                title="Cancelar"
+                              >
+                                <FiX />
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          // Modo de visualização
+                          <>
+                            <span className="ingredient-emoji-display">{item.emoji || '📦'}</span>
+                            <div className="ingredient-info">
+                              <div className="ingredient-name-display">{item.name || 'Sem nome'}</div>
+                              <div className="ingredient-details">
+                                {item.packageQty && <span>Pacote: {item.packageQty}</span>}
+                                {item.quantity && <span>Qtd: {item.quantity}</span>}
+                                {item.totalValue && <span>Valor: R$ {Number(item.totalValue).toFixed(2)}</span>}
+                              </div>
+                            </div>
+                            <div className="ingredient-display-actions">
+                              <button
+                                type="button"
+                                className="ingredient-edit-btn"
+                                onClick={() => handleEditConfirmedIngredient(index)}
+                                title="Editar"
+                              >
+                                <FiEdit2 />
+                              </button>
+                              <button
+                                type="button"
+                                className="ingredient-delete-btn"
+                                onClick={() => handleDeleteConfirmedIngredient(index)}
+                                title="Excluir"
+                              >
+                                <FiTrash2 />
+                              </button>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {calculatedCosts.totalCost > 0 && (
+                <div className="cost-summary">
+                  <h4>Resumo automático</h4>
+                  <div className="summary-grid">
+                    <div className="summary-item">
+                      <span className="summary-label">Custo Total em Produtos</span>
+                      <span className="summary-value">R$ {calculatedCosts.totalCost.toFixed(2)}</span>
+                    </div>
+                    <div className="summary-item">
+                      <span className="summary-label">Custo de Uso</span>
+                      <span className="summary-value">R$ {calculatedCosts.usageCost.toFixed(2)}</span>
                     </div>
                   </div>
-                  
-                  {/* Linha 1: Nome do ingrediente (ocupa 2 colunas) */}
-                  <input
-                    type="text"
-                    value={item.name || ''}
-                    onChange={(e) =>
-                      handleUpdateIngredient(index, 'name', e.target.value)
-                    }
-                    placeholder="Nome do ingrediente"
-                    className="ingredient-name"
-                  />
-                  
-                  {/* Linha 2: Qtd. original do pacote | Valor total */}
-                  <input
-                    type="number"
-                    value={item.packageQty || ''}
-                    onChange={(e) => {
-                      const value = e.target.value
-                      handleUpdateIngredient(index, 'packageQty', value)
-                    }}
-                    onBlur={(e) => {
-                      const value = e.target.value
-                      if (value && (isNaN(Number(value)) || Number(value) < 0)) {
-                        handleUpdateIngredient(index, 'packageQty', '')
-                      }
-                    }}
-                    placeholder="Qtd. original do pacote"
-                    min="0"
-                    step="0.01"
-                    className="ingredient-package-qty"
-                  />
-                  
-                  <input
-                    type="number"
-                    value={item.totalValue || ''}
-                    onChange={(e) => {
-                      const value = e.target.value
-                      handleUpdateIngredient(index, 'totalValue', value)
-                    }}
-                    onBlur={(e) => {
-                      // Garantir que o valor seja válido ao sair do campo
-                      const value = e.target.value
-                      if (value && (isNaN(Number(value)) || Number(value) <= 0)) {
-                        handleUpdateIngredient(index, 'totalValue', '')
-                      }
-                    }}
-                    placeholder="Valor total (R$)"
-                    min="0"
-                    step="0.01"
-                    className="ingredient-value"
-                  />
-                  
-                  {/* Linha 3: Mg/Ml usados | Botão excluir */}
-                  <input
-                    type="number"
-                    value={item.quantity || ''}
-                    onChange={(e) => {
-                      const value = e.target.value
-                      handleUpdateIngredient(index, 'quantity', value)
-                    }}
-                    onBlur={(e) => {
-                      // Garantir que o valor seja válido ao sair do campo
-                      const value = e.target.value
-                      if (value && (isNaN(Number(value)) || Number(value) < 0)) {
-                        handleUpdateIngredient(index, 'quantity', '')
-                      } else {
-                        // Recalcular valor total quando sair do campo de quantidade
-                        const currentItem = formState.recipeIngredients[index]
-                        if (currentItem && currentItem.name) {
-                          const foundIngredient = ingredients.find(
-                            (ing) => ing.name.toLowerCase() === currentItem.name.toLowerCase().trim()
-                          )
-                          if (foundIngredient && value) {
-                            const quantity = Number(value) || 0
-                            handleUpdateIngredient(index, 'totalValue', (foundIngredient.unitCost * quantity).toFixed(2))
-                          }
-                        }
-                      }
-                    }}
-                    placeholder="Mg/Ml usados"
-                    min="0"
-                    step="0.01"
-                    className="ingredient-quantity"
-                  />
-                  
-                  <button
-                    type="button"
-                    className="remove-ingredient-btn"
-                    onClick={() => handleRemoveIngredient(index)}
-                  >
-                    ✕
-                  </button>
                 </div>
-              ))}
+              )}
             </div>
           )}
         </div>
-
-        {calculatedCosts.totalCost > 0 && (
-          <div className="cost-summary">
-            <h4>Resumo automático</h4>
-            <div className="summary-grid">
-              <div className="summary-item">
-                <span className="summary-label">Custo total</span>
-                <span className="summary-value">R$ {calculatedCosts.totalCost.toFixed(2)}</span>
-              </div>
-              <div className="summary-item">
-                <span className="summary-label">Custo de Uso</span>
-                <span className="summary-value">R$ {calculatedCosts.usageCost.toFixed(2)}</span>
-              </div>
-            </div>
-          </div>
-        )}
       </FormModal>
     </div>
   )

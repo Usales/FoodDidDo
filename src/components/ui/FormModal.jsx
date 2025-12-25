@@ -1,13 +1,13 @@
 import PropTypes from 'prop-types'
 import './FormModal.css'
 
-export function FormModal({ isOpen, title, description, onClose, children, footer }) {
+export function FormModal({ isOpen, title, description, onClose, children, footer, isExpanded = false }) {
   if (!isOpen) return null
 
   return (
     <div className="form-modal-backdrop" role="presentation" onClick={onClose}>
       <div
-        className="form-modal"
+        className={`form-modal ${isExpanded ? 'form-modal-expanded' : ''}`}
         role="dialog"
         aria-modal="true"
         aria-labelledby="form-modal-title"
@@ -35,11 +35,13 @@ FormModal.propTypes = {
   description: PropTypes.string,
   onClose: PropTypes.func.isRequired,
   children: PropTypes.node.isRequired,
-  footer: PropTypes.node
+  footer: PropTypes.node,
+  isExpanded: PropTypes.bool
 }
 
 FormModal.defaultProps = {
   description: null,
-  footer: null
+  footer: null,
+  isExpanded: false
 }
 
