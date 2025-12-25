@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types'
-import { NavLink, Outlet } from 'react-router-dom'
+import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import {
   AiOutlineHome,
   AiOutlineShoppingCart,
@@ -17,7 +17,9 @@ import {
   AiOutlineRise
 } from 'react-icons/ai'
 import { FiLogOut, FiSearch, FiChevronDown } from 'react-icons/fi'
-import { useState } from 'react'
+import { HiMoon, HiSun } from 'react-icons/hi'
+import { useState, useEffect, useRef } from 'react'
+import { useTheme } from '../../contexts/ThemeContext'
 import './MainLayout.css'
 
 const navigation = [
@@ -55,6 +57,26 @@ const navigation = [
 export function MainLayout({ onLogout, user }) {
   const [searchQuery, setSearchQuery] = useState('')
   const [userDropdownOpen, setUserDropdownOpen] = useState(false)
+  const dropdownRef = useRef(null)
+  const navigate = useNavigate()
+  const { theme, toggleTheme, isDarkMode } = useTheme()
+
+  // Fechar dropdown ao clicar fora
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setUserDropdownOpen(false)
+      }
+    }
+
+    if (userDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [userDropdownOpen])
 
   return (
     <div className="main-shell">
@@ -101,7 +123,7 @@ export function MainLayout({ onLogout, user }) {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <div className="user-dropdown-wrapper">
+            <div className="user-dropdown-wrapper" ref={dropdownRef}>
               <button
                 type="button"
                 className="user-chip"
@@ -113,7 +135,26 @@ export function MainLayout({ onLogout, user }) {
               </button>
               {userDropdownOpen && (
                 <div className="user-dropdown">
-                  <button type="button" className="dropdown-item">
+                  <button 
+                    type="button" 
+                    className="dropdown-item"
+                    onClick={() => {
+                      toggleTheme()
+                      setUserDropdownOpen(false)
+                    }}
+                  >
+                    {isDarkMode ? <HiSun size={16} /> : <HiMoon size={16} />}
+                    {isDarkMode ? 'Modo Claro' : 'Modo Escuro'}
+                  </button>
+                  <button 
+                    type="button" 
+                    className="dropdown-item"
+                    onClick={() => {
+                      navigate('/config')
+                      setUserDropdownOpen(false)
+                    }}
+                  >
+                    <AiOutlineSetting size={16} />
                     Configurações
                   </button>
                   <button type="button" className="dropdown-item" onClick={onLogout}>

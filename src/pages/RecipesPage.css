@@ -5,6 +5,7 @@
 .recipes-header h1 {
   font-size: 2rem;
   margin-bottom: 0.4rem;
+  color: var(--text-primary);
 }
 
 .recipes-header p {
@@ -25,7 +26,7 @@
 }
 
 .recipe-card {
-  background: #ffffff;
+  background: var(--bg-card, #ffffff);
   border-radius: 22px;
   border: var(--border-soft);
   box-shadow: var(--card-shadow);
@@ -33,6 +34,7 @@
   flex-direction: column;
   overflow: hidden;
   min-height: 100%;
+  transition: background 0.2s ease;
 }
 
 .recipe-card-image {
@@ -74,6 +76,7 @@
   margin: 0;
   font-size: 1.15rem;
   letter-spacing: -0.01em;
+  color: var(--text-primary);
 }
 
 .recipe-meta {
