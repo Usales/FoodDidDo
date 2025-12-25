@@ -1,0 +1,144 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Budget {
+  id          String   @id @default(uuid())
+  name        String
+  amount      Float
+  spent       Float    @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Ingredient {
+  id                String   @id @default(uuid())
+  name              String
+  category          String
+  packagePrice      Float
+  packageQty        Float
+  unitCost          Float
+  stockQty          Float    @default(0)
+  lowStockThreshold Float    @default(0)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  recipeIngredients RecipeIngredient[]
+  stockMovements    StockMovement[]
+}
+
+model Recipe {
+  id                String   @id @default(uuid())
+  name              String
+  yield             Int
+  prepTime          Int      // em minutos
+  totalCost         Float
+  unitCost          Float
+  contributionMargin Float?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  ingredients       RecipeIngredient[]
+}
+
+model RecipeIngredient {
+  id           String   @id @default(uuid())
+  recipeId     String
+  ingredientId String
+  quantity     Float
+  unit         String   @default("g")
+  createdAt    DateTime @default(now())
+  
+  recipe       Recipe     @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  ingredient   Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
+  
+  @@unique([recipeId, ingredientId])
+}
+
+model Meal {
+  id          String   @id @default(uuid())
+  title       String
+  calories    String
+  ingredients String
+  time        String
+  status      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Pricing {
+  id          String   @id @default(uuid())
+  recipeId    String?
+  recipeName  String?
+  price       Float
+  margin      Float?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model FixedCost {
+  id              String   @id @default(uuid())
+  name            String
+  type            String   // 'fixo' ou 'indireto'
+  value           Float
+  allocationMethod String  // 'mensal', 'por hora', 'por lote'
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model CashflowEntry {
+  id          String   @id @default(uuid())
+  type        String   // 'entrada' ou 'saida'
+  amount      Float
+  description String
+  date        DateTime
+  category    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model StockMovement {
+  id          String   @id @default(uuid())
+  ingredientId String
+  type        String   // 'entrada' ou 'saida'
+  quantity    Float
+  reference   String?
+  createdAt   DateTime @default(now())
+  
+  ingredient  Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
+}
+
+model Warehouse {
+  id          String   @id @default(uuid())
+  name        String
+  capacity    Float?
+  capacityUnit String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  items       WarehouseItem[]
+}
+
+model WarehouseItem {
+  id          String   @id @default(uuid())
+  warehouseId String
+  emoji       String?
+  name        String
+  quantity    Float
+  unit        String
+  minIdeal    Float?
+  unitCost    Float?
+  category    String?
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  warehouse   Warehouse @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
+}

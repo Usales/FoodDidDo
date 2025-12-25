@@ -85,3 +85,13 @@ jspm_packages/
 
 # DynamoDB Local files
 .dynamodb/
+/src/generated/prisma
+
+# Prisma Database
+prisma/dev.db
+prisma/dev.db-journal
+*.db
+*.db-journal
+
+# Tauri build
+src-tauri/target/

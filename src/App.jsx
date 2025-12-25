@@ -1,8 +1,10 @@
+import { useEffect } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AuthProvider, useAuth } from './components/AuthProvider'
 import NameScreen from './components/NameScreen'
 import { ThemeProvider } from './contexts/ThemeContext'
 import { MainLayout } from './components/layout/MainLayout'
+import { useAppStore } from './stores/appStore'
 import {
   DashboardPage,
   BudgetPage,
@@ -24,6 +26,12 @@ import './App.css'
 
 function AppRoutes() {
   const { logout, user } = useAuth()
+  const loadData = useAppStore((state) => state.loadData)
+
+  useEffect(() => {
+    // Carregar dados do servidor quando a aplicação iniciar
+    loadData()
+  }, [loadData])
 
   return (
     <BrowserRouter>
