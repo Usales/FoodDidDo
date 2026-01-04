@@ -593,9 +593,10 @@
 
   .meal-form input,
   .meal-form select {
-    padding: 0.55rem 0.75rem;
+    padding: 0.4rem 0.75rem;
     font-size: 0.9rem;
     border-radius: 0.65rem;
+    height: auto;
   }
 
   .meal-form-actions {
@@ -680,8 +681,9 @@
 
   .meal-form input,
   .meal-form select {
-    padding: 0.5rem 0.65rem;
+    padding: 0.35rem 0.65rem;
     font-size: 0.85rem;
+    height: auto;
   }
 
   .fab-container {
