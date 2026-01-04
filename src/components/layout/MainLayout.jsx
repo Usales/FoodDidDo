@@ -155,10 +155,21 @@ export function MainLayout({ onLogout, user }) {
             aria-expanded={mobileMenuOpen}
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
-            {mobileMenuOpen ? <FiX size={24} /> : <FiMenu size={24} />}
+            {mobileMenuOpen ? (
+              <FiX size={20} style={{ display: 'block' }} />
+            ) : (
+              <FiMenu size={20} style={{ display: 'block' }} />
+            )}
           </button>
           <div className="topbar-left">
-            <h1>Bem-vinda, {user?.name ?? 'GabrielSales'}</h1>
+            <h1>
+              {(() => {
+                const hour = new Date().getHours()
+                const greeting = hour < 12 ? 'Bom dia' : hour < 18 ? 'Boa tarde' : 'Boa noite'
+                const userName = user?.name?.split(' ')[0] || 'Sales'
+                return `${greeting}, ${userName}`
+              })()}
+            </h1>
             <span className="topbar-subtitle">Organize suas receitas favoritas e gerencie sua geladeira.</span>
           </div>
           <div className="topbar-actions">
