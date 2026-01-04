@@ -288,10 +288,22 @@
   gap: 0.5rem;
   font-size: 0.9rem;
   transition: background 0.2s ease;
+  outline: none;
+  box-shadow: none;
 }
 
 .dropdown-item:hover {
   background: var(--bg-secondary);
+}
+
+.dropdown-item:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.dropdown-item:active {
+  outline: none;
+  box-shadow: none;
 }
 
 .dropdown-item:not(:last-child) {
