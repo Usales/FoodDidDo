@@ -167,7 +167,7 @@ export function MainLayout({ onLogout, user }) {
                 const hour = new Date().getHours()
                 const greeting = hour < 12 ? 'Bom dia' : hour < 18 ? 'Boa tarde' : 'Boa noite'
                 const userName = user?.name?.split(' ')[0] || 'Sales'
-                return `${greeting}, ${userName}`
+                return `${greeting}, ${userName} 👋`
               })()}
             </h1>
             <span className="topbar-subtitle">Organize suas receitas favoritas e gerencie sua geladeira.</span>
@@ -178,7 +178,7 @@ export function MainLayout({ onLogout, user }) {
               <input
                 type="text"
                 className="global-search"
-                placeholder="Buscar receitas, ingredientes, custos..."
+                placeholder="Buscar receitas ou ingredientes"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
