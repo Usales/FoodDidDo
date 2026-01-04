@@ -101,6 +101,10 @@
 .meal-form-close {
   width: 32px;
   height: 32px;
+  min-width: 32px;
+  min-height: 32px;
+  max-width: 32px;
+  max-height: 32px;
   border-radius: 50%;
   border: none;
   background: var(--bg-tertiary);
@@ -112,6 +116,9 @@
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
+  padding: 0;
+  flex-shrink: 0;
+  box-sizing: border-box;
 }
 
 .meal-form-close:hover {
