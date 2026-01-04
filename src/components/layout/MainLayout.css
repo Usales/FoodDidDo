@@ -602,8 +602,8 @@
     padding: 0.75rem 1rem;
     gap: 0.75rem;
     flex-direction: row;
-    align-items: flex-start;
-    flex-wrap: wrap;
+    align-items: center;
+    flex-wrap: nowrap;
     min-height: auto;
     width: 100%;
     max-width: 100%;
@@ -619,6 +619,7 @@
     width: 36px;
     height: 36px;
     margin-right: 0.5rem;
+    align-self: center;
   }
 
   .mobile-menu-toggle svg {
@@ -658,6 +659,9 @@
   .user-chip {
     max-width: 100%;
     overflow: hidden;
+    height: 44px;
+    display: flex;
+    align-items: center;
   }
 
   .user-dropdown {
@@ -674,6 +678,8 @@
     min-width: 0;
     max-width: 100%;
     box-sizing: border-box;
+    display: flex;
+    align-items: center;
   }
 
   .global-search {
@@ -684,6 +690,7 @@
     box-sizing: border-box;
     flex: 1;
     min-width: 0;
+    height: 44px;
   }
 }
 
@@ -695,6 +702,7 @@
     width: 100%;
     box-sizing: border-box;
     overflow-y: visible;
+    align-items: center;
   }
 
   .mobile-menu-toggle {
@@ -702,6 +710,7 @@
     height: 32px;
     margin-right: 0.5rem;
     flex-shrink: 0;
+    align-self: center;
   }
 
   .mobile-menu-toggle svg {
@@ -725,6 +734,9 @@
   .user-chip {
     padding: 0.35rem 0.5rem 0.35rem 0.35rem;
     max-width: 60px;
+    height: 44px;
+    display: flex;
+    align-items: center;
   }
 
   .user-avatar {
@@ -741,10 +753,20 @@
     max-width: calc(100vw - 2rem);
   }
 
+  .search-box-wrapper {
+    display: flex;
+    align-items: center;
+  }
+
   .global-search {
     font-size: 0.85rem;
     padding: 0.55rem 0.875rem 0.55rem 2.25rem;
     max-width: 100%;
+    height: 44px;
+  }
+
+  .topbar-actions {
+    align-items: center;
   }
 }
 
