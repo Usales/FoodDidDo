@@ -8,6 +8,9 @@
   max-width: 100%;
   box-sizing: border-box;
   overflow-x: hidden;
+  overflow-y: visible;
+  position: relative;
+  z-index: 0;
 }
 
 .main-shell-sidebar {
@@ -574,6 +577,8 @@
     box-sizing: border-box;
     overflow-x: hidden;
     overflow-y: visible;
+    position: relative;
+    z-index: 0;
   }
 
   .mobile-menu-toggle {
@@ -610,6 +615,8 @@
     box-sizing: border-box;
     overflow-x: hidden;
     overflow-y: visible;
+    z-index: 1;
+    isolation: isolate;
   }
 
   .mobile-menu-toggle {
@@ -651,8 +658,8 @@
     order: 2;
     flex-shrink: 0;
     max-width: 100%;
-    position: relative;
-    z-index: 1001;
+    position: static;
+    z-index: 10001;
   }
 
   .user-chip {
@@ -661,11 +668,14 @@
   }
 
   .user-dropdown {
-    right: 0;
-    left: auto;
-    min-width: 180px;
+    position: fixed !important;
+    top: 0 !important;
+    right: 0 !important;
+    left: auto !important;
+    min-width: 200px;
     max-width: calc(100vw - 2rem);
-    z-index: 1002;
+    z-index: 10002 !important;
+    transform: translateY(0);
   }
 
   .search-box-wrapper {
@@ -719,7 +729,7 @@
 
   .user-dropdown-wrapper {
     position: relative;
-    z-index: 1001;
+    z-index: 10001;
   }
 
   .user-chip {
@@ -734,11 +744,13 @@
   }
 
   .user-dropdown {
-    z-index: 10000;
-    right: 0;
-    left: auto;
-    min-width: 180px;
+    position: fixed !important;
+    top: 0 !important;
+    right: 0 !important;
+    left: auto !important;
+    min-width: 200px;
     max-width: calc(100vw - 2rem);
+    z-index: 10002 !important;
   }
 
   .global-search {

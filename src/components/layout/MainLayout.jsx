@@ -58,7 +58,9 @@ export function MainLayout({ onLogout, user }) {
   const [searchQuery, setSearchQuery] = useState('')
   const [userDropdownOpen, setUserDropdownOpen] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, right: 0 })
   const dropdownRef = useRef(null)
+  const userChipRef = useRef(null)
   const mobileMenuRef = useRef(null)
   const navigate = useNavigate()
   const { theme, toggleTheme, isDarkMode } = useTheme()
@@ -189,16 +191,32 @@ export function MainLayout({ onLogout, user }) {
             </div>
             <div className="user-dropdown-wrapper" ref={dropdownRef}>
               <button
+                ref={userChipRef}
                 type="button"
                 className="user-chip"
-                onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+                onClick={(e) => {
+                  if (userChipRef.current) {
+                    const rect = userChipRef.current.getBoundingClientRect()
+                    setDropdownPosition({
+                      top: rect.bottom + 8,
+                      right: window.innerWidth - rect.right
+                    })
+                  }
+                  setUserDropdownOpen(!userDropdownOpen)
+                }}
               >
                 <div className="user-avatar">{(user?.name ?? 'G').charAt(0).toUpperCase()}</div>
                 <span className="user-name">{user?.name ?? 'gabrielsales012345'}</span>
                 <FiChevronDown className={`dropdown-chevron ${userDropdownOpen ? 'open' : ''}`} />
               </button>
               {userDropdownOpen && (
-                <div className="user-dropdown">
+                <div 
+                  className="user-dropdown"
+                  style={{
+                    top: `${dropdownPosition.top}px`,
+                    right: `${dropdownPosition.right}px`
+                  }}
+                >
                   <button 
                     type="button" 
                     className="dropdown-item"
