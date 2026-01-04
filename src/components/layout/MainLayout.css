@@ -256,7 +256,7 @@
   border-radius: 12px;
   box-shadow: var(--shadow-xl);
   min-width: 200px;
-  z-index: 1000;
+  z-index: 10000;
   overflow: hidden;
   animation: dropdownFadeIn 0.2s ease;
 }
@@ -573,6 +573,7 @@
     width: 100%;
     box-sizing: border-box;
     overflow-x: hidden;
+    overflow-y: visible;
   }
 
   .mobile-menu-toggle {
@@ -608,6 +609,7 @@
     max-width: 100%;
     box-sizing: border-box;
     overflow-x: hidden;
+    overflow-y: visible;
   }
 
   .mobile-menu-toggle {
@@ -638,7 +640,7 @@
     flex: 1;
     justify-content: flex-end;
     max-width: calc(100% - 50px);
-    overflow: hidden;
+    overflow: visible;
   }
 
   .user-name-mobile {
@@ -649,11 +651,21 @@
     order: 2;
     flex-shrink: 0;
     max-width: 100%;
+    position: relative;
+    z-index: 1001;
   }
 
   .user-chip {
     max-width: 100%;
     overflow: hidden;
+  }
+
+  .user-dropdown {
+    right: 0;
+    left: auto;
+    min-width: 180px;
+    max-width: calc(100vw - 2rem);
+    z-index: 1002;
   }
 
   .search-box-wrapper {
@@ -682,6 +694,7 @@
     min-height: auto;
     width: 100%;
     box-sizing: border-box;
+    overflow-y: visible;
   }
 
   .mobile-menu-toggle {
@@ -704,6 +717,11 @@
     display: none;
   }
 
+  .user-dropdown-wrapper {
+    position: relative;
+    z-index: 1001;
+  }
+
   .user-chip {
     padding: 0.35rem 0.5rem 0.35rem 0.35rem;
     max-width: 60px;
@@ -713,6 +731,14 @@
     width: 28px;
     height: 28px;
     font-size: 0.8rem;
+  }
+
+  .user-dropdown {
+    z-index: 10000;
+    right: 0;
+    left: auto;
+    min-width: 180px;
+    max-width: calc(100vw - 2rem);
   }
 
   .global-search {
