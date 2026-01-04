@@ -625,44 +625,28 @@
   }
 
   .topbar-left {
-    order: 2;
-    flex: 1 1 auto;
-    min-width: 0;
-    max-width: calc(100% - 140px);
-    padding: 0;
-    margin: 0;
-    overflow: hidden;
-  }
-
-  .topbar h1 {
-    font-size: 1.9rem;
-    margin: 0;
-    font-weight: 600;
-    line-height: 1.4;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 100%;
-  }
-
-  .topbar-subtitle {
     display: none;
   }
 
   .topbar-actions {
-    order: 3;
+    order: 2;
     display: flex;
     flex-direction: row;
     align-items: center;
     gap: 0.5rem;
     flex-shrink: 0;
-    align-self: center;
-    max-width: 100%;
+    flex: 1;
+    justify-content: flex-end;
+    max-width: calc(100% - 50px);
     overflow: hidden;
   }
 
+  .user-name-mobile {
+    display: none;
+  }
+
   .user-dropdown-wrapper {
-    order: 1;
+    order: 2;
     flex-shrink: 0;
     max-width: 100%;
   }
@@ -673,10 +657,9 @@
   }
 
   .search-box-wrapper {
-    order: 2;
-    width: 100%;
-    flex: 1 1 100%;
-    margin-top: 0.625rem;
+    order: 1;
+    flex: 1;
+    min-width: 0;
     max-width: 100%;
     box-sizing: border-box;
   }
@@ -687,6 +670,8 @@
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
+    flex: 1;
+    min-width: 0;
   }
 }
 
@@ -712,15 +697,10 @@
   }
 
   .topbar-left {
-    max-width: calc(100% - 90px);
-    flex: 1 1 auto;
+    display: none;
   }
 
-  .topbar h1 {
-    font-size: 1.8rem;
-  }
-
-  .user-name {
+  .user-name-mobile {
     display: none;
   }
 

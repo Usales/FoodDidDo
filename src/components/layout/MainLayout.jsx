@@ -167,7 +167,11 @@ export function MainLayout({ onLogout, user }) {
                 const hour = new Date().getHours()
                 const greeting = hour < 12 ? 'Bom dia' : hour < 18 ? 'Boa tarde' : 'Boa noite'
                 const userName = user?.name?.split(' ')[0] || 'Sales'
-                return `${greeting}, ${userName} 👋`
+                return (
+                  <>
+                    {greeting}<span className="user-name-mobile">, {userName}</span> 👋
+                  </>
+                )
               })()}
             </h1>
             <span className="topbar-subtitle">Organize suas receitas favoritas e gerencie sua geladeira.</span>
