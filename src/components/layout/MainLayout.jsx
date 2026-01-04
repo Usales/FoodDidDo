@@ -59,11 +59,22 @@ export function MainLayout({ onLogout, user }) {
   const [userDropdownOpen, setUserDropdownOpen] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, right: 0 })
+  const [isMobile, setIsMobile] = useState(false)
   const dropdownRef = useRef(null)
   const userChipRef = useRef(null)
   const mobileMenuRef = useRef(null)
   const navigate = useNavigate()
   const { theme, toggleTheme, isDarkMode } = useTheme()
+
+  // Verificar se é mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 960)
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   // Fechar dropdown ao clicar fora
   useEffect(() => {
@@ -195,7 +206,8 @@ export function MainLayout({ onLogout, user }) {
                 type="button"
                 className="user-chip"
                 onClick={(e) => {
-                  if (userChipRef.current) {
+                  // Calcular posição apenas no mobile
+                  if (userChipRef.current && isMobile) {
                     const rect = userChipRef.current.getBoundingClientRect()
                     setDropdownPosition({
                       top: rect.bottom + 8,
@@ -212,10 +224,10 @@ export function MainLayout({ onLogout, user }) {
               {userDropdownOpen && (
                 <div 
                   className="user-dropdown"
-                  style={{
+                  style={isMobile ? {
                     top: `${dropdownPosition.top}px`,
                     right: `${dropdownPosition.right}px`
-                  }}
+                  } : {}}
                 >
                   <button 
                     type="button" 

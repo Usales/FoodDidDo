@@ -660,6 +660,7 @@
     justify-content: flex-end;
     max-width: calc(100% - 50px);
     overflow: visible;
+    position: relative;
   }
 
   .user-name-mobile {
@@ -670,7 +671,7 @@
     order: 2;
     flex-shrink: 0;
     max-width: 100%;
-    position: static;
+    position: relative;
     z-index: 10001;
   }
 
@@ -687,7 +688,6 @@
     min-width: 200px;
     max-width: calc(100vw - 2rem);
     z-index: 10002 !important;
-    transform: translateY(0);
   }
 
   .search-box-wrapper {
