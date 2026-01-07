@@ -38,10 +38,65 @@ const defaultMeals = [
 const initialForm = {
   title: '',
   calories: '',
+  caloriesUnit: 'Cal',
   ingredients: '',
   time: '',
+  timeUnit: 'Min',
   cost: '',
   status: 'fazer'
+}
+
+// Mapeamento de ingredientes para emojis
+const ingredientEmojis = {
+  'abacaxi': '🍍', 'pineapple': '🍍',
+  'abacate': '🥑', 'avocado': '🥑',
+  'alface': '🥬', 'lettuce': '🥬',
+  'arroz': '🍚', 'rice': '🍚',
+  'azeitona': '🫒', 'olive': '🫒',
+  'banana': '🍌',
+  'batata': '🥔', 'potato': '🥔',
+  'bread': '🍞', 'pão': '🍞',
+  'brocolis': '🥦', 'brócolis': '🥦', 'broccoli': '🥦',
+  'carne': '🥩', 'meat': '🥩', 'beef': '🥩',
+  'chicken': '🍗', 'frango': '🍗',
+  'carrot': '🥕', 'cenoura': '🥕',
+  'cebola': '🧅', 'onion': '🧅',
+  'cheese': '🧀', 'queijo': '🧀',
+  'chocolate': '🍫',
+  'coco': '🥥', 'coconut': '🥥',
+  'couve': '🥬', 'kale': '🥬',
+  'egg': '🥚', 'eggs': '🥚', 'ovo': '🥚', 'ovos': '🥚',
+  'espinafre': '🥬', 'spinach': '🥬',
+  'fish': '🐟', 'peixe': '🐟',
+  'leite': '🥛', 'milk': '🥛',
+  'mint': '🌿', 'hortelã': '🌿', 'hortelã': '🌿',
+  'manteiga': '🧈', 'butter': '🧈',
+  'milho': '🌽', 'corn': '🌽',
+  'mushroom': '🍄', 'cogumelo': '🍄',
+  'pasta': '🍝', 'macarrão': '🍝',
+  'pepper': '🫑', 'pimentão': '🫑',
+  'quinoa': '🌾',
+  'sal': '🧂', 'salt': '🧂',
+  'tomato': '🍅', 'tomate': '🍅',
+  'trigo': '🌾', 'wheat': '🌾',
+  'uva': '🍇', 'grape': '🍇',
+  'limão': '🍋', 'lemon': '🍋',
+  'laranja': '🍊', 'orange': '🍊',
+  'morango': '🍓', 'strawberry': '🍓',
+  'maçã': '🍎', 'apple': '🍎',
+  'alfredo': '🍝', 'molho': '🍝', 'sauce': '🍝'
+}
+
+// Função para obter emoji do ingrediente
+const getIngredientEmoji = (ingredient) => {
+  const normalized = ingredient.trim().toLowerCase()
+  return ingredientEmojis[normalized] || '🥘'
+}
+
+// Função para capitalizar primeira letra
+const capitalizeFirst = (str) => {
+  if (!str) return ''
+  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase()
 }
 
 export function DashboardPage() {
@@ -141,11 +196,25 @@ export function DashboardPage() {
 
   const handleEdit = (meal) => {
     setEditingId(meal.id)
+    // Extrair valor e unidade de calorias (ex: "250 Cal" -> "250", "Cal")
+    const caloriesStr = meal.calories || ''
+    const caloriesMatch = caloriesStr.match(/^(\d+(?:\.\d+)?)\s*(Cal|Seg|Min|Hrs|KG|G|Litro)?$/i)
+    const caloriesValue = caloriesMatch ? caloriesMatch[1] : caloriesStr.replace(/\s*(Cal|Seg|Min|Hrs|KG|G|Litro)/gi, '').trim() || ''
+    const caloriesUnit = caloriesMatch?.[2] || (caloriesStr.toLowerCase().includes('cal') ? 'Cal' : 'Cal')
+    
+    // Extrair valor e unidade de tempo (ex: "15 min" -> "15", "Min")
+    const timeStr = meal.time || ''
+    const timeMatch = timeStr.match(/^(\d+(?:\.\d+)?)\s*(Seg|Min|Hrs|KG|G|Litro)?$/i)
+    const timeValue = timeMatch ? timeMatch[1] : timeStr.replace(/\s*(Seg|Min|Hrs|KG|G|Litro)/gi, '').trim() || ''
+    const timeUnit = timeMatch?.[2] || (timeStr.toLowerCase().includes('min') ? 'Min' : (timeStr.toLowerCase().includes('hrs') || timeStr.toLowerCase().includes('hora') ? 'Hrs' : 'Min'))
+    
     setFormData({
       title: meal.title,
-      calories: meal.calories,
+      calories: caloriesValue,
+      caloriesUnit: caloriesUnit,
       ingredients: meal.ingredients,
-      time: meal.time,
+      time: timeValue,
+      timeUnit: timeUnit,
       cost: meal.cost || '',
       status: meal.status
     })
@@ -159,15 +228,21 @@ export function DashboardPage() {
   const handleSubmit = () => {
     if (!formData.title.trim()) return
 
+    const mealData = {
+      ...formData,
+      calories: `${formData.calories} ${formData.caloriesUnit}`,
+      time: `${formData.time} ${formData.timeUnit}`
+    }
+
     if (editingId) {
       setMeals((prev) =>
-        prev.map((meal) => (meal.id === editingId ? { ...meal, ...formData } : meal))
+        prev.map((meal) => (meal.id === editingId ? { ...meal, ...mealData } : meal))
       )
     } else {
       setMeals((prev) => [
         {
           id: `meal-${Date.now()}`,
-          ...formData
+          ...mealData
         },
         ...prev
       ])
@@ -177,6 +252,12 @@ export function DashboardPage() {
     setEditingId(null)
     setShowForm(false)
     setShowFabMenu(false)
+  }
+
+  // Função para obter lista de ingredientes
+  const getIngredientsList = () => {
+    if (!formData.ingredients) return []
+    return formData.ingredients.split(',').map(ing => ing.trim()).filter(ing => ing.length > 0)
   }
 
   return (
@@ -258,12 +339,27 @@ export function DashboardPage() {
               </label>
               <label>
                 <span>Calorias</span>
-                <input
-                  type="text"
-                  value={formData.calories}
-                  onChange={(event) => setFormData((prev) => ({ ...prev, calories: event.target.value }))}
-                  placeholder="Ex.: 250 Cal"
-                />
+                <div className="input-with-select">
+                  <input
+                    type="text"
+                    value={formData.calories}
+                    onChange={(event) => setFormData((prev) => ({ ...prev, calories: event.target.value }))}
+                    placeholder="Ex.: 250"
+                  />
+                  <select
+                    value={formData.caloriesUnit}
+                    onChange={(event) => setFormData((prev) => ({ ...prev, caloriesUnit: event.target.value }))}
+                    className="unit-select"
+                  >
+                    <option value="Cal">Cal</option>
+                    <option value="Seg">Seg</option>
+                    <option value="Min">Min</option>
+                    <option value="Hrs">Hrs</option>
+                    <option value="KG">KG</option>
+                    <option value="G">G</option>
+                    <option value="Litro">Litro</option>
+                  </select>
+                </div>
               </label>
             </div>
             <div className="meal-form-row">
@@ -275,15 +371,38 @@ export function DashboardPage() {
                   onChange={(event) => setFormData((prev) => ({ ...prev, ingredients: event.target.value }))}
                   placeholder="Ex.: Avocado, Bread, Eggs"
                 />
+                {getIngredientsList().length > 0 && (
+                  <div className="ingredients-chips">
+                    {getIngredientsList().map((ingredient, index) => (
+                      <span key={index} className="ingredient-chip">
+                        {getIngredientEmoji(ingredient)}{capitalizeFirst(ingredient)}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </label>
               <label>
                 <span>Tempo</span>
-                <input
-                  type="text"
-                  value={formData.time}
-                  onChange={(event) => setFormData((prev) => ({ ...prev, time: event.target.value }))}
-                  placeholder="Ex.: 15 min"
-                />
+                <div className="input-with-select">
+                  <input
+                    type="text"
+                    value={formData.time}
+                    onChange={(event) => setFormData((prev) => ({ ...prev, time: event.target.value }))}
+                    placeholder="Ex.: 15"
+                  />
+                  <select
+                    value={formData.timeUnit}
+                    onChange={(event) => setFormData((prev) => ({ ...prev, timeUnit: event.target.value }))}
+                    className="unit-select"
+                  >
+                    <option value="Seg">Seg</option>
+                    <option value="Min">Min</option>
+                    <option value="Hrs">Hrs</option>
+                    <option value="KG">KG</option>
+                    <option value="G">G</option>
+                    <option value="Litro">Litro</option>
+                  </select>
+                </div>
               </label>
               <label>
                 <span>Custo (R$)</span>
@@ -361,7 +480,19 @@ export function DashboardPage() {
                     {meal.calories}
                   </span>
                 </div>
-                <p className="meal-ingredients">Ingredientes: {meal.ingredients}</p>
+                <div className="meal-ingredients">
+                  <span className="meal-ingredients-label">Ingredientes:</span>
+                  <div className="ingredients-chips">
+                    {meal.ingredients?.split(',').map((ing, index) => {
+                      const trimmedIng = ing.trim()
+                      return trimmedIng ? (
+                        <span key={index} className="ingredient-chip">
+                          {getIngredientEmoji(trimmedIng)}{capitalizeFirst(trimmedIng)}
+                        </span>
+                      ) : null
+                    })}
+                  </div>
+                </div>
               </div>
             </article>
           ))}
