@@ -1092,6 +1092,26 @@ const capitalizeFirst = (str) => {
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase()
 }
 
+// Função para formatar calorias com separação visual
+const formatCalories = (caloriesStr) => {
+  if (!caloriesStr) return ''
+  
+  // Tenta encontrar padrão com quantidade e medida: "250 Cal 100 KG"
+  const matchWithValue = caloriesStr.match(/^(\d+(?:\.\d+)?)\s*Cal\s+(\d+(?:\.\d+)?)\s+(KG|G|Ml|L|Kg|g|ml|l|mg)$/i)
+  if (matchWithValue) {
+    return `${matchWithValue[1]} Cal • ${matchWithValue[2]} ${matchWithValue[3]}`
+  }
+  
+  // Tenta encontrar padrão com medida sem quantidade: "250 Cal KG"
+  const matchWithMeasure = caloriesStr.match(/^(\d+(?:\.\d+)?)\s*Cal\s+(KG|G|Ml|L|Kg|g|ml|l|mg)$/i)
+  if (matchWithMeasure) {
+    return `${matchWithMeasure[1]} Cal • ${matchWithMeasure[2]}`
+  }
+  
+  // Padrão simples: "250 Cal"
+  return caloriesStr
+}
+
 export function DashboardPage() {
   const { user } = useAuth()
   const recipes = useAppStore((state) => state.recipes)
@@ -1504,7 +1524,7 @@ export function DashboardPage() {
                   )}
                   <span className="meal-detail-item">
                     <FiThermometer size={14} />
-                    {meal.calories}
+                    {formatCalories(meal.calories)}
                   </span>
                 </div>
                 <div className="meal-ingredients">

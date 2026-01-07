@@ -198,7 +198,7 @@
 }
 
 .input-with-select .unit-select-fixed {
-  border-radius: 0;
+  border-radius: 0 0.75rem 0.75rem 0;
   background: var(--bg-tertiary);
   cursor: not-allowed;
   opacity: 0.8;
@@ -209,8 +209,12 @@
   border-radius: 0 0.75rem 0.75rem 0;
 }
 
-.input-with-select .unit-select-fixed + .unit-select {
-  border-left: 1px solid var(--border-primary);
+.calories-input-group .input-with-select:first-child .unit-select-fixed {
+  border-radius: 0 0.75rem 0.75rem 0;
+}
+
+.calories-input-group .input-with-select:last-child .unit-select:not(.unit-select-fixed) {
+  border-radius: 0 0.75rem 0.75rem 0;
 }
 
 .calories-input-group {
