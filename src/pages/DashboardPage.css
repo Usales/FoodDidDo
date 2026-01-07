@@ -158,6 +158,48 @@
   box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.2);
 }
 
+.input-with-select {
+  display: flex;
+  gap: 0;
+  position: relative;
+}
+
+.input-with-select input {
+  flex: 1;
+  border-radius: 0.75rem 0 0 0.75rem;
+  border-right: none;
+}
+
+.input-with-select .unit-select {
+  border-radius: 0 0.75rem 0.75rem 0;
+  border-left: 1px solid var(--border-primary);
+  padding: 0.65rem 0.5rem;
+  min-width: 80px;
+  background: var(--bg-secondary);
+  cursor: pointer;
+}
+
+.ingredients-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.ingredient-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.4rem 0.75rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
 .meal-form-actions {
   display: flex;
   justify-content: flex-end;
@@ -265,6 +307,14 @@
   font-size: 0.875rem;
   color: var(--text-muted);
   line-height: 1.4;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.meal-ingredients-label {
+  font-weight: 500;
+  color: var(--text-secondary);
 }
 
 .meal-card p {
