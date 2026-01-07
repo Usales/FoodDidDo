@@ -39,6 +39,7 @@ const initialForm = {
   title: '',
   calories: '',
   caloriesUnit: 'Cal',
+  caloriesMeasure: '',
   ingredients: '',
   time: '',
   timeUnit: 'Min',
@@ -1187,22 +1188,27 @@ export function DashboardPage() {
 
   const handleEdit = (meal) => {
     setEditingId(meal.id)
-    // Extrair valor e unidade de calorias (ex: "250 Cal" -> "250", "Cal")
+    // Extrair valor, unidade e medida de calorias (ex: "250 Cal KG" -> "250", "Cal", "KG")
     const caloriesStr = meal.calories || ''
-    const caloriesMatch = caloriesStr.match(/^(\d+(?:\.\d+)?)\s*(Cal|Seg|Min|Hrs|KG|G|Litro)?$/i)
-    const caloriesValue = caloriesMatch ? caloriesMatch[1] : caloriesStr.replace(/\s*(Cal|Seg|Min|Hrs|KG|G|Litro)/gi, '').trim() || ''
-    const caloriesUnit = caloriesMatch?.[2] || (caloriesStr.toLowerCase().includes('cal') ? 'Cal' : 'Cal')
-
+    // Primeiro tenta encontrar padrão com medida: "250 Cal KG"
+    const caloriesMatchWithMeasure = caloriesStr.match(/^(\d+(?:\.\d+)?)\s*Cal\s+(KG|G|Ml|L|Kg|g|ml|l|mg)$/i)
+    // Se não encontrar, tenta padrão simples: "250 Cal"
+    const caloriesMatchSimple = caloriesStr.match(/^(\d+(?:\.\d+)?)\s*Cal$/i)
+    const caloriesValue = caloriesMatchWithMeasure ? caloriesMatchWithMeasure[1] : (caloriesMatchSimple ? caloriesMatchSimple[1] : caloriesStr.replace(/\s*(Cal|KG|G|Ml|L|Kg|g|ml|l|mg)/gi, '').trim() || '')
+    const caloriesUnit = 'Cal' // Sempre Cal
+    const caloriesMeasure = caloriesMatchWithMeasure?.[2] || ''
+    
     // Extrair valor e unidade de tempo (ex: "15 min" -> "15", "Min")
     const timeStr = meal.time || ''
     const timeMatch = timeStr.match(/^(\d+(?:\.\d+)?)\s*(Seg|Min|Hrs|KG|G|Litro)?$/i)
     const timeValue = timeMatch ? timeMatch[1] : timeStr.replace(/\s*(Seg|Min|Hrs|KG|G|Litro)/gi, '').trim() || ''
     const timeUnit = timeMatch?.[2] || (timeStr.toLowerCase().includes('min') ? 'Min' : (timeStr.toLowerCase().includes('hrs') || timeStr.toLowerCase().includes('hora') ? 'Hrs' : 'Min'))
-
+    
     setFormData({
       title: meal.title,
       calories: caloriesValue,
       caloriesUnit: caloriesUnit,
+      caloriesMeasure: caloriesMeasure,
       ingredients: meal.ingredients,
       time: timeValue,
       timeUnit: timeUnit,
@@ -1219,9 +1225,13 @@ export function DashboardPage() {
   const handleSubmit = () => {
     if (!formData.title.trim()) return
 
+    const caloriesStr = formData.caloriesMeasure 
+      ? `${formData.calories} ${formData.caloriesUnit} ${formData.caloriesMeasure}`
+      : `${formData.calories} ${formData.caloriesUnit}`
+
     const mealData = {
       ...formData,
-      calories: `${formData.calories} ${formData.caloriesUnit}`,
+      calories: caloriesStr,
       time: `${formData.time} ${formData.timeUnit}`
     }
 
@@ -1339,16 +1349,23 @@ export function DashboardPage() {
                   />
                   <select
                     value={formData.caloriesUnit}
-                    onChange={(event) => setFormData((prev) => ({ ...prev, caloriesUnit: event.target.value }))}
-                    className="unit-select"
+                    className="unit-select unit-select-fixed"
+                    disabled
                   >
                     <option value="Cal">Cal</option>
-                    <option value="Seg">Seg</option>
-                    <option value="Min">Min</option>
-                    <option value="Hrs">Hrs</option>
+                  </select>
+                  <select
+                    value={formData.caloriesMeasure}
+                    onChange={(event) => setFormData((prev) => ({ ...prev, caloriesMeasure: event.target.value }))}
+                    className="unit-select"
+                  >
+                    <option value="">-</option>
                     <option value="KG">KG</option>
-                    <option value="G">G</option>
-                    <option value="Litro">Litro</option>
+                    <option value="g">g</option>
+                    <option value="Ml">Ml</option>
+                    <option value="L">L</option>
+                    <option value="mg">mg</option>
+                    <option value="ml">ml</option>
                   </select>
                 </div>
               </label>

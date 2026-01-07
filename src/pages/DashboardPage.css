@@ -186,16 +186,31 @@
 }
 
 .input-with-select .unit-select {
-  border-radius: 0 0.75rem 0.75rem 0;
   border-left: 1px solid var(--border-primary);
   padding: 0.65rem 0.5rem;
-  min-width: 80px;
-  max-width: 100px;
+  min-width: 60px;
+  max-width: 80px;
   flex-shrink: 0;
   background: var(--bg-secondary);
   cursor: pointer;
   z-index: 1;
   box-sizing: border-box;
+}
+
+.input-with-select .unit-select-fixed {
+  border-radius: 0;
+  background: var(--bg-tertiary);
+  cursor: not-allowed;
+  opacity: 0.8;
+  color: var(--text-muted);
+}
+
+.input-with-select .unit-select:not(.unit-select-fixed) {
+  border-radius: 0 0.75rem 0.75rem 0;
+}
+
+.input-with-select .unit-select-fixed + .unit-select {
+  border-left: 1px solid var(--border-primary);
 }
 
 .ingredients-chips {
