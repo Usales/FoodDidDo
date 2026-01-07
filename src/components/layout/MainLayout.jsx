@@ -222,40 +222,78 @@ export function MainLayout({ onLogout, user }) {
                 <FiChevronDown className={`dropdown-chevron ${userDropdownOpen ? 'open' : ''}`} />
               </button>
               {userDropdownOpen && (
-                <div 
-                  className="user-dropdown"
-                  style={isMobile ? {
-                    top: `${dropdownPosition.top}px`,
-                    right: `${dropdownPosition.right}px`
-                  } : {}}
-                >
-                  <button 
-                    type="button" 
-                    className="dropdown-item"
-                    onClick={() => {
-                      toggleTheme()
-                      setUserDropdownOpen(false)
-                    }}
+                <>
+                  {isMobile && (
+                    <div 
+                      className="user-dropdown-overlay" 
+                      onClick={() => setUserDropdownOpen(false)}
+                    />
+                  )}
+                  <div 
+                    className={`user-dropdown ${isMobile ? 'mobile' : 'desktop'}`}
+                    style={isMobile ? {
+                      top: `${dropdownPosition.top}px`,
+                      right: `${dropdownPosition.right}px`
+                    } : {}}
                   >
-                    {isDarkMode ? <HiSun size={16} /> : <HiMoon size={16} />}
-                    {isDarkMode ? 'Modo Claro' : 'Modo Escuro'}
-                  </button>
-                  <button 
-                    type="button" 
-                    className="dropdown-item"
-                    onClick={() => {
-                      navigate('/config')
-                      setUserDropdownOpen(false)
-                    }}
-                  >
-                    <AiOutlineSetting size={16} />
-                    Configurações
-                  </button>
-                  <button type="button" className="dropdown-item" onClick={onLogout}>
-                    <FiLogOut size={16} />
-                    Sair
-                  </button>
-                </div>
+                    <div className="dropdown-header">
+                      <div className="dropdown-user-info">
+                        <div className="dropdown-user-avatar">
+                          {(user?.name ?? 'G').charAt(0).toUpperCase()}
+                        </div>
+                        <div className="dropdown-user-details">
+                          <span className="dropdown-user-name">{user?.name ?? 'Usuário'}</span>
+                          {user?.email && (
+                            <span className="dropdown-user-email">{user.email}</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="dropdown-divider"></div>
+                    <button 
+                      type="button" 
+                      className="dropdown-item"
+                      onClick={() => {
+                        toggleTheme()
+                        setUserDropdownOpen(false)
+                      }}
+                    >
+                      <span className="dropdown-item-icon">
+                        {isDarkMode ? <HiSun size={18} /> : <HiMoon size={18} />}
+                      </span>
+                      <span className="dropdown-item-text">
+                        {isDarkMode ? 'Modo Claro' : 'Modo Escuro'}
+                      </span>
+                    </button>
+                    <button 
+                      type="button" 
+                      className="dropdown-item"
+                      onClick={() => {
+                        navigate('/config')
+                        setUserDropdownOpen(false)
+                      }}
+                    >
+                      <span className="dropdown-item-icon">
+                        <AiOutlineSetting size={18} />
+                      </span>
+                      <span className="dropdown-item-text">Configurações</span>
+                    </button>
+                    <div className="dropdown-divider"></div>
+                    <button 
+                      type="button" 
+                      className="dropdown-item dropdown-item-danger" 
+                      onClick={() => {
+                        setUserDropdownOpen(false)
+                        onLogout()
+                      }}
+                    >
+                      <span className="dropdown-item-icon">
+                        <FiLogOut size={18} />
+                      </span>
+                      <span className="dropdown-item-text">Sair</span>
+                    </button>
+                  </div>
+                </>
               )}
             </div>
           </div>
@@ -317,7 +355,8 @@ export function MainLayout({ onLogout, user }) {
 MainLayout.propTypes = {
   onLogout: PropTypes.func.isRequired,
   user: PropTypes.shape({
-    name: PropTypes.string
+    name: PropTypes.string,
+    email: PropTypes.string
   })
 }
 

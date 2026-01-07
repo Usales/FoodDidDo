@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, useRef } from 'react'
 import { useAppStore } from '../stores/appStore'
 import { useAuth } from '../components/AuthProvider'
 import { FiEdit3, FiTrash2, FiPlus, FiClock, FiDollarSign, FiThermometer } from 'react-icons/fi'
@@ -1196,6 +1196,7 @@ export function DashboardPage() {
   const [formData, setFormData] = useState(initialForm)
   const [editingId, setEditingId] = useState(null)
   const [showFabMenu, setShowFabMenu] = useState(false)
+  const ingredientsTimerRef = useRef(null)
 
   useEffect(() => {
     const stored = localStorage.getItem('fooddiddo_meals')
@@ -1366,6 +1367,173 @@ export function DashboardPage() {
     return formData.ingredients.split(',').map(ing => ing.trim()).filter(ing => ing.length > 0)
   }
 
+  // Função para encontrar o melhor match de ingrediente
+  const findBestIngredientMatch = (partial) => {
+    if (!partial || partial.trim().length === 0) return null
+    
+    const normalized = partial.trim().toLowerCase()
+    const keys = Object.keys(ingredientEmojis)
+    
+    // Busca exata
+    if (ingredientEmojis[normalized]) {
+      return normalized
+    }
+    
+    // Busca por começo da palavra
+    const startsWith = keys.find(key => key.startsWith(normalized))
+    if (startsWith) return startsWith
+    
+    // Busca por contém
+    const contains = keys.find(key => key.includes(normalized))
+    if (contains) return contains
+    
+    // Busca por similaridade (primeiras letras)
+    if (normalized.length >= 3) {
+      const similar = keys.find(key => {
+        const keyStart = key.substring(0, Math.min(normalized.length, key.length))
+        return keyStart === normalized.substring(0, keyStart.length)
+      })
+      if (similar) return similar
+    }
+    
+    return null
+  }
+
+  // Função para adicionar ingrediente automaticamente
+  const addIngredientAutomatically = (ingredientText, clearInput = false) => {
+    if (!ingredientText || ingredientText.trim().length === 0) return
+    
+    const trimmed = ingredientText.trim()
+    const currentList = getIngredientsList()
+    
+    // Verifica se já existe
+    if (currentList.some(ing => ing.toLowerCase() === trimmed.toLowerCase())) {
+      if (clearInput) {
+        // Se já existe e quer limpar, apenas limpa o input mantendo os existentes
+        const existingIngredients = currentList.join(', ')
+        setFormData((prev) => ({ ...prev, ingredients: existingIngredients }))
+      }
+      return
+    }
+    
+    // Tenta encontrar match
+    const bestMatch = findBestIngredientMatch(trimmed)
+    const ingredientToAdd = bestMatch || trimmed
+    
+    // Adiciona à lista
+    const newIngredients = currentList.length > 0 
+      ? [...currentList, ingredientToAdd].join(', ')
+      : ingredientToAdd
+    
+    setFormData((prev) => ({ ...prev, ingredients: newIngredients }))
+  }
+
+  // Função para lidar com mudanças no input de ingredientes
+  const handleIngredientsChange = (value) => {
+    setFormData((prev) => ({ ...prev, ingredients: value }))
+    
+    // Limpa o timer anterior
+    if (ingredientsTimerRef.current) {
+      clearTimeout(ingredientsTimerRef.current)
+    }
+    
+    // Pega o último ingrediente (após a última vírgula, ou tudo se não houver vírgula)
+    const parts = value.split(',')
+    const lastPart = parts[parts.length - 1]?.trim() || ''
+    
+    // Se houver texto no último ingrediente, inicia timer de 10 segundos
+    if (lastPart.length > 0) {
+      ingredientsTimerRef.current = setTimeout(() => {
+        // Para o auto-add, pega os ingredientes já confirmados (antes da última vírgula)
+        const confirmedParts = parts.slice(0, -1).filter(p => p.trim().length > 0).map(p => p.trim())
+        const confirmedIngredients = confirmedParts.join(', ')
+        
+        // Adiciona o último ingrediente automaticamente
+        const currentList = confirmedParts
+        if (!currentList.some(ing => ing.toLowerCase() === lastPart.toLowerCase())) {
+          const bestMatch = findBestIngredientMatch(lastPart)
+          const ingredientToAdd = bestMatch || lastPart
+          const newIngredients = confirmedIngredients 
+            ? `${confirmedIngredients}, ${ingredientToAdd}`
+            : ingredientToAdd
+          setFormData((prev) => ({ ...prev, ingredients: newIngredients }))
+        } else {
+          // Se já existe, mantém apenas os confirmados
+          setFormData((prev) => ({ ...prev, ingredients: confirmedIngredients }))
+        }
+      }, 10000) // 10 segundos
+    }
+  }
+
+  // Função para lidar com Enter no input de ingredientes
+  const handleIngredientsKeyDown = (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault()
+      const value = event.target.value
+      
+      // Pega o último ingrediente digitado (após a última vírgula)
+      const parts = value.split(',')
+      const lastPart = parts[parts.length - 1]?.trim() || ''
+      
+      if (lastPart.length > 0) {
+        // Limpa o timer
+        if (ingredientsTimerRef.current) {
+          clearTimeout(ingredientsTimerRef.current)
+        }
+        
+        // Pega os ingredientes já confirmados (antes da última vírgula)
+        const existingParts = parts.slice(0, -1).filter(p => p.trim().length > 0)
+        const confirmedIngredients = existingParts.map(p => p.trim())
+        
+        // Cria lista completa incluindo o novo ingrediente
+        const currentList = [...confirmedIngredients]
+        
+        // Verifica se o último ingrediente já existe
+        if (!currentList.some(ing => ing.toLowerCase() === lastPart.toLowerCase())) {
+          // Tenta encontrar match melhor
+          const bestMatch = findBestIngredientMatch(lastPart)
+          const ingredientToAdd = bestMatch || lastPart
+          
+          // Adiciona à lista
+          currentList.push(ingredientToAdd)
+        }
+        
+        // Atualiza o formData com apenas os ingredientes confirmados (sem o que estava sendo digitado)
+        const newIngredients = currentList.join(', ')
+        setFormData((prev) => ({ ...prev, ingredients: newIngredients }))
+      }
+    }
+  }
+
+  // Função para remover ingrediente ao clicar no chip
+  const handleRemoveIngredient = (indexToRemove) => {
+    const currentList = getIngredientsList()
+    // Remove apenas o item no índice específico
+    const updatedList = currentList.filter((_, index) => index !== indexToRemove)
+    const newIngredients = updatedList.join(', ')
+    setFormData((prev) => ({ ...prev, ingredients: newIngredients }))
+    
+    // Limpa o timer se estiver ativo
+    if (ingredientsTimerRef.current) {
+      clearTimeout(ingredientsTimerRef.current)
+    }
+  }
+
+  // Limpar timer quando o componente desmontar ou o formulário fechar
+  useEffect(() => {
+    return () => {
+      if (ingredientsTimerRef.current) {
+        clearTimeout(ingredientsTimerRef.current)
+      }
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!showForm && ingredientsTimerRef.current) {
+      clearTimeout(ingredientsTimerRef.current)
+    }
+  }, [showForm])
+
   return (
     <div className="dashboard-page page">
       {/* Painel de Status Diário */}
@@ -1491,13 +1659,20 @@ export function DashboardPage() {
                 <input
                   type="text"
                   value={formData.ingredients}
-                  onChange={(event) => setFormData((prev) => ({ ...prev, ingredients: event.target.value }))}
+                  onChange={(event) => handleIngredientsChange(event.target.value)}
+                  onKeyDown={handleIngredientsKeyDown}
                   placeholder="Ex.: Avocado, Bread, Eggs"
                 />
                 {getIngredientsList().length > 0 && (
                   <div className="ingredients-chips">
                     {getIngredientsList().map((ingredient, index) => (
-                      <span key={index} className="ingredient-chip">
+                      <span 
+                        key={index} 
+                        className="ingredient-chip"
+                        onClick={() => handleRemoveIngredient(index)}
+                        style={{ cursor: 'pointer' }}
+                        title="Clique para remover"
+                      >
                         {getIngredientEmoji(ingredient)}{capitalizeFirst(ingredient)}
                       </span>
                     ))}
