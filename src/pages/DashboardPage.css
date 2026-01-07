@@ -129,7 +129,9 @@
 .meal-form-row {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
+  gap: 1.5rem;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .meal-form label {
@@ -138,6 +140,12 @@
   gap: 0.35rem;
   font-size: 0.85rem;
   color: var(--text-muted);
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  position: relative;
+  z-index: 0;
 }
 
 .meal-form input,
@@ -162,12 +170,19 @@
   display: flex;
   gap: 0;
   position: relative;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  z-index: 1;
 }
 
 .input-with-select input {
   flex: 1;
   border-radius: 0.75rem 0 0 0.75rem;
   border-right: none;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .input-with-select .unit-select {
@@ -175,8 +190,12 @@
   border-left: 1px solid var(--border-primary);
   padding: 0.65rem 0.5rem;
   min-width: 80px;
+  max-width: 100px;
+  flex-shrink: 0;
   background: var(--bg-secondary);
   cursor: pointer;
+  z-index: 1;
+  box-sizing: border-box;
 }
 
 .ingredients-chips {
