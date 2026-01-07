@@ -257,6 +257,7 @@
   background: var(--bg-secondary);
   border-radius: 8px;
   font-weight: 500;
+  color: var(--text-primary);
 }
 
 .meal-ingredients {
