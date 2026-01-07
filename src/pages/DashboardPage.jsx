@@ -1041,7 +1041,7 @@ const ingredientEmojis = {
   'champagne': '🍾',
   'prosecco': '🍾',
   'cava': '🍾',
-  'vinho porto': '🍷', 'port wine': '🍷',
+  'vinho do porto': '🍷', 'port wine': '🍷',
   'vinho madeira': '🍷', 'madeira wine': '🍷',
   'vinho xerez': '🍷', 'sherry wine': '🍷',
   'vinho moscatel': '🍷', 'muscat wine': '🍷',
