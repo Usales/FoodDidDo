@@ -292,6 +292,16 @@
   gap: 1.5rem;
 }
 
+.meal-list > div {
+  display: contents;
+}
+
+.meal-list .meal-form {
+  grid-column: 1 / -1;
+  margin-top: -0.5rem;
+  margin-bottom: 0.5rem;
+}
+
 .meal-card {
   background: var(--bg-card);
   border-radius: 16px;

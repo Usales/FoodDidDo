@@ -1583,10 +1583,10 @@ export function DashboardPage() {
           </div>
         </header>
 
-        {showForm ? (
+        {showForm && !editingId ? (
           <div className="meal-form">
             <div className="meal-form-header">
-              <h3>{editingId ? 'Editar refeição' : 'Nova refeição'}</h3>
+              <h3>Nova refeição</h3>
               <button
                 type="button"
                 className="meal-form-close"
@@ -1724,24 +1724,8 @@ export function DashboardPage() {
               </label>
             </div>
             <div className="meal-form-actions">
-              {editingId && (
-                <button
-                  type="button"
-                  className="delete-meal-btn"
-                  onClick={() => {
-                    handleDelete(editingId)
-                    setShowForm(false)
-                    setEditingId(null)
-                    setFormData(initialForm)
-                    setShowFabMenu(false)
-                  }}
-                  title="Excluir refeição"
-                >
-                  <FiTrash2 size={18} />
-                </button>
-              )}
               <button type="button" className="primary-btn" onClick={handleSubmit}>
-                {editingId ? 'Atualizar refeição' : 'Salvar refeição'}
+                Salvar refeição
               </button>
             </div>
           </div>
@@ -1749,50 +1733,212 @@ export function DashboardPage() {
 
         <div className="meal-list">
           {meals.map((meal) => (
-            <article
-              key={meal.id}
-              className="meal-card"
-              onClick={(e) => {
-                e.stopPropagation()
-                handleEdit(meal)
-              }}
-            >
-              <div className="meal-card-content">
-                <header>
-                  <h3>{meal.title}</h3>
-                  <span className={`status-pill status-${meal.status}`}>{meal.status}</span>
-                </header>
-                <div className="meal-details">
-                  <span className="meal-detail-item">
-                    <FiClock size={14} />
-                    {meal.time}
-                  </span>
-                  {meal.cost && (
+            <div key={meal.id} style={{ width: '100%' }}>
+              <article
+                className="meal-card"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleEdit(meal)
+                }}
+              >
+                <div className="meal-card-content">
+                  <header>
+                    <h3>{meal.title}</h3>
+                    <span className={`status-pill status-${meal.status}`}>{meal.status}</span>
+                  </header>
+                  <div className="meal-details">
                     <span className="meal-detail-item">
-                      <FiDollarSign size={14} />
-                      R$ {parseFloat(meal.cost).toFixed(2)}
+                      <FiClock size={14} />
+                      {meal.time}
                     </span>
-                  )}
-                  <span className="meal-detail-item">
-                    <FiThermometer size={14} />
-                    {formatCalories(meal.calories)}
-                  </span>
-                </div>
-                <div className="meal-ingredients">
-                  <span className="meal-ingredients-label">Ingredientes:</span>
-                  <div className="ingredients-chips">
-                    {meal.ingredients?.split(',').map((ing, index) => {
-                      const trimmedIng = ing.trim()
-                      return trimmedIng ? (
-                        <span key={index} className="ingredient-chip">
-                          {getIngredientEmoji(trimmedIng)}{capitalizeFirst(trimmedIng)}
-                        </span>
-                      ) : null
-                    })}
+                    {meal.cost && (
+                      <span className="meal-detail-item">
+                        <FiDollarSign size={14} />
+                        R$ {parseFloat(meal.cost).toFixed(2)}
+                      </span>
+                    )}
+                    <span className="meal-detail-item">
+                      <FiThermometer size={14} />
+                      {formatCalories(meal.calories)}
+                    </span>
+                  </div>
+                  <div className="meal-ingredients">
+                    <span className="meal-ingredients-label">Ingredientes:</span>
+                    <div className="ingredients-chips">
+                      {meal.ingredients?.split(',').map((ing, index) => {
+                        const trimmedIng = ing.trim()
+                        return trimmedIng ? (
+                          <span key={index} className="ingredient-chip">
+                            {getIngredientEmoji(trimmedIng)}{capitalizeFirst(trimmedIng)}
+                          </span>
+                        ) : null
+                      })}
+                    </div>
                   </div>
                 </div>
-              </div>
-            </article>
+              </article>
+              {showForm && editingId === meal.id && (
+                <div className="meal-form">
+                  <div className="meal-form-header">
+                    <h3>Editar refeição</h3>
+                    <button
+                      type="button"
+                      className="meal-form-close"
+                      onClick={() => {
+                        setShowForm(false)
+                        setEditingId(null)
+                        setFormData(initialForm)
+                        setShowFabMenu(false)
+                      }}
+                      aria-label="Fechar formulário"
+                    >
+                      ×
+                    </button>
+                  </div>
+                  <div className="meal-form-row">
+                    <label>
+                      <span>Título</span>
+                      <input
+                        type="text"
+                        value={formData.title}
+                        onChange={(event) => setFormData((prev) => ({ ...prev, title: event.target.value }))}
+                        placeholder="Ex.: Avocado toast"
+                      />
+                    </label>
+                    <label>
+                      <span>Calorias</span>
+                      <div className="calories-input-group">
+                        <div className="input-with-select">
+                          <input
+                            type="text"
+                            value={formData.calories}
+                            onChange={(event) => setFormData((prev) => ({ ...prev, calories: event.target.value }))}
+                            placeholder="Ex.: 250"
+                          />
+                          <select
+                            value={formData.caloriesUnit}
+                            className="unit-select unit-select-fixed"
+                            disabled
+                          >
+                            <option value="Cal">Cal</option>
+                          </select>
+                        </div>
+                        <div className="input-with-select">
+                          <input
+                            type="text"
+                            value={formData.caloriesMeasureValue}
+                            onChange={(event) => setFormData((prev) => ({ ...prev, caloriesMeasureValue: event.target.value }))}
+                            placeholder="Ex.: 100"
+                          />
+                          <select
+                            value={formData.caloriesMeasure}
+                            onChange={(event) => setFormData((prev) => ({ ...prev, caloriesMeasure: event.target.value }))}
+                            className="unit-select"
+                          >
+                            <option value="">-</option>
+                            <option value="KG">KG</option>
+                            <option value="g">g</option>
+                            <option value="Ml">Ml</option>
+                            <option value="L">L</option>
+                            <option value="mg">mg</option>
+                            <option value="ml">ml</option>
+                          </select>
+                        </div>
+                      </div>
+                    </label>
+                  </div>
+                  <div className="meal-form-row">
+                    <label>
+                      <span>Ingredientes</span>
+                      <input
+                        type="text"
+                        value={formData.ingredients}
+                        onChange={(event) => handleIngredientsChange(event.target.value)}
+                        onKeyDown={handleIngredientsKeyDown}
+                        placeholder="Ex.: Avocado, Bread, Eggs"
+                      />
+                      {getIngredientsList().length > 0 && (
+                        <div className="ingredients-chips">
+                          {getIngredientsList().map((ingredient, index) => (
+                            <span 
+                              key={index} 
+                              className="ingredient-chip"
+                              onClick={() => handleRemoveIngredient(index)}
+                              style={{ cursor: 'pointer' }}
+                              title="Clique para remover"
+                            >
+                              {getIngredientEmoji(ingredient)}{capitalizeFirst(ingredient)}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </label>
+                    <label>
+                      <span>Tempo</span>
+                      <div className="input-with-select">
+                        <input
+                          type="text"
+                          value={formData.time}
+                          onChange={(event) => setFormData((prev) => ({ ...prev, time: event.target.value }))}
+                          placeholder="Ex.: 15"
+                        />
+                        <select
+                          value={formData.timeUnit}
+                          onChange={(event) => setFormData((prev) => ({ ...prev, timeUnit: event.target.value }))}
+                          className="unit-select"
+                        >
+                          <option value="Seg">Seg</option>
+                          <option value="Min">Min</option>
+                          <option value="Hrs">Hrs</option>
+                          <option value="KG">KG</option>
+                          <option value="G">G</option>
+                          <option value="Litro">Litro</option>
+                        </select>
+                      </div>
+                    </label>
+                    <label>
+                      <span>Custo (R$)</span>
+                      <input
+                        type="text"
+                        value={formData.cost}
+                        onChange={(event) => setFormData((prev) => ({ ...prev, cost: event.target.value }))}
+                        placeholder="Ex.: 8.20"
+                      />
+                    </label>
+                    <label>
+                      <span>Status</span>
+                      <select
+                        value={formData.status}
+                        onChange={(event) => setFormData((prev) => ({ ...prev, status: event.target.value }))}
+                      >
+                        <option value="fazer">Fazer</option>
+                        <option value="planejado">Planejado</option>
+                        <option value="finalizado">Finalizado</option>
+                      </select>
+                    </label>
+                  </div>
+                  <div className="meal-form-actions">
+                    <button
+                      type="button"
+                      className="delete-meal-btn"
+                      onClick={() => {
+                        handleDelete(editingId)
+                        setShowForm(false)
+                        setEditingId(null)
+                        setFormData(initialForm)
+                        setShowFabMenu(false)
+                      }}
+                      title="Excluir refeição"
+                    >
+                      <FiTrash2 size={18} />
+                    </button>
+                    <button type="button" className="primary-btn" onClick={handleSubmit}>
+                      Atualizar refeição
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           ))}
         </div>
       </section>
