@@ -58,7 +58,7 @@ export function MainLayout({ onLogout, user }) {
   const [searchQuery, setSearchQuery] = useState('')
   const [userDropdownOpen, setUserDropdownOpen] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [dropdownPosition, setDropdownPosition] = useState({ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' })
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, transform: 'translate(-50%, -50%)' })
   const [isMobile, setIsMobile] = useState(false)
   const dropdownRef = useRef(null)
   const userChipRef = useRef(null)
@@ -206,11 +206,13 @@ export function MainLayout({ onLogout, user }) {
                 type="button"
                 className="user-chip"
                 onClick={(e) => {
-                  // No mobile, centralizar o dropdown
+                  // No mobile, centralizar o dropdown usando valores calculados
                   if (isMobile) {
+                    const viewportWidth = window.innerWidth
+                    const viewportHeight = window.innerHeight
                     setDropdownPosition({
-                      top: '50%',
-                      left: '50%',
+                      top: viewportHeight / 2,
+                      left: viewportWidth / 2,
                       transform: 'translate(-50%, -50%)'
                     })
                   }
@@ -232,10 +234,12 @@ export function MainLayout({ onLogout, user }) {
                   <div 
                     className={`user-dropdown ${isMobile ? 'mobile' : 'desktop'}`}
                     style={isMobile ? {
-                      top: dropdownPosition.top,
-                      left: dropdownPosition.left,
+                      top: `${dropdownPosition.top}px`,
+                      left: `${dropdownPosition.left}px`,
                       transform: dropdownPosition.transform,
-                      right: 'auto'
+                      right: 'auto',
+                      WebkitTransform: dropdownPosition.transform,
+                      msTransform: dropdownPosition.transform
                     } : {}}
                   >
                     <div className="dropdown-header">
