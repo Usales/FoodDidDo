@@ -8,14 +8,16 @@ const allocationOptions = [
   { value: 'mensal', label: 'Mensal' },
   { value: 'por hora', label: 'Por hora produtiva' },
   { value: 'por lote', label: 'Por lote produzido' },
-  { value: 'por unidade', label: 'Por unidade' }
+  { value: 'por unidade', label: 'Por unidade' },
+  { value: 'pagamento unico', label: 'Pagamento Único' }
 ]
 
 const allocationMethodInfo = {
   'mensal': 'Mensal: custo fixo dividido entre todas as receitas do mês',
   'por hora': 'Por hora: usado em equipamentos que consomem por tempo de uso',
   'por lote': 'Por lote: usado para produção específica em lotes',
-  'por unidade': 'Por unidade: custo distribuído proporcionalmente por cada unidade produzida'
+  'por unidade': 'Por unidade: custo distribuído proporcionalmente por cada unidade produzida',
+  'pagamento unico': 'Pagamento Único: custo pago uma única vez, não rateado mensalmente'
 }
 
 const quickAddOptions = [
@@ -47,6 +49,11 @@ const formatDate = (date) => {
 const calculateImpactPerUnit = (cost, totalCosts, recipes) => {
   if (!recipes || recipes.length === 0) return 0
   
+  // Pagamento único não é rateado
+  if (cost.allocationMethod === 'pagamento unico') {
+    return 0
+  }
+  
   // Estimativa: assume que o custo é distribuído entre todas as unidades produzidas
   const totalYield = recipes.reduce((acc, recipe) => acc + (recipe.yield || 0), 0)
   if (totalYield === 0) return 0
@@ -65,6 +72,11 @@ const calculateImpactPerUnit = (cost, totalCosts, recipes) => {
 // Função para calcular impacto por lote (estimativa)
 const calculateImpactPerBatch = (cost, totalCosts, recipes) => {
   if (!recipes || recipes.length === 0) return 0
+  
+  // Pagamento único não é rateado
+  if (cost.allocationMethod === 'pagamento unico') {
+    return 0
+  }
   
   // Estimativa: assume lotes médios baseados nas receitas
   const avgBatchSize = recipes.reduce((acc, r) => acc + (r.yield || 0), 0) / recipes.length
