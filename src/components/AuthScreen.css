@@ -240,12 +240,13 @@
   text-align: center;
   max-width: 800px;
   width: 100%;
-  animation: slideUp 1s ease-out;
+  animation: fadeInCenter 1s ease-out;
   position: relative;
   overflow: visible;
   box-sizing: border-box;
   color: var(--text-primary);
   margin: 1rem auto;
+  transform: translateX(0);
 }
 
 
@@ -263,6 +264,17 @@
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes fadeInCenter {
+  from {
+    opacity: 0;
+    transform: translateX(0) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
   }
 }
 
