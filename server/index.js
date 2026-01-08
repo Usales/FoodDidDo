@@ -111,85 +111,191 @@ fastify.get('/api/recipes', async (request, reply) => {
 })
 
 fastify.post('/api/recipes', async (request, reply) => {
-  const { name, yield: recipeYield, prepTime, totalCost, unitCost, contributionMargin, ingredients } = request.body
-  
-  const recipe = await prisma.recipe.create({
-    data: {
-      name,
-      yield: recipeYield,
-      prepTime,
-      totalCost,
-      unitCost,
-      contributionMargin,
-      ingredients: {
-        create: ingredients.map(ing => ({
-          ingredientId: ing.ingredientId || ing.id,
-          quantity: ing.quantity,
+  try {
+    const { name, yield: recipeYield, prepTime, totalCost, unitCost, contributionMargin, ingredients } = request.body
+    
+    // Validar dados obrigatórios
+    if (!name || !recipeYield || !ingredients || ingredients.length === 0) {
+      return reply.status(400).send({ 
+        error: 'Dados inválidos', 
+        message: 'Nome, rendimento e ingredientes são obrigatórios' 
+      })
+    }
+
+    // Processar ingredientes: buscar ou criar pelo nome
+    const ingredientConnections = await Promise.all(
+      ingredients.map(async (ing) => {
+        let ingredientId = ing.ingredientId || ing.id
+        
+        // Se não tiver ID, buscar ou criar pelo nome
+        if (!ingredientId && ing.name) {
+          let ingredient = await prisma.ingredient.findFirst({
+            where: { name: ing.name.trim() }
+          })
+          
+          // Se não existir, criar o ingrediente
+          if (!ingredient) {
+            ingredient = await prisma.ingredient.create({
+              data: {
+                name: ing.name.trim(),
+                category: ing.category || 'Outros',
+                packagePrice: ing.totalValue || ing.packagePrice || 0,
+                packageQty: ing.packageQty || 1,
+                unitCost: (ing.totalValue || 0) / (ing.packageQty || 1),
+                stockQty: 0,
+                lowStockThreshold: 0
+              }
+            })
+          }
+          
+          ingredientId = ingredient.id
+        }
+        
+        if (!ingredientId) {
+          throw new Error(`Ingrediente inválido: ${ing.name || 'sem nome'}`)
+        }
+        
+        return {
+          ingredientId,
+          quantity: Number(ing.quantity) || 0,
           unit: ing.unit || 'g'
-        }))
-      }
-    },
-    include: {
-      ingredients: {
-        include: {
-          ingredient: true
+        }
+      })
+    )
+    
+    const recipe = await prisma.recipe.create({
+      data: {
+        name: name.trim(),
+        yield: Number(recipeYield),
+        prepTime: Number(prepTime) || 0,
+        totalCost: Number(totalCost) || 0,
+        unitCost: Number(unitCost) || 0,
+        contributionMargin: contributionMargin ? Number(contributionMargin) : null,
+        ingredients: {
+          create: ingredientConnections
+        }
+      },
+      include: {
+        ingredients: {
+          include: {
+            ingredient: true
+          }
         }
       }
+    })
+    
+    return {
+      ...recipe,
+      ingredients: recipe.ingredients.map(ri => ({
+        ...ri.ingredient,
+        quantity: ri.quantity,
+        unit: ri.unit
+      }))
     }
-  })
-  
-  return {
-    ...recipe,
-    ingredients: recipe.ingredients.map(ri => ({
-      ...ri.ingredient,
-      quantity: ri.quantity,
-      unit: ri.unit
-    }))
+  } catch (error) {
+    fastify.log.error(error)
+    return reply.status(500).send({ 
+      error: 'Erro ao criar receita', 
+      message: error.message 
+    })
   }
 })
 
 fastify.put('/api/recipes/:id', async (request, reply) => {
-  const { id } = request.params
-  const { name, yield: recipeYield, prepTime, totalCost, unitCost, contributionMargin, ingredients } = request.body
-  
-  // Deletar ingredientes antigos
-  await prisma.recipeIngredient.deleteMany({
-    where: { recipeId: id }
-  })
-  
-  const recipe = await prisma.recipe.update({
-    where: { id },
-    data: {
-      name,
-      yield: recipeYield,
-      prepTime,
-      totalCost,
-      unitCost,
-      contributionMargin,
-      ingredients: {
-        create: ingredients.map(ing => ({
-          ingredientId: ing.ingredientId || ing.id,
-          quantity: ing.quantity,
+  try {
+    const { id } = request.params
+    const { name, yield: recipeYield, prepTime, totalCost, unitCost, contributionMargin, ingredients } = request.body
+    
+    // Validar dados obrigatórios
+    if (!name || !recipeYield || !ingredients || ingredients.length === 0) {
+      return reply.status(400).send({ 
+        error: 'Dados inválidos', 
+        message: 'Nome, rendimento e ingredientes são obrigatórios' 
+      })
+    }
+
+    // Processar ingredientes: buscar ou criar pelo nome
+    const ingredientConnections = await Promise.all(
+      ingredients.map(async (ing) => {
+        let ingredientId = ing.ingredientId || ing.id
+        
+        // Se não tiver ID, buscar ou criar pelo nome
+        if (!ingredientId && ing.name) {
+          let ingredient = await prisma.ingredient.findFirst({
+            where: { name: ing.name.trim() }
+          })
+          
+          // Se não existir, criar o ingrediente
+          if (!ingredient) {
+            ingredient = await prisma.ingredient.create({
+              data: {
+                name: ing.name.trim(),
+                category: ing.category || 'Outros',
+                packagePrice: ing.totalValue || ing.packagePrice || 0,
+                packageQty: ing.packageQty || 1,
+                unitCost: (ing.totalValue || 0) / (ing.packageQty || 1),
+                stockQty: 0,
+                lowStockThreshold: 0
+              }
+            })
+          }
+          
+          ingredientId = ingredient.id
+        }
+        
+        if (!ingredientId) {
+          throw new Error(`Ingrediente inválido: ${ing.name || 'sem nome'}`)
+        }
+        
+        return {
+          ingredientId,
+          quantity: Number(ing.quantity) || 0,
           unit: ing.unit || 'g'
-        }))
-      }
-    },
-    include: {
-      ingredients: {
-        include: {
-          ingredient: true
+        }
+      })
+    )
+    
+    // Deletar ingredientes antigos
+    await prisma.recipeIngredient.deleteMany({
+      where: { recipeId: id }
+    })
+    
+    const recipe = await prisma.recipe.update({
+      where: { id },
+      data: {
+        name: name.trim(),
+        yield: Number(recipeYield),
+        prepTime: Number(prepTime) || 0,
+        totalCost: Number(totalCost) || 0,
+        unitCost: Number(unitCost) || 0,
+        contributionMargin: contributionMargin ? Number(contributionMargin) : null,
+        ingredients: {
+          create: ingredientConnections
+        }
+      },
+      include: {
+        ingredients: {
+          include: {
+            ingredient: true
+          }
         }
       }
+    })
+    
+    return {
+      ...recipe,
+      ingredients: recipe.ingredients.map(ri => ({
+        ...ri.ingredient,
+        quantity: ri.quantity,
+        unit: ri.unit
+      }))
     }
-  })
-  
-  return {
-    ...recipe,
-    ingredients: recipe.ingredients.map(ri => ({
-      ...ri.ingredient,
-      quantity: ri.quantity,
-      unit: ri.unit
-    }))
+  } catch (error) {
+    fastify.log.error(error)
+    return reply.status(500).send({ 
+      error: 'Erro ao atualizar receita', 
+      message: error.message 
+    })
   }
 })
 
