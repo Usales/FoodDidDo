@@ -291,8 +291,13 @@
 
 .user-dropdown.mobile {
   position: fixed;
-  min-width: 200px;
+  top: 50% !important;
+  left: 50% !important;
+  right: auto !important;
+  transform: translate(-50%, -50%) !important;
+  min-width: 280px;
   max-width: calc(100vw - 2rem);
+  width: auto;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
@@ -809,14 +814,15 @@
 
   .user-dropdown {
     position: fixed !important;
-    top: auto !important;
-    bottom: auto !important;
-    left: auto !important;
+    top: 50% !important;
+    left: 50% !important;
     right: auto !important;
-    min-width: 200px !important;
+    transform: translate(-50%, -50%) !important;
+    min-width: 280px !important;
     max-width: calc(100vw - 2rem) !important;
+    width: auto !important;
     z-index: 10002 !important;
-    margin-top: 0.5rem;
+    margin-top: 0 !important;
   }
 
   .user-dropdown.mobile {
@@ -923,14 +929,15 @@
 
   .user-dropdown {
     position: fixed !important;
-    top: auto !important;
-    bottom: auto !important;
-    left: auto !important;
+    top: 50% !important;
+    left: 50% !important;
     right: auto !important;
-    min-width: 180px !important;
+    transform: translate(-50%, -50%) !important;
+    min-width: 260px !important;
     max-width: calc(100vw - 1.5rem) !important;
+    width: auto !important;
     z-index: 10002 !important;
-    margin-top: 0.5rem;
+    margin-top: 0 !important;
   }
 
   .user-dropdown.mobile {

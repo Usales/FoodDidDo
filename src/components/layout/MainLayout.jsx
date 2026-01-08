@@ -58,7 +58,7 @@ export function MainLayout({ onLogout, user }) {
   const [searchQuery, setSearchQuery] = useState('')
   const [userDropdownOpen, setUserDropdownOpen] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, right: 0 })
+  const [dropdownPosition, setDropdownPosition] = useState({ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' })
   const [isMobile, setIsMobile] = useState(false)
   const dropdownRef = useRef(null)
   const userChipRef = useRef(null)
@@ -206,12 +206,12 @@ export function MainLayout({ onLogout, user }) {
                 type="button"
                 className="user-chip"
                 onClick={(e) => {
-                  // Calcular posição apenas no mobile
-                  if (userChipRef.current && isMobile) {
-                    const rect = userChipRef.current.getBoundingClientRect()
+                  // No mobile, centralizar o dropdown
+                  if (isMobile) {
                     setDropdownPosition({
-                      top: rect.bottom + 8,
-                      right: window.innerWidth - rect.right
+                      top: '50%',
+                      left: '50%',
+                      transform: 'translate(-50%, -50%)'
                     })
                   }
                   setUserDropdownOpen(!userDropdownOpen)
@@ -232,8 +232,10 @@ export function MainLayout({ onLogout, user }) {
                   <div 
                     className={`user-dropdown ${isMobile ? 'mobile' : 'desktop'}`}
                     style={isMobile ? {
-                      top: `${dropdownPosition.top}px`,
-                      right: `${dropdownPosition.right}px`
+                      top: dropdownPosition.top,
+                      left: dropdownPosition.left,
+                      transform: dropdownPosition.transform,
+                      right: 'auto'
                     } : {}}
                   >
                     <div className="dropdown-header">
