@@ -4,13 +4,14 @@ async function request(endpoint, options = {}) {
   const url = `${API_BASE_URL}${endpoint}`
   const config = {
     headers: {
-      'Content-Type': 'application/json',
       ...options.headers
     },
     ...options
   }
 
+  // Só definir Content-Type se houver body
   if (options.body) {
+    config.headers['Content-Type'] = 'application/json'
     config.body = JSON.stringify(options.body)
   }
 
@@ -18,10 +19,33 @@ async function request(endpoint, options = {}) {
     const response = await fetch(url, config)
     
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
+      // Tentar pegar a mensagem de erro do servidor
+      let errorMessage = `HTTP error! status: ${response.status}`
+      try {
+        const contentType = response.headers.get('content-type')
+        if (contentType && contentType.includes('application/json')) {
+          const errorData = await response.json()
+          errorMessage = errorData.message || errorData.error || errorMessage
+        } else {
+          const text = await response.text()
+          if (text) errorMessage = text
+        }
+      } catch (e) {
+        // Se não conseguir parsear a resposta, usar a mensagem padrão
+      }
+      throw new Error(errorMessage)
     }
     
-    return await response.json()
+    // Verificar se há conteúdo para parsear
+    const contentType = response.headers.get('content-type')
+    if (contentType && contentType.includes('application/json')) {
+      const text = await response.text()
+      return text ? JSON.parse(text) : {}
+    }
+    
+    // Se não houver conteúdo ou não for JSON, retornar objeto vazio ou texto
+    const text = await response.text()
+    return text ? JSON.parse(text) : { success: true }
   } catch (error) {
     console.error('API Error:', error)
     throw error

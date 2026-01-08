@@ -27,7 +27,8 @@ const fastify = Fastify({
 
 // Registrar CORS
 await fastify.register(cors, {
-  origin: true
+  origin: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
 })
 
 // Rotas de Ingredientes
@@ -300,11 +301,64 @@ fastify.put('/api/recipes/:id', async (request, reply) => {
 })
 
 fastify.delete('/api/recipes/:id', async (request, reply) => {
-  const { id } = request.params
-  await prisma.recipe.delete({
-    where: { id }
-  })
-  return { success: true }
+  try {
+    const { id } = request.params
+    fastify.log.info(`Tentando deletar receita com ID: ${id}`)
+    
+    // Verificar se a receita existe
+    const recipe = await prisma.recipe.findUnique({
+      where: { id }
+    })
+    
+    if (!recipe) {
+      fastify.log.warn(`Receita não encontrada: ${id}`)
+      return reply.status(404).send({ 
+        error: 'Receita não encontrada', 
+        message: `Receita com ID ${id} não foi encontrada` 
+      })
+    }
+    
+    fastify.log.info(`Receita encontrada: ${recipe.name}`)
+    
+    // O onDelete: Cascade já deve deletar os RecipeIngredient automaticamente
+    // Mas vamos deletar manualmente para garantir
+    const deletedIngredients = await prisma.recipeIngredient.deleteMany({
+      where: { recipeId: id }
+    })
+    fastify.log.info(`Deletados ${deletedIngredients.count} ingredientes relacionados`)
+    
+    // Deletar a receita
+    await prisma.recipe.delete({
+      where: { id }
+    })
+    
+    fastify.log.info(`Receita ${id} deletada com sucesso`)
+    return { success: true }
+  } catch (error) {
+    fastify.log.error('Erro ao deletar receita:', error)
+    fastify.log.error('Erro completo:', JSON.stringify(error, null, 2))
+    
+    // Verificar se é um erro de Prisma
+    if (error.code === 'P2025') {
+      return reply.status(404).send({ 
+        error: 'Receita não encontrada', 
+        message: error.meta?.cause || 'Receita não foi encontrada' 
+      })
+    }
+    
+    // Se for um erro de validação, retornar 400
+    if (error.code === 'P2003' || error.name === 'PrismaClientValidationError') {
+      return reply.status(400).send({ 
+        error: 'Erro de validação', 
+        message: error.message || 'Dados inválidos para deletar receita' 
+      })
+    }
+    
+    return reply.status(500).send({ 
+      error: 'Erro ao deletar receita', 
+      message: error.message || 'Erro desconhecido ao deletar receita' 
+    })
+  }
 })
 
 // Rotas de Orçamentos

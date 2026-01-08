@@ -14,6 +14,7 @@ export function CostPage() {
   const ingredients = useAppStore((state) => state.ingredients)
   const addRecipe = useAppStore((state) => state.addRecipe)
   const updateRecipe = useAppStore((state) => state.updateRecipe)
+  const deleteRecipe = useAppStore((state) => state.deleteRecipe)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isModalExpanded, setIsModalExpanded] = useState(false)
   const [editingId, setEditingId] = useState(null)
@@ -74,28 +75,27 @@ export function CostPage() {
   const handleOpenModal = (recipe = null) => {
     if (recipe) {
       setEditingId(recipe.id)
-      // Converter ingredientes antigos (com ingredientId) para novo formato (com name, totalValue, quantity)
+      console.log('Carregando receita para edição:', recipe)
+      
+      // Converter ingredientes do formato do backend para o formato do formulário
+      // O backend retorna: { ...ingredient, quantity, unit } onde ingredient tem todas as props
       const convertedIngredients = (recipe.ingredients || []).map((ing) => {
-        if (ing.ingredientId) {
-          // Formato antigo: buscar o ingrediente
-          const ingredient = ingredients.find((i) => i.id === ing.ingredientId)
-          return {
-            emoji: ing.emoji || '📦',
-            name: ingredient?.name || '',
-            packageQty: ingredient?.packageQty?.toString() || '',
-            totalValue: ingredient ? (ingredient.unitCost * (ing.quantity || 0)).toString() : '',
-            quantity: ing.quantity?.toString() || ''
-          }
-        }
-        // Formato novo: já tem name, totalValue, quantity
+        // Calcular totalValue baseado no unitCost e quantity
+        const quantity = Number(ing.quantity) || 0
+        const unitCost = Number(ing.unitCost) || 0
+        const totalValue = quantity > 0 && unitCost > 0 ? (unitCost * quantity).toFixed(2) : (ing.totalValue?.toString() || '0')
+        
         return {
           emoji: ing.emoji || '📦',
           name: ing.name || '',
-          packageQty: ing.packageQty?.toString() || '',
-          totalValue: ing.totalValue?.toString() || '',
-          quantity: ing.quantity?.toString() || ''
+          packageQty: (ing.packageQty?.toString() || ''),
+          totalValue: ing.totalValue?.toString() || totalValue,
+          quantity: quantity > 0 ? quantity.toString() : ''
         }
       })
+      
+      console.log('Receita carregada:', recipe)
+      console.log('Ingredientes convertidos:', convertedIngredients)
       // Separar yield em quantidade e gramatura se houver yieldWeight no recipe
       const yieldStr = recipe.yield.toString()
       const yieldQuantity = recipe.yieldQuantity?.toString() || yieldStr
@@ -111,6 +111,10 @@ export function CostPage() {
       })
       setConfirmedIngredients(convertedIngredients)
       setEditingIngredients([])
+      // Expandir modal se houver ingredientes
+      if (convertedIngredients.length > 0) {
+        setIsModalExpanded(true)
+      }
     } else {
       setEditingId(null)
     setFormState({
@@ -134,26 +138,19 @@ export function CostPage() {
       const recipe = recipes.find((r) => r.id === editRecipeId)
       if (recipe) {
         setEditingId(recipe.id)
-        // Converter ingredientes antigos (com ingredientId) para novo formato (com name, totalValue, quantity)
+        // Converter ingredientes do formato do backend para o formato do formulário
         const convertedIngredients = (recipe.ingredients || []).map((ing) => {
-          if (ing.ingredientId) {
-            // Formato antigo: buscar o ingrediente
-            const ingredient = ingredients.find((i) => i.id === ing.ingredientId)
-            return {
-              emoji: ing.emoji || '📦',
-              name: ingredient?.name || '',
-              packageQty: ingredient?.packageQty?.toString() || '',
-              totalValue: ingredient ? (ingredient.unitCost * (ing.quantity || 0)).toString() : '',
-              quantity: ing.quantity?.toString() || ''
-            }
-          }
-          // Formato novo: já tem name, totalValue, quantity
+          // Calcular totalValue baseado no unitCost e quantity
+          const quantity = Number(ing.quantity) || 0
+          const unitCost = Number(ing.unitCost) || 0
+          const totalValue = quantity > 0 && unitCost > 0 ? (unitCost * quantity).toFixed(2) : (ing.totalValue?.toString() || '0')
+          
           return {
             emoji: ing.emoji || '📦',
             name: ing.name || '',
-            packageQty: ing.packageQty?.toString() || '',
-            totalValue: ing.totalValue?.toString() || '',
-            quantity: ing.quantity?.toString() || ''
+            packageQty: (ing.packageQty?.toString() || ''),
+            totalValue: ing.totalValue?.toString() || totalValue,
+            quantity: quantity > 0 ? quantity.toString() : ''
           }
         })
         // Separar yield em quantidade e gramatura se houver yieldWeight no recipe
@@ -169,6 +166,12 @@ export function CostPage() {
           prepTime: recipe.prepTime.toString(),
           recipeIngredients: convertedIngredients
         })
+        setConfirmedIngredients(convertedIngredients)
+        setEditingIngredients([])
+        // Expandir modal se houver ingredientes
+        if (convertedIngredients.length > 0) {
+          setIsModalExpanded(true)
+        }
         setIsModalOpen(true)
         // Limpar o state para não abrir novamente
         window.history.replaceState({}, document.title)
@@ -334,6 +337,18 @@ export function CostPage() {
       [field]: value
     }))
   }
+
+  // Calcular peso por porção
+  const weightPerPortion = useMemo(() => {
+    const quantity = Number(formState.yieldQuantity) || 0
+    const weight = Number(formState.yieldWeight) || 0
+    
+    if (quantity > 0 && weight > 0) {
+      return (weight / quantity).toFixed(0)
+    }
+    
+    return null
+  }, [formState.yieldQuantity, formState.yieldWeight])
 
   // Calcular custos automaticamente
   const calculatedCosts = useMemo(() => {
@@ -506,6 +521,18 @@ export function CostPage() {
     return 'var(--error)'
   }
 
+  const handleDeleteRecipe = async (recipeId, recipeName) => {
+    if (window.confirm(`Tem certeza que deseja excluir a receita "${recipeName}"?`)) {
+      try {
+        await deleteRecipe(recipeId)
+        alert('Receita excluída com sucesso!')
+      } catch (error) {
+        console.error('Erro ao excluir receita:', error)
+        alert(`Erro ao excluir receita: ${error.message || 'Tente novamente.'}`)
+      }
+    }
+  }
+
   return (
     <div className="page cost-page">
       <section className="page-stack">
@@ -568,13 +595,23 @@ export function CostPage() {
                         </span>
                       </td>
                       <td>
-                        <button
-                          type="button"
-                          className="edit-btn"
-                          onClick={() => handleOpenModal(recipe)}
-                        >
-                          Editar
-                        </button>
+                        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                          <button
+                            type="button"
+                            className="edit-btn"
+                            onClick={() => handleOpenModal(recipe)}
+                          >
+                            Editar
+                          </button>
+                          <button
+                            type="button"
+                            className="delete-btn"
+                            onClick={() => handleDeleteRecipe(recipe.id, recipe.name)}
+                            title="Excluir receita"
+                          >
+                            <FiTrash2 />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   )
@@ -670,6 +707,17 @@ export function CostPage() {
                 />
               </label>
             </div>
+            {weightPerPortion && (
+              <div style={{ 
+                marginTop: '-0.5rem', 
+                marginBottom: '1rem',
+                fontSize: '0.9rem',
+                color: 'var(--text-secondary)',
+                fontStyle: 'italic'
+              }}>
+                Cada porção terá: <strong style={{ color: 'var(--primary-color)' }}>{weightPerPortion} g</strong>
+              </div>
+            )}
             <label className="input-control">
               <span>Tempo de preparo (minutos)</span>
               <input

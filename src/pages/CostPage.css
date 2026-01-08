@@ -153,6 +153,27 @@
   border-color: var(--primary-color);
 }
 
+.delete-btn {
+  background: transparent;
+  border: 1px solid var(--border-primary);
+  border-radius: 0.85rem;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.delete-btn:hover {
+  background: var(--error, #dc2626);
+  color: #ffffff;
+  border-color: var(--error, #dc2626);
+}
+
 .empty-state {
   text-align: center;
   padding: 3rem 2rem;
