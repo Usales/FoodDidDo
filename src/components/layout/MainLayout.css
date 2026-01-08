@@ -412,7 +412,7 @@
   width: 100%;
   padding: 0.875rem 1rem;
   background: transparent;
-  border: none;
+  border: none !important;
   color: var(--text-primary);
   text-align: left;
   cursor: pointer;
@@ -420,15 +420,26 @@
   align-items: center;
   gap: 0.75rem;
   font-size: 0.9rem;
-  transition: all 0.2s ease;
-  outline: none;
-  box-shadow: none;
+  transition: background 0.2s ease, color 0.2s ease;
+  outline: none !important;
+  box-shadow: none !important;
   position: relative;
+}
+
+.dropdown-item::before,
+.dropdown-item::after {
+  display: none !important;
+  content: none !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 .dropdown-item:hover {
   background: var(--bg-secondary);
   color: var(--text-primary);
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 .dropdown-item:active {
@@ -437,9 +448,10 @@
 }
 
 .dropdown-item:focus {
-  outline: none;
+  outline: none !important;
   background: var(--bg-secondary);
-  box-shadow: inset 0 0 0 2px var(--primary-color);
+  box-shadow: none !important;
+  border: none !important;
 }
 
 .dropdown-item-icon {
@@ -470,6 +482,9 @@
 .dropdown-item-danger:hover {
   background: rgba(239, 68, 68, 0.1);
   color: var(--error, #ef4444);
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 .dropdown-item-danger .dropdown-item-icon {
