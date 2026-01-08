@@ -126,7 +126,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-11",
+    "id": "local-10",
     "title": "Arroz com Frango | Galinhada",
     "image": "/local-recipes/images/arroz-com-frango.png",
     "instructions": "1. Tempere o frango com sal, pimenta, alho e limão e deixe marinar por 30 minutos.\n2. Em uma panela grande, aqueça o óleo e doure o frango.\n3. Adicione a cebola, alho e pimentão e refogue.\n4. Adicione o tomate picado e refogue até murchar.\n5. Adicione o arroz lavado e refogue por 2 minutos.\n6. Adicione a água quente (2 xícaras de água para 1 xícara de arroz).\n7. Tempere com sal, pimenta e ervas a gosto.\n8. Quando começar a ferver, abaixe o fogo e tampe.\n9. Deixe cozinhar por 15-20 minutos até a água secar.\n10. Desligue o fogo e deixe descansar tampado por 5 minutos.\n11. Solte com um garfo, adicione cheiro-verde e sirva.",
@@ -140,7 +140,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-12",
+    "id": "local-11",
     "title": "Arroz com Linguiça",
     "image": "/local-recipes/images/arroz-com-linguica.png",
     "instructions": "1. Corte a linguiça em rodelas ou cubos.\n2. Em uma panela, aqueça o óleo e frite a linguiça até dourar.\n3. Retire a linguiça e reserve o óleo da fritura.\n4. No mesmo óleo, refogue a cebola e o alho.\n5. Adicione o arroz lavado e refogue por 2 minutos.\n6. Adicione a água quente (2 xícaras de água para 1 xícara de arroz).\n7. Tempere com sal e misture bem.\n8. Quando começar a ferver, abaixe o fogo e tampe.\n9. Após 10 minutos, adicione a linguiça reservada.\n10. Continue cozinhando até a água secar.\n11. Desligue o fogo, deixe descansar tampado por 5 minutos, solte com um garfo e sirva.",
@@ -154,7 +154,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-13",
+    "id": "local-12",
     "title": "Gohan (Arroz Japonês)",
     "image": "/local-recipes/images/gohan.png",
     "instructions": "1. Lave o arroz japonês em água corrente, esfregando suavemente.\n2. Continue lavando até a água ficar completamente clara (cerca de 5-6 vezes).\n3. Deixe o arroz de molho na água por 30 minutos.\n4. Escorra bem e coloque na panela elétrica de arroz ou panela com tampa.\n5. Adicione água na proporção de 1:1 (1 xícara de arroz para 1 xícara de água).\n6. Deixe cozinhar em fogo médio até começar a ferver.\n7. Abaixe o fogo ao mínimo e cozinhe por 15 minutos.\n8. Desligue o fogo e deixe descansar tampado por 10 minutos sem abrir.\n9. Abra a tampa e solte o arroz com uma espátula de madeira.\n10. Sirva quente como acompanhamento de pratos japoneses.",
@@ -168,7 +168,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-14",
+    "id": "local-13",
     "title": "Arroz para Sushi",
     "image": "/local-recipes/images/arroz-sushi.png",
     "instructions": "1. Lave o arroz japonês em água corrente até a água ficar cristalina.\n2. Deixe o arroz de molho por 30 minutos e escorra bem.\n3. Cozinhe o arroz na proporção 1:1 com água por 15 minutos em fogo baixo.\n4. Deixe descansar tampado por 10 minutos.\n5. Enquanto isso, aqueça o vinagre de arroz, açúcar e sal em uma panela até dissolver.\n6. Deixe o tempero esfriar completamente.\n7. Transfira o arroz cozido para uma tigela de madeira (hangiri) ou tigela grande.\n8. Espalhe o tempero sobre o arroz e misture delicadamente com uma espátula de madeira.\n9. Ventile o arroz enquanto mistura para esfriar rapidamente.\n10. Quando o arroz estiver em temperatura ambiente, está pronto para fazer sushi.\n11. Mantenha coberto com pano úmido até usar.",
@@ -182,7 +182,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-15",
+    "id": "local-14",
     "title": "Omelete Simples",
     "image": "/local-recipes/images/omelete-simples.jpeg",
     "instructions": "1. Quebre os ovos em uma tigela.\n2. Bata bem com um garfo ou fouet até ficar homogêneo.\n3. Tempere com sal, pimenta e os temperos extras que quiser.\n4. Aqueça uma frigideira antiaderente com um pouco de manteiga ou óleo.\n5. Despeje a mistura de ovo.\n6. Deixe cozinhar em fogo médio-baixo até as bordas firmarem.\n7. Com uma espátula, solte as bordas e, se quiser, vire para dourar o outro lado (ou dobre ao meio).\n8. Quando estiver dourado e cozido do jeito que você gosta, desligue o fogo e sirva.",
@@ -196,7 +196,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-3",
+    "id": "local-15",
     "title": "Ovos Mexidos Cremosos",
     "image": "/local-recipes/images/ovos-mexidos.jpeg",
     "instructions": "1. Quebre os ovos numa tigela e bata levemente (não precisa ficar completamente espumoso).\n2. Tempere com sal e pimenta.\n3. Aqueça uma panela ou frigideira em fogo baixo-médio com manteiga ou óleo.\n4. Despeje os ovos batidos.\n5. Misture delicadamente com uma espátula, fazendo movimentos suaves.\n6. Se quiser cremosos, retire do fogo um pouco antes de estarem totalmente firmes, pois continuarão cozinhando um pouco com o calor residual.\n7. Se quiser mais firmes, deixe cozinhar mais, mexendo até o ponto desejado.\n8. Sirva imediatamente.",
@@ -210,7 +210,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-4",
+    "id": "local-16",
     "title": "Fritada de Legumes",
     "image": "/local-recipes/images/fritada-legumes.jpeg",
     "instructions": "1. Lave, descasque e corte os legumes em pedaços pequenos ou médios.\n2. Se for necessário, pré-cozinhe legumes mais duros (ex: batata, cenoura) até amolecer um pouco.\n3. Em uma frigideira, aqueça azeite ou óleo, refogue cebola/alho primeiro, depois adicione os legumes até começarem a ficar macios.\n4. Bata os ovos numa tigela, tempere com sal/pimenta/ervas.\n5. Adicione os legumes refogados aos ovos batidos e misture.\n6. (Se for forno) coloque em forma untada e asse em forno pré-aquecido a ~180-200°C até firmar e dourar por cima. (Se for frigideira) cozinhe em fogo médio-baixo, tampado, até os ovos firmarem por baixo; se quiser, termine no forno ou vire para dourar o outro lado.\n7. Deixe descansar 1-2 minutos antes de cortar/sacar para servir.",
@@ -224,7 +224,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-5",
+    "id": "local-17",
     "title": "Ovos Cozidos Recheados",
     "image": "/local-recipes/images/ovos-cozidos-recheados.jpeg",
     "instructions": "1. Coloque os ovos em uma panela, cubra com água e leve para ferver.\n2. Depois que ferver, deixe cozinhar por ~10-12 minutos para que fiquem bem firmes.\n3. Escorra a água quente e coloque os ovos em água fria para parar o cozimento.\n4. Descasque os ovos com cuidado.\n5. Corte ao meio no sentido do comprimento e retire as gemas, colocando-as numa tigela.\n6. Amasse as gemas com um garfo, misture com maionese, cebolinha e os temperos desejados.\n7. Recheie cada metade da clara com essa mistura de gema.\n8. Sirva frio ou gelado como aperitivo ou lanche.",
@@ -238,7 +238,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-6",
+    "id": "local-18",
     "title": "Shakshuka (Ovos no Molho de Tomate)",
     "image": "/local-recipes/images/shakshuka.jpeg",
     "instructions": "1. Aqueça um fio de azeite em uma frigideira grande. Refogue a cebola até ficar transparente.\n2. Adicione o pimentão picado e refogue por uns 5 minutos até dourar levemente.\n3. Acrescente o alho e mexa bem até liberar o aroma e ficar levemente dourado.\n4. Adicione os tomates picados, tempere com sal, cominho, pimenta. Mexa bem. Se quiser, coloque salsa.\n5. Abaixe o fogo (médio-baixo), tampe a frigideira e deixe cozinhar por 20-30 minutos, mexendo de vez em quando, até o molho ficar espesso. Se necessário, adicione um pouco de água.\n6. Com uma colher, faça 'ninhos' no molho e quebre com cuidado um ovo em cada cavidade.\n7. Tampe parcialmente e cozinhe por mais alguns minutos até que os ovos estejam no ponto desejado (gema mole ou mais firme).\n8. Sirva imediatamente, com pão branco ou outro que você goste.",
@@ -252,7 +252,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-7",
+    "id": "local-19",
     "title": "Ovo Pochê",
     "image": "/local-recipes/images/ovo-poche.jpeg",
     "instructions": "1. Encha uma panela com água e leve ao fogo. Adicione um pouco de vinagre.\n2. Quando ferver, reduza o fogo para que fique uma fervura suave.\n3. Faça um redemoinho na água usando uma colher (para ajudar a clara envolver a gema).\n4. Quebre o ovo em um recipiente pequeno e depois deslize com cuidado para o centro do redemoinho.\n5. Deixe cozinhar por cerca de 3 minutos para gema mole. Se quiser mais firme, deixe um pouco mais.\n6. Retire com escumadeira, escorra bem. Tempere com sal/pimenta. Sirva imediatamente.",
@@ -266,7 +266,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-8",
+    "id": "local-20",
     "title": "Ovos Assados no Pão",
     "image": "/local-recipes/images/ovos-assados-pao.jpeg",
     "instructions": "1. Pré-aqueça o forno a cerca de 200-220°C.\n2. Pegue fatias de pão e faça um buraco no meio da fatia (usando um copo ou cortador).\n3. Unte levemente uma forma ou chapa com manteiga ou azeite. Coloque as fatias de pão.\n4. Quebre o ovo dentro do buraco de cada fatia de pão.\n5. Tempere com sal e pimenta, e se quiser, coloque queijo ralado ou ervas por cima.\n6. Leve ao forno até que o ovo esteja cozido ao seu gosto (gema mais mole ou mais firme), geralmente uns 10-15 minutos.\n7. Sirva quente.",
@@ -280,7 +280,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-9",
+    "id": "local-21",
     "title": "Quiche de Ovo e Queijo",
     "image": "/local-recipes/images/quiche-ovo-queijo.jpeg",
     "instructions": "1. Pré-aqueça o forno a cerca de 180-200°C.\n2. Se for usar massa, forre a forma com a massa preparada, pressione bem nos cantos, fure com garfo para que não estufe.\n3. No bowl, bata os ovos com creme de leite ou leite até ficar bem misturado.\n4. Junte o queijo ralado ou em pedaços, tempere com sal, pimenta, noz-moscada ou ervas se quiser.\n5. Despeje essa mistura sobre a massa (ou diretamente se for quiche sem massa).\n6. Leve ao forno até que a quiche esteja dourada por cima e firme no centro (teste com um garfo: se sair limpo, está pronto), cerca de 30-45 minutos dependendo da forma e forno.\n7. Deixe descansar um pouco antes de cortar, para firmar.",
@@ -294,7 +294,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-10",
+    "id": "local-22",
     "title": "Pudim de Ovos (Clássico Brasileiro)",
     "image": "/local-recipes/images/pudim-ovos.jpeg",
     "instructions": "1. Prepare o caramelo: em uma forma de pudim, derreta o açúcar até obter um caramelo dourado.\n2. Em uma tigela, bata os ovos com o açúcar até formar um creme homogêneo.\n3. Adicione o leite e a raspa de limão à mistura de ovos e misture bem.\n4. Despeje a mistura na forma caramelizada.\n5. Cozinhe em banho-maria por aproximadamente 1 hora ou até que, ao espetar um palito, ele saia limpo.\n6. Deixe esfriar e desenforme.",
@@ -308,7 +308,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-11",
+    "id": "local-23",
     "title": "Quindim",
     "image": "/local-recipes/images/quindim.jpeg",
     "instructions": "1. Unte forminhas individuais com manteiga e polvilhe com açúcar.\n2. Em uma tigela, misture as gemas, o coco ralado, o açúcar e a manteiga derretida até obter uma massa homogênea.\n3. Despeje a mistura nas forminhas untadas.\n4. Asse em forno preaquecido a 180°C por cerca de 30 minutos ou até que fiquem dourados.\n5. Deixe esfriar antes de desenformar.",
@@ -322,7 +322,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-12",
+    "id": "local-24",
     "title": "Pão de Ló",
     "image": "/local-recipes/images/pao-de-lo.jpeg",
     "instructions": "1. Bata os ovos com o açúcar até obter uma mistura fofa e esbranquiçada.\n2. Adicione a farinha de trigo peneirada e misture delicadamente.\n3. Acrescente a raspa de limão ou laranja e o fermento, se estiver utilizando.\n4. Despeje a massa em uma forma untada e enfarinhada.\n5. Asse em forno preaquecido a 180°C por cerca de 25 a 30 minutos ou até que, ao espetar um palito, ele saia limpo.\n6. Deixe esfriar antes de desenformar.",
@@ -336,7 +336,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-13",
+    "id": "local-25",
     "title": "Ambrosia (Sobremesa Caseira)",
     "image": "/local-recipes/images/ambrosia.jpeg",
     "instructions": "1. Em uma panela, misture o leite, o açúcar, a canela, os cravos e o suco de limão.\n2. Leve ao fogo médio, mexendo até o açúcar dissolver completamente.\n3. Quando começar a ferver, abaixe o fogo e cozinhe por cerca de 20 minutos, sem mexer, até formar uma calda espessa.\n4. Enquanto isso, bata os ovos inteiros em uma tigela.\n5. Despeje os ovos batidos na calda quente, mexendo delicadamente para formar grumos.\n6. Cozinhe por mais 10 minutos, mexendo ocasionalmente.\n7. Retire do fogo e deixe esfriar antes de servir.",
@@ -350,7 +350,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-14",
+    "id": "local-26",
     "title": "Suspiro (Clara em Neve)",
     "image": "/local-recipes/images/suspiros.jpeg",
     "instructions": "1. Preaqueça o forno a 100°C.\n2. Na batedeira, bata as claras em velocidade alta até ficarem em neve.\n3. Adicione o açúcar aos poucos, sem parar de bater, até obter um merengue firme e brilhante.\n4. Acrescente o suco de limão e bata por mais 2 minutos.\n5. Coloque o merengue em um saco de confeitar e modele montinhos em uma assadeira forrada com papel manteiga.\n6. Leve ao forno por cerca de 1 hora ou até que os suspiros estejam secos e levemente dourados.\n7. Deixe esfriar completamente antes de retirar da assadeira.",
@@ -364,7 +364,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-15",
+    "id": "local-27",
     "title": "Fios de Ovos (Doce Tradicional Português)",
     "image": "/local-recipes/images/fios-de-ovos.jpeg",
     "instructions": "1. Em uma panela, misture o açúcar e a água.\n2. Leve ao fogo médio, mexendo até o açúcar dissolver completamente.\n3. Quando começar a ferver, abaixe o fogo e cozinhe por cerca de 20 minutos, até atingir o ponto de fio.\n4. Enquanto isso, passe as gemas por uma peneira fina para remover impurezas.\n5. Despeje as gemas delicadamente na calda quente, mexendo constantemente para formar fios.\n6. Cozinhe por mais 5 minutos, mexendo delicadamente.\n7. Retire do fogo e deixe esfriar antes de servir.",
@@ -378,7 +378,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-16",
+    "id": "local-28",
     "title": "Pamonha de Milho Verde",
     "image": "/local-recipes/images/pamonha.jpeg",
     "instructions": "1. Descasque as espigas de milho, retire os cabelinhos e reserve as palhas.\n2. Cozinhe as palhas em água fervente por cerca de 10 minutos para amolecer.\n3. Debulhe as espigas de milho e bata no liquidificador com o coco ralado e o leite até obter uma massa homogênea.\n4. Acrescente o açúcar e misture bem.\n5. Coloque a massa nas palhas de milho, formando pacotinhos, e amarre bem.\n6. Cozinhe os pacotinhos em água fervente por aproximadamente 1 hora ou até que estejam firmes.",
@@ -392,7 +392,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-17",
+    "id": "local-29",
     "title": "Bolo de Milho Salgado",
     "image": "/local-recipes/images/bolo-de-milho-salgado.jpeg",
     "instructions": "1. No liquidificador, bata o milho, leite, óleo e ovos até obter uma mistura homogênea.\n2. Transfira para uma tigela e adicione o fubá, amido de milho, açúcar, sal e fermento. Misture bem.\n3. Incorpore o presunto e queijo picados, além da salsinha e cebolinha.\n4. Despeje a massa em uma forma untada e enfarinhada.\n5. Asse em forno pré-aquecido a 180°C por cerca de 40 minutos ou até dourar.",
@@ -406,7 +406,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-18",
+    "id": "local-30",
     "title": "Cuscuz de Milho",
     "image": "/local-recipes/images/cuscuz-de-milho.jpeg",
     "instructions": "1. Em uma tigela, misture a farinha de milho com o sal.\n2. Adicione a água aos poucos, mexendo com uma colher para umedecer a farinha. Deixe hidratar por 10 minutos.\n3. Preencha o fundo de uma cuscuzeira com água e coloque o cesto de vapor.\n4. Coloque a mistura de farinha de milho no cesto, sem compactar.\n5. Cozinhe em fogo alto até a água ferver, depois reduza para fogo baixo e deixe no vapor por cerca de 10 minutos.\n6. Retire o cuscuz, adicione a manteiga e sirva.",
@@ -420,7 +420,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-19",
+    "id": "local-31",
     "title": "Milho Cozido com Manteiga de Ervas",
     "image": "/local-recipes/images/milho-cozido-manteiga-ervas.jpeg",
     "instructions": "1. Em uma panela grande, coloque água para ferver.\n2. Acrescente as espigas de milho e cozinhe por 20 minutos.\n3. Escorra, passe manteiga por cima e polvilhe sal e ervas finas antes de servir.",
@@ -434,7 +434,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-20",
+    "id": "local-32",
     "title": "Polenta Cremosa ou Frita",
     "image": "/local-recipes/images/polenta-cremosa-frita.jpeg",
     "instructions": "1. Dissolva o fubá em 2 copos de água fria.\n2. Em uma panela em fogo médio, adicione o azeite, cebola, alho e o sal. Mexa bem até dourar.\n3. Acrescente o fubá já diluído (na água toda), mexendo de preferência com uma colher de pau por mais ou menos 15 minutos, até obter uma consistência bem firme na polenta.",
@@ -448,7 +448,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-21",
+    "id": "local-33",
     "title": "Sopa de Milho Cremosa",
     "image": "/local-recipes/images/sopa-milho-cremosa.jpeg",
     "instructions": "1. Bata no liquidificador o milho, o creme de leite, o leite e o sal até obter um creme bem homogêneo.\n2. Passe pela peneira, depois coloque em uma panela e leve ao fogo até levantar fervura.\n3. Junte o queijo e sirva a seguir.",
@@ -462,7 +462,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-22",
+    "id": "local-34",
     "title": "Curau - Creme de Milho com Leite",
     "image": "/local-recipes/images/curau-milho-verde.jpeg",
     "instructions": "1. Debulhe as espigas de milho com uma faca.\n2. No liquidificador, bata o milho com o leite até triturar bem.\n3. Passe a mistura por uma peneira fina, pressionando com as costas de uma colher para extrair bem todo o líquido.\n4. Coloque o líquido em uma panela, adicione o açúcar, o sal e a manteiga.\n5. Leve ao fogo médio, mexendo constantemente com um batedor de arame até começar a ferver.\n6. Abaixe o fogo e continue mexendo por mais 5 minutos, até formar um creme grosso.\n7. Distribua o creme em tigelas individuais e leve à geladeira por pelo menos 1 hora.\n8. Antes de servir, polvilhe com canela em pó.",
@@ -476,7 +476,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-23",
+    "id": "local-35",
     "title": "Canjica - Milho Branco com Leite e Coco",
     "image": "/local-recipes/images/canjica-milho-branco.jpeg",
     "instructions": "1. Lave bem a canjica em água corrente.\n2. Deixe de molho por aproximadamente 4 horas.\n3. Escorra a canjica e coloque-a na panela de pressão.\n4. Cubra com 2 litros de água e cozinhe por cerca de 20 minutos ou até que esteja macia.\n5. Em outra panela, adicione o leite, o leite condensado, o açúcar, o coco ralado, o cravo e a canela.\n6. Leve ao fogo médio e deixe ferver por 10 minutos, mexendo sempre para não grudar no fundo da panela.\n7. Adicione a canjica cozida à mistura e cozinhe por mais 10 minutos, mexendo ocasionalmente.\n8. Sirva quente ou morno.",
@@ -490,7 +490,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-24",
+    "id": "local-36",
     "title": "Molho de Tomate Caseiro",
     "image": "/local-recipes/images/molho-tomate-caseiro.jpeg",
     "instructions": "1. Lave bem os tomates, corte-os em 8 partes e coloque-os na panela de pressão (com sementes e pele).\n2. Adicione a cebola, o alho, o sal e o açúcar.\n3. Feche a panela de pressão e cozinhe por 15 minutos (após o apito).\n4. Abra a panela, despeje o conteúdo no liquidificador e bata até obter um creme pastoso.\n5. Se desejar, adicione manjericão fresco picado e misture bem.",
@@ -504,7 +504,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-25",
+    "id": "local-37",
     "title": "Bruschetta de Tomate e Manjericão",
     "image": "/local-recipes/images/bruschetta-tomate-manjericao.jpeg",
     "instructions": "1. Corte a baguete em fatias de 1 cm e toste-as no forno até ficarem crocantes e levemente douradas.\n2. Lave, seque e corte os tomates ao meio. Retire as sementes e corte cada metade em cubos pequenos.\n3. Transfira os tomates para uma tigela, adicione as folhas de manjericão picadas e regue com azeite. Tempere com sal e pimenta a gosto e misture delicadamente.\n4. Esfregue um dente de alho nas fatias de pão tostado.\n5. Coloque a mistura de tomate sobre as fatias de pão e sirva imediatamente.",
@@ -518,7 +518,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-26",
+    "id": "local-38",
     "title": "Salada Caprese",
     "image": "/local-recipes/images/salada-caprese.jpeg",
     "instructions": "1. Lave bem os tomates e corte-os em rodelas médias.\n2. Corte a mussarela de búfala em fatias do mesmo tamanho das rodelas de tomate.\n3. Em um prato, alterne as fatias de tomate e mussarela, formando uma espiral ou linha reta.\n4. Regue com azeite, tempere com sal e pimenta-do-reino a gosto.\n5. Finalize com folhas de manjericão fresco por cima.",
@@ -532,7 +532,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-27",
+    "id": "local-39",
     "title": "Sopa de Tomate Cremosa",
     "image": "/local-recipes/images/sopa-tomate-cremosa.jpeg",
     "instructions": "1. Em uma panela, aqueça o azeite e refogue a cebola e o alho até ficarem dourados.\n2. Adicione os tomates picados e cozinhe por cerca de 10 minutos.\n3. Acrescente o caldo de legumes e deixe ferver por 15 minutos.\n4. Bata tudo no liquidificador até obter um creme homogêneo.\n5. Volte à panela, adicione o creme de leite e ajuste o sal e a pimenta.\n6. Sirva quente, decorado com folhas de manjericão fresco.",
@@ -546,7 +546,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-28",
+    "id": "local-40",
     "title": "Macarrão alla Puttanesca",
     "image": "/local-recipes/images/pasta-alla-puttanesca.jpeg",
     "instructions": "1. Cozinhe o espaguete conforme as instruções da embalagem.\n2. Em uma frigideira, aqueça o azeite e refogue o alho até dourar.\n3. Adicione as anchovas e amasse-as até desmancharem.\n4. Acrescente as azeitonas, alcaparras e tomates picados.\n5. Cozinhe por cerca de 8 minutos, até o molho engrossar.\n6. Misture o molho com o espaguete cozido.\n7. Sirva com salsinha picada e um fio de azeite.",
@@ -560,7 +560,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-29",
+    "id": "local-41",
     "title": "Pizza Margherita",
     "image": "/local-recipes/images/pizza-margherita.jpeg",
     "instructions": "1. Prepare a massa: em uma tigela, misture o fermento com água morna e deixe descansar por 5 minutos.\n2. Adicione a farinha e o sal, misture até formar uma massa lisa.\n3. Sove a massa por cerca de 10 minutos e deixe descansar por 1 hora.\n4. Modele a massa em formato de disco e coloque em uma assadeira.\n5. Espalhe o molho de tomate sobre a massa.\n6. Cubra com fatias de mussarela e folhas de manjericão.\n7. Asse em forno pré-aquecido a 220°C por 10-15 minutos, até o queijo derreter e dourar.",
@@ -574,7 +574,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-30",
+    "id": "local-42",
     "title": "Sopa de Cenoura Cremosa",
     "image": "/local-recipes/images/sopa-cenoura-cremosa.jpeg",
     "instructions": "1. Refogue a cebola e o alho no azeite até ficarem dourados.\n2. Adicione as cenouras picadas e refogue por mais alguns minutos.\n3. Acrescente o caldo quente e deixe cozinhar até as cenouras ficarem bem macias.\n4. Bata a sopa no liquidificador (cuidado com o vapor) até ficar cremosa.\n5. Tempere com sal e pimenta. Se quiser, finalize com um fio de creme de leite.",
@@ -588,7 +588,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-31",
+    "id": "local-43",
     "title": "Salada de Cenoura Ralada",
     "image": "/local-recipes/images/salada-cenoura-ralada.jpeg",
     "instructions": "1. Lave, descasque e rale as cenouras no ralo grosso.\n2. Em uma tigela, misture a cenoura ralada com o suco de limão, o azeite e o sal.\n3. Acrescente as ervas picadas e misture bem.\n4. Deixe na geladeira por alguns minutos para os sabores se incorporarem.",
@@ -602,7 +602,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-32",
+    "id": "local-44",
     "title": "Cenoura Assada com Mel e Ervas",
     "image": "/local-recipes/images/cenoura-assada-mel-ervas.jpeg",
     "instructions": "1. Pré-aqueça o forno a 200°C.\n2. Em uma tigela, misture as cenouras com o azeite, mel, ervas, sal e pimenta.\n3. Espalhe as cenouras em uma assadeira, sem amontoar.\n4. Asse por 25-35 minutos, ou até ficarem macias e com as bordas douradas.",
@@ -616,7 +616,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-33",
+    "id": "local-45",
     "title": "Cenoura Refogada com Alho e Cebola",
     "image": "/local-recipes/images/cenoura-refogada-alho-cebola.jpeg",
     "instructions": "1. Aqueça o azeite em uma panela e refogue a cebola até ficar transparente.\n2. Adicione o alho e refogue por mais 30 segundos.\n3. Acrescente as cenouras, tempere com sal e pimenta e refogue por alguns minutos.\n4. Adicione um pouco de água (cerca de 1/4 de xícara), tampe a panela e cozinhe em fogo baixo até a cenoura ficar \"al dente\".\n5. Finalize com salsinha picada.",
@@ -630,7 +630,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-34",
+    "id": "local-46",
     "title": "Bolinho de Legumes com Cenoura",
     "image": "/local-recipes/images/bolinho-legumes-cenoura.jpeg",
     "instructions": "1. Em uma tigela, misture todos os legumes ralados.\n2. Adicione a batata amassada, o ovo, a farinha de trigo e os temperos. Misture bem até formar uma massa homogênea.\n3. Modele pequenos bolinhos com as mãos.\n4. Aqueça o óleo em uma panela e frite os bolinhos em fogo médio até dourarem dos dois lados.\n5. Coloque sobre papel toalha para escorrer o excesso de óleo.",
@@ -644,7 +644,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-35",
+    "id": "local-47",
     "title": "Bolo de Cenoura com Cobertura de Chocolate",
     "image": "/local-recipes/images/bolo-cenoura-cobertura-chocolate.jpeg",
     "instructions": "1. Bata no liquidificador as cenouras, os ovos e o óleo.\n2. Em uma tigela, misture o líquido do liquidificador com o açúcar e a farinha peneirada.\n3. Por último, adicione o fermento e misture delicadamente.\n4. Despeje em uma forma untada e asse em forno médio (180°C) por cerca de 40 minutos.\n5. Para a cobertura, misture todos os ingredientes em uma panela e leve ao fogo baixo, mexendo até engrossar. Cubra o bolo ainda quente.",
@@ -658,7 +658,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-36",
+    "id": "local-48",
     "title": "Muffins de Cenoura",
     "image": "/local-recipes/images/muffins-cenoura.jpeg",
     "instructions": "1. Pré-aqueça o forno a 180°C. Forre uma fôrma de muffins com forminhas de papel.\n2. Em uma tigela, misture os ingredientes secos (farinha, açúcar, canela, fermento e sal).\n3. Em outra tigela, misture os ingredientes molhados (óleo, ovo e cenoura ralada).\n4. Junte as duas misturas, mexendo apenas até incorporar (não bata demais).\n5. Distribua a massa nas forminhas e asse por 20-25 minutos, ou até que um palito saia limpo.",
@@ -672,7 +672,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-37",
+    "id": "local-49",
     "title": "Pão de Cenoura",
     "image": "/local-recipes/images/pao-cenoura.jpeg",
     "instructions": "1. Dissolva o fermento no leite morno com uma pitada de açúcar.\n2. Em uma tigela, misture a cenoura, o óleo, o ovo, o sal e o açúcar. Adicione a mistura de leite e fermento.\n3. Acrescente a farinha de trigo aos poucos, sovando a massa até que ela desgrude das mãos.\n4. Deixe a massa descansar por 1 hora, ou até dobrar de volume.\n5. Modele o pão, coloque em uma forma e deixe descansar por mais 30 minutos. Asse em forno médio por cerca de 30 minutos.",
@@ -686,7 +686,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-38",
+    "id": "local-50",
     "title": "Docinho de Cenoura com Coco",
     "image": "/local-recipes/images/docinho-cenoura-coco.jpeg",
     "instructions": "1. Em uma panela, misture a cenoura ralada, o leite condensado, a manteiga e o coco.\n2. Cozinhe em fogo médio, mexendo sem parar, até a massa desgrudar do fundo da panela (ponto de brigadeiro).\n3. Transfira para um prato untado com manteiga e deixe esfriar.\n4. Com as mãos untadas, faça bolinhas e passe no açúcar com canela ou no coco ralado.",
@@ -700,7 +700,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-39",
+    "id": "local-51",
     "title": "Brócolis ao Alho e Óleo",
     "image": "/local-recipes/images/brocolis-alho-oleo.jpeg",
     "instructions": "1. Lave o brócolis e corte os floretes. O talo pode ser descascado e picado para usar também.\n2. Cozinhe os brócolis no vapor ou em água fervente com sal por 3-4 minutos, até ficar \"al dente\". Escorra bem.\n3. Em uma frigideira grande, aqueça o azeite e refogue o alho até dourar levemente.\n4. Adicione o brócolis cozido e escorrido à frigideira. Tempere com sal, pimenta e refogue por alguns minutos para incorporar os sabores.\n5. Finalize com o suco de limão, se desejar.",
@@ -714,7 +714,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-40",
+    "id": "local-52",
     "title": "Sopa Cremosa de Brócolis",
     "image": "/local-recipes/images/sopa-cremosa-brocolis.jpeg",
     "instructions": "1. Refogue a cebola e o alho em uma panela com um fio de azeite.\n2. Adicione a batata e o brócolis (floretes e talo picado) e refogue por 2 minutos.\n3. Acrescente o caldo quente e cozinhe até os legumes ficarem bem macios.\n4. Bata a sopa no liquidificador (cuidado com o vapor) até ficar lisa e cremosa.\n5. Volte a sopa para a panela, tempere com sal, pimenta e noz-moscada. Desligue o fogo e misture o creme de leite, se usar.",
@@ -728,7 +728,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-41",
+    "id": "local-53",
     "title": "Quiche de Brócolis",
     "image": "/local-recipes/images/quiche-brocolis.jpeg",
     "instructions": "1. Pré-aqueça o forno a 180°C. Forre uma forma de torta com a massa e fure o fundo com um garfo.\n2. Espalhe o brócolis cozido e a cebola refogada sobre a massa.\n3. Em uma tigela, bata os ovos, o creme de leite, o queijo e os temperos.\n4. Despeje essa mistura sobre o brócolis na forma.\n5. Asse por 30 a 40 minutos, ou até dourar e o recheio estar firme.",
@@ -742,7 +742,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-42",
+    "id": "local-54",
     "title": "Macarrão com Brócolis e Alho",
     "image": "/local-recipes/images/macarrao-brocolis-alho.jpeg",
     "instructions": "1. Cozinhe o macarrão em água salgada. Nos últimos 3 minutos de cozimento, adicione os floretes de brócolis à panela.\n2. Enquanto isso, aqueça uma boa quantidade de azeite em uma frigideira e doure as lâminas de alho.\n3. Escorra o macarrão e o brócolis, reservando um pouco da água do cozimento.\n4. Misture o macarrão e o brócolis na frigideira com o azeite e alho. Adicione um pouco da água do cozimento para formar um molho.\n5. Tempere com sal e pimenta. Sirva com queijo parmesão ralado por cima.",
@@ -756,7 +756,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-43",
+    "id": "local-55",
     "title": "Salada de Brócolis com Grão-de-Bico",
     "image": "/local-recipes/images/salada-brocolis-grao-bico.jpeg",
     "instructions": "1. Cozinhe os floretes de brócolis no vapor por 3-4 minutos, até ficarem verdes e crocantes. Depois, mergulhe em água gelada para parar o cozimento.\n2. Em uma tigela grande, misture o brócolis resfriado, o grão-de-bico e os tomates cereja.\n3. Tempere com azeite, suco de limão, sal, pimenta e as ervas picadas.\n4. Misture bem e leve à geladeira por pelo menos 30 minutos para os sabores se incorporarem.",
@@ -770,7 +770,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-44",
+    "id": "local-56",
     "title": "Purê de Batata Cremoso",
     "image": "/local-recipes/images/pure-batata-cremoso.jpeg",
     "instructions": "1. Descasque e corte as batatas em pedaços. Cozinhe em água salgada até ficarem macias.\n2. Escorra bem a água e passe as batatas quentes pelo espremedor.\n3. Volte o purê para a panela e adicione a manteiga, mexendo até incorporar.\n4. Aqueça o leite com o creme de leite e adicione aos poucos ao purê, mexendo vigorosamente.\n5. Tempere com sal e noz-moscada a gosto até ficar cremoso e homogêneo.",
@@ -784,7 +784,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-45",
+    "id": "local-57",
     "title": "Batata Frita Tradicional",
     "image": "/local-recipes/images/batata-frita-tradicional.jpeg",
     "instructions": "1. Descasque as batatas e corte em palitos de espessura uniforme.\n2. Lave bem os palitos em água fria e seque muito bem com um pano de prato.\n3. Aqueça o óleo em uma panela funda. Frite as batatas em fogo médio-alto em duas etapas:\n4. Primeira fritura: Frite até ficarem cozidas por dentro e levemente douradas. Retire e escorra.\n5. Segunda fritura: Aumente o fogo e frite as batatas novamente, até ficarem crocantes e douradas.\n6. Escorra em papel toalha e tempere com sal imediatamente.",
@@ -798,7 +798,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-46",
+    "id": "local-58",
     "title": "Batata Rústica no Forno",
     "image": "/local-recipes/images/batata-rustica-forno.jpeg",
     "instructions": "1. Pré-aqueça o forno a 200°C.\n2. Lave bem as batatas (com a casca) e corte em pedaços irregulares (gomos).\n3. Em uma tigela, misture as batatas com o azeite, o alecrim, o alho, o sal e a pimenta.\n4. Espalhe as batatas em uma assadeira, sem amontoar.\n5. Asse por 40-50 minutos, ou até ficarem douradas e crocantes por fora e macias por dentro.",
@@ -812,7 +812,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-47",
+    "id": "local-59",
     "title": "Batata Recheada",
     "image": "/local-recipes/images/batata-recheada.jpeg",
     "instructions": "1. Pré-aqueça o forno a 200°C. Lave e seque as batatas.\n2. Faça furos com um garfo, passe azeite e sal e asse por cerca de 1 hora, ou até ficarem macias.\n3. Deixe esfriar um pouco, corte ao meio e retire o miolo com cuidado, deixando uma borda.\n4. Amasse o miolo e misture com o recheio de sua escolha (ex.: frango desfiado com requeijão).\n5. Recheie as cascas de batata, cubra com queijo e leve ao forno novamente por 15-20 minutos para gratinar.",
@@ -826,7 +826,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-48",
+    "id": "local-60",
     "title": "Sopa de Batata com Queijo",
     "image": "/local-recipes/images/sopa-batata-queijo.jpeg",
     "instructions": "1. Refogue a cebola e o alho em uma panela com manteiga ou azeite.\n2. Adicione as batatas e o caldo. Cozinhe até as batatas estarem macias.\n3. Amasse levemente as batatas com um amassador, deixando alguns pedaços para textura.\n4. Abaixe o fogo e adicione o creme de leite e o queijo, mexendo até derreter.\n5. Tempere com sal e pimenta. Sirva com cebolinha picada por cima.",
@@ -840,7 +840,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-49",
+    "id": "local-61",
     "title": "Escondidinho de Carne Seca com Purê de Batata",
     "image": "/local-recipes/images/escondidinho-carne-seca.jpeg",
     "instructions": "1. Preparo da Batata: Descasque e corte as batatas em pedaços. Cozinhe em água salgada até ficarem muito macias. Escorra a água completamente e passe as batatas ainda quentes pelo espremedor. Volte o purê para a panela, em fogo baixo, e adicione a manteiga, mexendo bem. Aos poucos, adicione o leite morno e o creme de leite, mexendo vigorosamente até obter um purê liso e cremoso. Tempere com sal e uma pitada de noz-moscada. Reserve.\n2. Preparo do Recheio: Em uma panela, aqueça o azeite e refogue a cebola e o alho até dourarem. Adicione a carne seca desfiada e o pimentão, refogando por alguns minutos. Incorpore o tomate picado e cozinhe até que ele comece a se desfazer. Se necessário, adicione um pouco da água do cozimento da carne para umedecer. Finalize com a salsinha e cebolinha. Ajuste o sal, se preciso (cuidado, a carne já é salgada).\n3. Montagem e Gratinação: Pré-aqueça o forno a 200°C. Em um refratário, espalhe metade do recheio de carne seca. Cubra com uma camada de purê de batata. Adicione o restante do recheio e finalize com a última camada de purê. Alise a superfície e cubra generosamente com o queijo ralado.\n4. Leve ao forno por cerca de 20 a 30 minutos, ou até que o queijo esteja derretido e o escondidinho esteja bem quente e levemente dourado. Sirva a seguir.",
@@ -854,7 +854,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-50",
+    "id": "local-62",
     "title": "Batata Gratinada ao Forno (Batata Au Gratin)",
     "image": "/local-recipes/images/batata-gratinada-forno.jpeg",
     "instructions": "1. Molho Branco (Béchamel): Em uma panela, derreta a manteiga em fogo médio. Adicione a farinha de trigo e mexa por 1 minuto para cozinhar o sabor da farinha (faça um 'roux'). Aos poucos, adicione o leite frio, batendo com um fouet para não formar grumos. Adicione o creme de leite e os dentes de alho amassados. Cozinhe, mexendo sempre, até o molho engrossar e cobrir o fundo da colher. Tempere com sal, pimenta branca e noz-moscada a gosto.\n2. Preparo da Batata: Descasque as batatas e corte-as em rodelas finas e uniformes (use uma faca afiada ou um mandolin). Não é necessário lavar as rodelas após o corte, pois o amido ajuda a engrossar o molho.\n3. Montagem: Pré-aqueça o forno a 200°C. Unte um refratário com manteiga. Forre o fundo com uma camada de rodelas de batata. Tempere com uma pitada de sal e pimenta. Regue com uma concha do molho branco e polvilhe com uma mistura dos queijos. Repita as camadas (batata, sal, pimenta, molho, queijo) até acabar os ingredientes, terminando com uma generosa camada de molho e queijo.\n4. Cozimento: Cubra o refratário com papel alumínio e leve ao forno para cozinhar por cerca de 40 minutos. Retire o papel alumínio e deixe no forno por mais 20 a 30 minutos, ou até as batatas estarem completamente macias (teste com um garfo) e a superfície estiver dourada e borbulhante. Deixe descansar por 10 minutos antes de servir.",
@@ -868,7 +868,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-51",
+    "id": "local-63",
     "title": "Salada de Batata com Maionese",
     "image": "/local-recipes/images/salada-batata-maionese.jpeg",
     "instructions": "1. Cozimento da Batata: Lave bem as batatas. Coloque-as em uma panela com água fria e sal. Leve ao fogo e cozinhe até que estejam macias (perfure com uma faca para verificar), mas ainda firmes, sem se desmanchar. Cuidado para não cozinhar demais.\n2. Resfriamento: Assim que estiverem cozidas, escorra a água quente imediatamente e coloque as batatas em uma tigela com água gelada e gelo. Isso interrompe o cozimento e ajuda a manter a textura. Deixe esfriar completamente.\n3. Descascamento e Corte: Após frias, descasque as batatas. Elas devem descascar com facilidade. Corte-as em cubos de tamanho uniforme e coloque em uma tigela grande.\n4. Temperos e Montagem: Adicione a cebola picada, a salsinha e a cenoura (se usar). Regue com o suco de limão e misture delicadamente. Tempere com sal e pimenta-do-reino.\n5. Finalização: Adicione a maionese e incorpore com uma espátula ou colher, de forma suave, até que todos os ingredientes estejam bem envolvidos. Prove e ajuste os temperos. Leve à geladeira por, pelo menos, 1 hora antes de servir para os sabores se incorporarem.",
@@ -882,7 +882,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-52",
+    "id": "local-64",
     "title": "Batata Sauté (na Manteiga e Ervas)",
     "image": "/local-recipes/images/batata-saute-manteiga-ervas.jpeg",
     "instructions": "1. Pré-cozimento da Batata: Descasque as batatas. Se forem pequenas, deixe inteiras; se forem maiores, corte em quartos ou pedaços uniformes. Coloque-as em uma panela, cubra com água fria e adicione sal. Leve ao fogo e cozinhe por cerca de 10-15 minutos, ou até que estejam quase macias, mas ainda ofereçam resistência ao garfo (al dente). Escorra bem e seque levemente com um pano de prato.\n2. Dourar: Em uma frigideira grande e preferencialmente antiaderente, aqueça a manteiga e o azeite em fogo médio-alto. A manteiga deve derreter e começar a espumar. Adicione as batatas escorridas, espalhando-as em uma camada única.\n3. Refogar: Deixe as batatas dourarem por 5 a 7 minutos, sem mexer muito, para que criem uma crosta dourada. Vire os pedaços e repita o processo do outro lado.\n4. Finalização com Alho e Ervas: Quando as batatas estiverem douradas e crocantes por fora, reduza o fogo para médio. Adicione as lâminas de alho e refogue por mais 1 minuto, tomando cuidado para não queimar o alho, pois ele ficaria amargo. Finalize com as ervas frescas picadas, sal e pimenta-do-reino a gosto. Mexa bem por mais um minuto para aromatizar e sirva imediatamente.",
@@ -896,7 +896,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-53",
+    "id": "local-65",
     "title": "Batata Rosti Suíça",
     "image": "/local-recipes/images/batata-rosti-suica.jpeg",
     "instructions": "1. Preparo da Batata: Descasque as batatas. Rale-as no ralo grosso e, crucialmente, coloque-as imediatamente em uma peneira sobre uma tigela. Isso evita que oxidem (fiquem escuras).\n2. Remoção do Amido (Etapa Importante): Pressione as batatas raladas na peneira para eliminar o máximo de líquido possível. Em seguida, envolva-as em um pano de prato limpo e torça com força para extrair toda a umidade restante. Quanto mais secas, mais crocante ficará o Rosti.\n3. Temperar: Transfira a batata ralada e seca para uma tigela. Adicione a cebola ralada, o sal, a pimenta e a noz-moscada. Misture bem.\n4. Fritar: Aqueça uma frigideira antiaderente de fundo grosso com uma mistura de óleo e manteiga em fogo médio. Espalhe toda a mistura de batata na frigideira, pressionando bem com uma espátula para formar um disco uniforme e compacto.\n5. Cozimento: Frite por cerca de 8 a 10 minutos, ou até a base estar dourada e crocante. Para virar: Coloque um prato sobre a frigideira, vire com cuidado para que o Rosti fique no prato com a parte dourada para cima. Deslize o Rosti de volta para a frigideira para dourar o outro lado por mais 8 a 10 minutos.\n6. Servir: Escorra em papel toalha e sirva imediatamente, cortado em fatias.",
@@ -910,7 +910,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-54",
+    "id": "local-66",
     "title": "Nhoque de Batata Caseiro",
     "image": "/local-recipes/images/nhoque-batata-caseiro.jpeg",
     "instructions": "1. Cozimento da Batata: Lave bem as batatas. Coloque-as em uma panela com água fria e sal. Cozinhe com a casca até que fiquem bem macias (um garfo deve atravessar facilmente). É crucial cozinhá-las com casca para que absorvam menos água. Assim que estiverem cozidas, escorra a água e descasque as batatas ainda quentes, com o auxílio de um garfo e uma faca. Cuidado para não queimar as mãos.\n2. Preparo do Purê: Passe as batatas ainda quentes pelo espremedor diretamente sobre uma superfície lisa (como uma bancada de mármore ou tábua grande). Espalhe o purê e deixe esfriar completamente. Esta etapa é fundamental: se a batata estiver quente ao adicionar a farinha, o nhoque ficará pesado. Se estiver com pressa, pode espalhar o purê em uma assadeira para esfriar mais rápido.\n3. Sovar a Massa: Faça uma 'fonte' com a batata já fria. No centro, adicione o ovo batido, uma pitada generosa de sal e a noz-moscada. Aos poucos, incorpore a farinha de trigo, sovando delicadamente com as mãos até obter uma massa homogênea, lisa e que desgrude das mãos. Cuidado para não sovar em excesso. A quantidade exata de farinha pode variar, então adicione até atingir o ponto. Quanto menos farinha, mais leve ficará o nhoque.\n4. Modelagem do Nhoque: Pegue pequenas porções da massa e, em uma superfície enfarinhada, role-a com as mãos para formar 'cobrinhas' com cerca de 2 cm de diâmetro. Com uma faca, corte essas cobrinhas em pedaços de aproximadamente 2 a 3 cm. Opcionalmente, para dar o formato tradicional, pressione cada pedaço de nhoque levemente contra os dentes de um garfo, rolando-o para criar as marcas características.\n5. Cozimento: Leve uma panela grande com água e sal ao fogo alto. Quando a água estiver fervendo vigorosamente, adicione os nhoques em lotes, sem encher demais a panela. Mexa delicadamente para não grudarem no fundo. Os nhoques estão prontos quando subirem à superfície. Deixe cozinhar por mais 1 minuto após subirem. Com uma escumadeira, retire os nhoques cozidos e transfira-os diretamente para o molho de tomate quente.\n6. Finalização e Servir: Misture os nhoque delicadamente no molho quente. Sirva em seguida, finalizado com queijo parmesão ralado na hora e folhas de manjericão fresco. Para um toque extra, pode-se regar com um fio de azeite ou uma colher de manteiga derretida.",
@@ -924,7 +924,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-55",
+    "id": "local-67",
     "title": "Picadinho de Carne",
     "image": "/local-recipes/images/picadinho-carne.jpeg",
     "instructions": "1. Tempere a carne com sal, pimenta e cominho.\n2. Em uma panela, aqueça o azeite e sele a carne em lotes. Reserve.\n3. Na mesma panela, refogue cebola e alho até dourar. Acrescente o pimentão.\n4. Volte a carne, adicione tomates, salsinha e louro. Misture.\n5. Acrescente água quente, tampe e cozinhe em fogo baixo por 1h (ou até macia).\n6. Ajuste temperos e sirva.",
@@ -938,7 +938,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-56",
+    "id": "local-68",
     "title": "Carne de Panela",
     "image": "/local-recipes/images/carne-panela.jpeg",
     "instructions": "1. Tempere a carne com alho, sal, pimenta e colorau.\n2. Na panela de pressão, aqueça o óleo e sele a carne.\n3. Adicione cebola, tomate e refogue.\n4. Cubra com água quente, tampe e cozinhe por 30–40 min.\n5. Abra, adicione batatas e cenouras, tampe e cozinhe por mais 10 min.\n6. Finalize com salsinha e cebolinha.",
@@ -952,7 +952,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-57",
+    "id": "local-69",
     "title": "Bife à Cavalo",
     "image": "/local-recipes/images/bife-cavalo.jpeg",
     "instructions": "1. Tempere os bifes com alho, sal e pimenta.\n2. Frite em frigideira quente com óleo e manteiga (2–4 min cada lado).\n3. Retire e reserve.\n4. Na mesma frigideira, frite os ovos com gema mole.\n5. Sirva cada bife com um ovo por cima e batata frita.",
@@ -966,7 +966,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-58",
+    "id": "local-70",
     "title": "Escondidinho de Carne Moída",
     "image": "/local-recipes/images/escondidinho-carne-moida.jpeg",
     "instructions": "1. Purê: cozinhe as batatas, amasse e misture com leite, manteiga e temperos.\n2. Recheio: refogue cebola e alho, adicione carne moída e cozinhe. Acrescente extrato, ervilhas e temperos.\n3. Montagem: em refratário, coloque carne moída, cubra com purê e finalize com muçarela.\n4. Leve ao forno a 200°C por 20 min para gratinar.",
@@ -980,7 +980,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-59",
+    "id": "local-71",
     "title": "Carne Louca",
     "image": "/local-recipes/images/carne-louca.jpeg",
     "instructions": "1. Cozinhe a carne na pressão até macia e desfie.\n2. Refogue cebola, alho e pimentões em azeite.\n3. Acrescente a carne desfiada, molho de tomate, inglês, mostarda e temperos.\n4. Adicione palmito e azeitonas. Cozinhe por 10–15 min.\n5. Sirva em sanduíches, arroz ou tapiocas.",
@@ -994,7 +994,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-60",
+    "id": "local-72",
     "title": "Estrogonofe de Carne",
     "image": "/local-recipes/images/estrogonofe-carne.jpeg",
     "instructions": "1. Tempere a carne com sal e pimenta, polvilhe farinha.\n2. Derreta manteiga, sele carne em fogo alto e reserve.\n3. Refogue cebola e alho, volte a carne.\n4. Adicione mostarda, ketchup, molho inglês e champignon.\n5. Abaixe o fogo, adicione creme de leite e aqueça sem ferver.\n6. Ajuste temperos e sirva com arroz e batata palha.",
@@ -1008,7 +1008,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-61",
+    "id": "local-73",
     "title": "Churrasco (Picanha)",
     "image": "/local-recipes/images/churrasco-picanha.jpeg",
     "instructions": "1. Deixe a carne em temperatura ambiente por 1h.\n2. Espeto: corte bifes grossos, espete em 'U' e leve à brasa média (20–30 min).\n3. Grelha: coloque peça inteira na grelha, asse 40 min virando.\n4. Salgue com sal grosso apenas na reta final.\n5. Deixe descansar 5–10 min antes de fatiar.",
@@ -1022,7 +1022,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-62",
+    "id": "local-74",
     "title": "Beef Wellington",
     "image": "/local-recipes/images/beef-wellington.jpeg",
     "instructions": "1. Tempere o filé com sal e pimenta.\n2. Sele o filé em panela bem quente com óleo, dourando todos os lados. (2-3 min de cada lado)\n3. Deixe o filé esfriar um pouco e pinte todos os lados com mostarda Dijon.\n4. Prepare a duxelles: numa panela, refogue chalotas + alho, depois adicione os cogumelos picados, adicione tomilho, deixe os cogumelos soltarem água, cozinhe até que a água evapore bem, formando uma pasta úmida de cogumelos. Reserve para esfriar.\n5. Sobre um plástico filme, monte uma camada de presunto, sobre ele espalhe a duxelles de cogumelos. Coloque o filé em cima, enrole tudo com o plástico filme apertando bem, para firmar e moldar. Leve à geladeira por cerca de 20-30 min.\n6. Abra a massa folhada numa superfície enfarinhada num tamanho que envolva por completo o filé enrolado.\n7. Retire o filé do plástico-filme, coloque sobre a massa folhada, pincele as bordas da massa com gema de ovo, enrole fechando bem. Corte o excesso de massa se houver. Pincele toda superfície com gema. Se quiser, faça cortes decorativos leves na massa para 'desenhar'.\n8. Asse em forno pré-aquecido a ~200-220°C por cerca de 20-25 minutos (para ponto mal passado-ao-médio), ou até que a massa esteja dourada e crocante.\n9. Retire do forno, deixe descansar uns 10 minutos antes de fatiar, para os sucos se redistribuírem.",
@@ -1036,7 +1036,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-63",
+    "id": "local-75",
     "title": "Boeuf Bourguignon",
     "image": "/local-recipes/images/boeuf-bourguignon.jpeg",
     "instructions": "1. Tempere a carne com sal e pimenta.\n2. Em uma panela grande, aqueça um pouco de manteiga ou azeite e doure os cubos de carne (em partes se necessário), até ficarem bem selados. Reserve.\n3. Na mesma panela, doure o bacon/pancetta, depois retire um pouco (se tiver soltado muita gordura) e adicione cebola, cenoura e alho. Refogue até ficar levemente dourado.\n4. Polvilhe a farinha sobre os vegetais, mexa bem para incorporar (isso vai ajudar a engrossar o molho).\n5. Volte a carne para a panela, adicione o vinho tinto, o caldo de carne, as ervas (louro, tomilho).\n6. Deixe ferver, depois reduza o fogo, tampe a panela e cozinhe lentamente por 1,5 a 2 horas (ou até que a carne fique bem macia). Se quiser, leve ao forno em temperatura baixa (cerca de 160-170°C) por esse tempo.\n7. Ajuste sal e pimenta no final. Sirva com purê, arroz ou mesmo batatas cozidas, e se quiser decore com salsa fresca.",
@@ -1050,7 +1050,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-64",
+    "id": "local-76",
     "title": "Ropa Vieja",
     "image": "/local-recipes/images/ropa-vieja.jpeg",
     "instructions": "1. Tempere a carne com sal, pimenta, cominho e orégano.\n2. Em uma panela grande, aqueça azeite e doure a carne dos dois lados. Reserve.\n3. Na mesma panela, refogue cebola, alho, pimentões até ficarem macios.\n4. Adicione o vinho branco (se usar), o molho de tomate e o caldo, folhas de louro. Misture bem.\n5. Volte a carne para a panela, tampe e cozinhe em fogo baixo por 2-3 horas (ou até que a carne desmanche facilmente). Você pode também usar panela de pressão para reduzir o tempo.\n6. Quando a carne estiver macia, desfie-a com garfo. Misture ao molho, deixando apurar mais uns minutos.\n7. Ajuste sal e pimenta. Se quiser, adicione as azeitonas fatiadas ou guarneça com coentro/persil. Sirva com arroz branco, feijão preto ou plátanos (banana-da-terra frita).",
@@ -1064,7 +1064,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-2",
+    "id": "local-77",
     "title": "Cebola Frita Crocante",
     "image": "/local-recipes/images/cebola-frita.jpeg",
     "instructions": "1. Corte a cebola em rodelas ou pétalas finas.\n2. Separe anéis ou pedaços e seque bem com papel toalha.\n3. Em um recipiente, misture farinha de trigo, um pouco de sal e pimenta.\n4. Passe as fatias de cebola na mistura, cobrindo bem.\n5. Aqueça óleo em panela funda até atingir temperatura média-alta.\n6. Frite as cebolas aos poucos, até ficarem douradas e crocantes.\n7. Remova o excesso de óleo com papel absorvente.\n8. Sirva quente como petisco ou acompanhamento.",
@@ -1078,7 +1078,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-3",
+    "id": "local-78",
     "title": "Sopa de Cebola Cremosa",
     "image": "/local-recipes/images/sopa-de-cebola-cremosa.jpeg",
     "instructions": "1. Corte as cebolas em fatias finas.\n2. Em uma panela, derreta manteiga com um fio de azeite.\n3. Refogue as cebolas em fogo baixo até ficarem macias e levemente douradas.\n4. Polvilhe a farinha de trigo e mexa bem para incorporar.\n5. Adicione caldo de carne ou legumes, mexendo até ferver.\n6. Deixe cozinhar por uns minutos para engrossar um pouco.\n7. Tempere com sal e pimenta-do-reino a gosto.\n8. Sirva bem quente, se quiser com pão ou queijo gratinado por cima.",
@@ -1092,7 +1092,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-5",
+    "id": "local-79",
     "title": "Cebola Assada na Airfryer",
     "image": "/local-recipes/images/cebola-assada-airfryer.jpg",
     "instructions": "1. Descasque as cebolas e corte em fatias grossas ou em rodelas.\n2. Em uma tigela, misture azeite, ervas finas, páprica doce e sal.\n3. Tempere as fatias de cebola na mistura, cobrindo bem.\n4. Preaqueça a Airfryer a 180°C.\n5. Coloque as cebolas na cesta da Airfryer e asse por 15 minutos.\n6. Vire as fatias e asse por mais 10 minutos, ou até ficarem douradas e macias.\n7. Retire e sirva quente como acompanhamento ou em sanduíches.",
@@ -1106,7 +1106,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-12",
+    "id": "local-80",
     "title": "Alho Assado Inteiro",
     "image": "/local-recipes/images/alho-assado-inteiro.jpg",
     "instructions": "1. Preaqueça o forno a 200°C (ou 180°C para assar mais lentamente).\n2. Separe 4–6 cabeças de alho inteiras. Remova apenas a camada externa mais grossa (não solte os dentes).\n3. Corte cerca de 1/4 do topo de cada cabeça, expondo levemente os dentes.\n4. Coloque cada cabeça sobre um pedaço de papel-alumínio (ou dentro de um ramequin pequeno). Regue 1 colher de chá de azeite por cabeça (ou cerca de 1 colher de sopa para 4 cabeças) e espalhe com os dedos para que o azeite penetre entre os dentes. Polvilhe uma pitada de sal e pimenta.\n5. Feche o papel-alumínio (ou tampe o ramequin) formando um pacote bem selado.\n6. Leve ao forno por 35–45 minutos (verifique a partir dos 30 minutos). Os dentes estarão macios, com textura amanteigada e levemente dourados ao apertar.\n7. Retire do forno e deixe descansar 8–10 minutos para não se queimar. Aperte a base das cabeças para extrair a pasta de alho assado (ou use uma colher).\n8. Como usar: espalhe em pães, misture em purês, sopas, molhos e manteigas compostas.\n9. Armazenamento: conserve em pote tampado na geladeira por até 1–2 semanas. Use com cuidado em preparos frios; aqueça antes de servir se preferir.",
@@ -1120,7 +1120,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-13",
+    "id": "local-81",
     "title": "Alho Confit (alho cozido lentamente em óleo)",
     "image": "/local-recipes/images/alho-confit.jpg",
     "instructions": "1. Separe 3–4 cabeças de alho (aprox. 25–40 dentes). Descasque todos os dentes com cuidado.\n2. Escolha uma panela pequena ou uma caçarola rasa com tampa; coloque os dentes de alho no fundo.\n3. Cubra completamente os dentes com azeite de oliva extra virgem (aprox. 300–400 ml, o suficiente para cobrir todos os dentes). Adicione 1–2 ramos de alecrim ou tomilho e 1 folha de louro, se desejar.\n4. Leve ao fogo baixo. A ideia é manter o óleo em calor **muito baixo**: pequenas bolhas ocasionais ou apenas micro-simmer — nunca deixe ferver vigorosamente.\n5. Cozinhe suavemente por 45–60 minutos, mexendo ocasionalmente, até os dentes ficarem bem macios, translúcidos e levemente dourados.\n6. Retire do fogo, deixe o óleo amornar (10–15 minutos). Transfira os dentes e o óleo para um pote de vidro esterilizado, certificando-se de que os dentes fiquem totalmente cobertos pelo óleo.\n7. Armazenamento e segurança: feche o pote e mantenha **refrigerado**. Consumir preferencialmente em até 2 semanas; descarte se houver mau cheiro ou aparência estranha. Nunca deixe alho em óleo fora da refrigeração por longos períodos (risco de contaminação).\n8. Uso: alho confit fica ótimo em torradas, massas, molhos e para dar sabor ao próprio óleo (use o óleo para regar saladas ou cozinhar vegetais em fogo baixo).",
@@ -1134,7 +1134,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-14",
+    "id": "local-82",
     "title": "Pão de Alho Caseiro (manteiga de alho)",
     "image": "/local-recipes/images/pao-de-alho-caseiro.jpg",
     "instructions": "1. Reúna os ingredientes: 1 baguete ou pão italiano, 100 g de manteiga sem sal (em temperatura ambiente), 4–6 dentes de alho bem picados ou amassados, 2 colheres de sopa de salsinha fresca picada, 1 colher de sopa de queijo parmesão ralado (opcional), 1 colher de chá de suco de limão (opcional), sal e pimenta a gosto.\n2. Em uma tigela média, misture a manteiga amolecida com o alho picado até formar uma pasta homogênea. Adicione a salsinha, o parmesão, o suco de limão, sal e pimenta; misture bem.\n3. Corte a baguete ao meio no sentido do comprimento (ou faça cortes transversais sem chegar até o fim para formar fatias intercaladas). Espalhe generosamente a manteiga de alho entre as fatias e sobre as superfícies cortadas.\n4. Embrulhe o pão em papel-alumínio (lado brilhante para dentro) e leve ao forno preaquecido a 200°C por 10–15 minutos para aquecer e derreter a manteiga.\n5. Para um topo crocante: abra o papel-alumínio nos últimos 3–5 minutos e deixe dourar por cima ou leve ao grill por 1–2 minutos, observando para não queimar o alho.\n6. Retire do forno, deixe 1–2 minutos e sirva quente, cortado em fatias.\n7. Dicas: para variação, adicione ervas finas, cebola caramelizada, ou pedaços de bacon crocante por cima. Se quiser versão vegana, use margarina vegetal sólida.",
@@ -1148,7 +1148,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-15",
+    "id": "local-83",
     "title": "Molho Cremoso de Alho (versão iogurte) — alternativa ao aioli",
     "image": "/local-recipes/images/molho-cremoso-alho.jpg",
     "instructions": "1. Versão segura (iogurte): Em uma tigela, misture 200 g de iogurte grego (ou iogurte natural bem denso) com 2–3 dentes de alho finamente ralados ou amassados (ajuste a intensidade conforme o gosto).\n2. Adicione 1 colher de sopa de suco de limão fresco, 1–2 colheres de sopa de azeite de oliva, 1 colher de chá de mostarda dijon (opcional) e 2 colheres de sopa de cebolinha ou salsinha picada. Tempere com sal e pimenta-do-reino a gosto.\n3. Misture vigorosamente até ficar homogêneo. Prove e ajuste: se estiver muito forte, adicione mais iogurte; se muito ácido, uma pitada de açúcar pode equilibrar.\n4. Deixe descansar na geladeira por pelo menos 30 minutos para que os sabores se integrem.\n5. Versão aioli tradicional (aviso de segurança): se quiser a textura clássica de aioli, bata 1 gema de ovo com 1 dente de alho amassado e 1 colher de chá de suco de limão; comece a bater enquanto adiciona lentamente 150–180 ml de óleo (azeite ou mistura de azeite/óleo neutro) em fio até emulsificar. Tempere com sal. **Observação:** aioli com gema crua tem risco microbiológico para grupos sensíveis — use gema pasteurizada ou consuma logo.\n6. Uso: excelente para saladas, grelhados, sanduíches, batatas e como molho para petiscos.\n7. Armazenamento: versão iogurte dura 3–4 dias refrigerada; aioli com ovo crú deve ser consumido em 1–2 dias e mantido refrigerado.",
@@ -1162,7 +1162,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-16",
+    "id": "local-84",
     "title": "Espaguete Aglio e Olio com Alho Crocante",
     "image": "/local-recipes/images/espaguete-aglio-e-olio.jpg",
     "instructions": "1. Cozinhe 320 g de espaguete (4 porções) em água abundante e bem salgada até ficar al dente (siga o tempo da embalagem, normalmente 8–10 minutos). Reserve 1 xícara da água do cozimento antes de escorrer.\n2. Enquanto a massa cozinha, prepare o alho: fatie finamente 8–10 dentes de alho (quanto mais finas as lâminas, mais crocantes ficam). Separe 1/2 colher de chá de flocos de pimenta vermelha (opcional) e 4 colheres de sopa de azeite de oliva.\n3. Aqueça uma frigideira larga em fogo médio-baixo. Adicione o azeite e deixe aquecer sem ficar muito quente. Junte o alho fatiado e os flocos de pimenta; cozinhe em fogo baixo, mexendo frequentemente, até o alho ficar **dourado-claro** e levemente crocante (2–4 minutos). Atenção para não queimar: alho queimado fica amargo.\n4. Assim que o alho estiver no ponto, retire parte dos pedaços dourados com uma escumadeira e reserve para decorar (fica crocante por cima do prato).\n5. Adicione a massa escorrida à frigideira com o azeite e o alho restante. Misture e acrescente 1/2 xícara da água do cozimento reservada; mexa vigorosamente por 1–2 minutos para o molho aderir à massa. Se necessário, adicione água aos poucos até obter a textura desejada.\n6. Finalize com 1/2 xícara de salsinha fresca picada, raspas de 1 limão (opcional para frescor), sal e pimenta a gosto. Se gostar, junte 2 colheres de sopa de manteiga para um molho mais aveludado ou 1/3 xícara de queijo parmesão ralado.\n7. Sirva imediatamente, polvilhando os pedaços de alho crocante reservados por cima para contraste de textura.\n8. Dica: para variações, acrescente camarões grelhados, brócolis salteado ou lascas de pimenta para mais picância.",
@@ -1176,7 +1176,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-17",
+    "id": "local-85",
     "title": "Pimentão Recheado com Carne Moída | Pimentão Recheado",
     "image": "/local-recipes/images/pimentao-recheado-carne.jpg",
     "instructions": "1. Corte a tampa de 4 pimentões grandes (vermelho, amarelo ou verde) e retire cuidadosamente as sementes e as fibras brancas do interior. Reserve.\n2. Em uma frigideira, aqueça 2 colheres de sopa de azeite e refogue 1 cebola picada até dourar levemente.\n3. Acrescente 2 dentes de alho picados e refogue por mais 1 minuto.\n4. Adicione 500 g de carne moída, tempere com sal, pimenta-do-reino e páprica a gosto. Cozinhe até perder o tom rosado.\n5. Junte 2 tomates picados ou 1 lata de tomate pelado, mexa bem e cozinhe em fogo baixo até formar um molho encorpado (~10 minutos).\n6. Adicione 1/2 xícara de arroz já cozido (ou quinoa, se preferir) e misture. Ajuste os temperos.\n7. Recheie cada pimentão com a mistura, pressionando para preencher bem.\n8. Disponha os pimentões recheados em uma assadeira, regue com um fio de azeite e cubra com papel-alumínio.\n9. Asse em forno preaquecido a 200°C por 25–30 minutos. Retire o papel, polvilhe queijo ralado por cima e asse mais 10 minutos para gratinar.\n10. Sirva quente com salada ou arroz branco.",
@@ -1190,7 +1190,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-18",
+    "id": "local-86",
     "title": "Refogado Colorido de Pimentão com Cebola",
     "image": "/local-recipes/images/refogado-pimentao.jpg",
     "instructions": "1. Corte 1 pimentão vermelho, 1 amarelo e 1 verde em tiras finas.\n2. Em uma frigideira larga, aqueça 3 colheres de sopa de azeite em fogo médio.\n3. Adicione 1 cebola grande cortada em tiras e refogue até começar a dourar (~4 minutos).\n4. Acrescente os pimentões fatiados, misture bem e refogue por 6–8 minutos, mexendo de vez em quando.\n5. Tempere com sal, pimenta-do-reino e 1/2 colher de chá de orégano seco (ou manjericão fresco no final).\n6. Para um sabor agridoce, adicione 1 colher de chá de açúcar mascavo e 1 colher de sopa de vinagre balsâmico.\n7. Cozinhe até os pimentões ficarem macios, mas ainda ligeiramente crocantes.\n8. Sirva quente como acompanhamento para carnes, frango ou massas.",
@@ -1204,7 +1204,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-19",
+    "id": "local-87",
     "title": "Salada Fria de Pimentão Grelhado",
     "image": "/local-recipes/images/salada-pimentao.jpg",
     "instructions": "1. Corte 2 pimentões vermelhos e 2 amarelos ao meio, retire as sementes e pincele levemente com azeite.\n2. Grelhe os pimentões em uma frigideira de ferro ou na churrasqueira até ficarem com a casca levemente queimada e a polpa macia (~8 minutos de cada lado).\n3. Coloque os pimentões ainda quentes em um saco plástico ou tigela coberta com filme plástico. Deixe suar por 10 minutos para soltar a pele.\n4. Retire a pele queimada, corte os pimentões em tiras largas e transfira para um prato.\n5. Regue com azeite de oliva extra virgem, 1 colher de chá de vinagre de vinho, sal e pimenta.\n6. Acrescente folhas de manjericão fresco ou salsinha.\n7. Sirva fria ou em temperatura ambiente como entrada ou acompanhamento de pães e queijos.",
@@ -1218,7 +1218,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-20",
+    "id": "local-88",
     "title": "Molho de Pimentão Assado",
     "image": "/local-recipes/images/molho-pimentao.jpg",
     "instructions": "1. Coloque 3 pimentões vermelhos inteiros em uma assadeira e leve ao forno a 220°C por 25–30 minutos, virando na metade do tempo, até que a pele esteja bem tostada e com bolhas.\n2. Retire os pimentões e coloque-os em um saco plástico ou tigela coberta com filme por 10 minutos para facilitar a remoção da pele.\n3. Retire a pele, sementes e corte em pedaços.\n4. No liquidificador, bata os pimentões assados com 2 dentes de alho, 2 colheres de sopa de azeite, 1 colher de sopa de suco de limão e sal a gosto até virar um creme homogêneo.\n5. Se desejar, adicione 2 colheres de sopa de creme de leite para textura mais aveludada.\n6. Sirva como molho para massas, grelhados, peixes ou como pasta para pão.",
@@ -1232,7 +1232,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-21",
+    "id": "local-89",
     "title": "Arroz de Pimentão",
     "image": "/local-recipes/images/arroz-pimentao.jpg",
     "instructions": "1. Aqueça 2 colheres de sopa de óleo em uma panela média.\n2. Refogue 1 cebola picada e 2 dentes de alho até dourar.\n3. Acrescente 1 pimentão vermelho e 1 verde cortados em cubinhos e refogue por 4–5 minutos.\n4. Adicione 2 xícaras de arroz cru, mexa bem para envolver nos temperos.\n5. Acrescente 4 xícaras de caldo de legumes quente, 1 colher de chá de sal e 1/2 colher de chá de páprica defumada (opcional).\n6. Cozinhe em fogo médio até o líquido reduzir quase completamente.\n7. Abaixe o fogo, tampe a panela e cozinhe por mais 10–15 minutos, até o arroz ficar macio.\n8. Desligue o fogo e deixe descansar 5 minutos antes de servir.\n9. Finalize com cheiro-verde ou coentro fresco picado.",
@@ -1246,7 +1246,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-22",
+    "id": "local-90",
     "title": "Salada de Pepino com Iogurte (Tzatziki)",
     "image": "/local-recipes/images/tzatziki.jpg",
     "instructions": "1. Rale o pepino em tiras finas e coloque em uma peneira.\n2. Salpique um pouco de sal e deixe descansar por 10 minutos para soltar a água.\n3. Esprema o pepino com as mãos para retirar o excesso de líquido.\n4. Em uma tigela, misture iogurte natural, alho picado, azeite, suco de limão e hortelã picada.\n5. Acrescente o pepino ralado, mexa bem e ajuste o sal.\n6. Leve à geladeira por pelo menos 30 minutos antes de servir.",
@@ -1260,7 +1260,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-23",
+    "id": "local-91",
     "title": "Conserva de Pepino Caseira",
     "image": "/local-recipes/images/conserva-pepino.jpg",
     "instructions": "1. Corte os pepinos em rodelas finas.\n2. Ferva água com vinagre, açúcar, sal, sementes de mostarda e pimenta-do-reino em grãos.\n3. Coloque os pepinos em um pote de vidro esterilizado.\n4. Despeje a mistura quente sobre os pepinos.\n5. Feche bem o pote e deixe esfriar.\n6. Armazene na geladeira por 24 horas antes de consumir.",
@@ -1274,7 +1274,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-24",
+    "id": "local-92",
     "title": "Suco Refrescante de Pepino com Limão e Hortelã",
     "image": "/local-recipes/images/suco-pepino.jpg",
     "instructions": "1. Lave bem o pepino e corte em pedaços grandes.\n2. Coloque no liquidificador com água gelada, suco de limão, folhas de hortelã e mel (opcional).\n3. Bata até ficar homogêneo.\n4. Coe, se desejar, para retirar fibras.\n5. Sirva em copo alto com gelo.",
@@ -1288,7 +1288,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-25",
+    "id": "local-93",
     "title": "Sanduíche Natural de Pepino",
     "image": "/local-recipes/images/sanduiche-pepino.jpg",
     "instructions": "1. Corte o pepino em rodelas finas.\n2. Passe cream cheese ou requeijão em fatias de pão integral.\n3. Coloque as rodelas de pepino e folhas de alface.\n4. Tempere com uma pitada de sal e pimenta.\n5. Feche o sanduíche e corte ao meio antes de servir.",
@@ -1302,7 +1302,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-26",
+    "id": "local-94",
     "title": "Salada de Pepino Oriental | Sunomono",
     "image": "/local-recipes/images/salada-pepino-oriental.jpg",
     "instructions": "1. Corte o pepino em tiras finas ou rodelas.\n2. Em uma tigela, misture molho de soja, vinagre de arroz, óleo de gergelim e açúcar.\n3. Adicione sementes de gergelim e cebolinha picada.\n4. Coloque o pepino fatiado e misture bem.\n5. Leve à geladeira por 20 minutos antes de servir.",
@@ -1316,7 +1316,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-27",
+    "id": "local-95",
     "title": "Salada Verde Clássica",
     "image": "/local-recipes/images/salada-verde.jpg",
     "instructions": "1. Lave bem as folhas de alface e seque.\n2. Rasgue as folhas em pedaços médios.\n3. Coloque em uma tigela com tomate cereja cortado ao meio.\n4. Tempere com azeite, limão, sal e pimenta.\n5. Misture delicadamente e sirva imediatamente.",
@@ -1330,7 +1330,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-28",
+    "id": "local-96",
     "title": "Wrap de Frango com Alface",
     "image": "/local-recipes/images/wrap-frango-alface.jpg",
     "instructions": "1. Tempere o frango em tiras com sal, pimenta e azeite.\n2. Grelhe até dourar bem.\n3. Coloque folhas grandes de alface sobre uma tábua.\n4. Recheie com tiras de frango, cenoura ralada e molho de sua preferência.\n5. Enrole como um wrap e prenda com palito, se necessário.",
@@ -1344,7 +1344,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-29",
+    "id": "local-97",
     "title": "Sopa Cremosa de Alface",
     "image": "/local-recipes/images/sopa-alface.jpg",
     "instructions": "1. Em uma panela, refogue cebola e alho no azeite.\n2. Adicione batata picada e refogue por alguns minutos.\n3. Coloque água ou caldo de legumes e cozinhe até a batata amolecer.\n4. Acrescente folhas de alface rasgadas e cozinhe por mais 5 minutos.\n5. Bata tudo no liquidificador até ficar cremoso.\n6. Volte à panela, ajuste o sal e finalize com creme de leite.\n7. Sirva quente.",
@@ -1358,7 +1358,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-30",
+    "id": "local-98",
     "title": "Suco Detox de Alface com Limão",
     "image": "/local-recipes/images/suco-alface.jpg",
     "instructions": "1. Lave bem as folhas de alface.\n2. Coloque no liquidificador com água gelada, suco de limão e gengibre ralado.\n3. Bata até ficar homogêneo.\n4. Coe, se desejar, e adoce com mel ou açúcar mascavo.\n5. Sirva bem gelado.",
@@ -1372,7 +1372,7 @@
     "apiType": "local"
   },
   {
-    "id": "local-31",
+    "id": "local-99",
     "title": "Tacos de Alface com Carne Moída",
     "image": "/local-recipes/images/taco-alface.jpg",
     "instructions": "1. Refogue a carne moída com cebola, alho, sal, pimenta e páprica.\n2. Cozinhe até ficar bem dourada.\n3. Lave e seque folhas grandes de alface.\n4. Recheie cada folha com carne moída, tomate em cubos e queijo ralado.\n5. Finalize com molho de pimenta ou guacamole.\n6. Sirva imediatamente como tacos low-carb.",
