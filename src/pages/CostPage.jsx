@@ -22,6 +22,8 @@ export function CostPage() {
   const [formState, setFormState] = useState({
     name: '',
     yield: '',
+    yieldQuantity: '',
+    yieldWeight: '',
     prepTime: '',
     recipeIngredients: []
   })
@@ -94,9 +96,16 @@ export function CostPage() {
           quantity: ing.quantity?.toString() || ''
         }
       })
+      // Separar yield em quantidade e gramatura se houver yieldWeight no recipe
+      const yieldStr = recipe.yield.toString()
+      const yieldQuantity = recipe.yieldQuantity?.toString() || yieldStr
+      const yieldWeight = recipe.yieldWeight?.toString() || ''
+      
       setFormState({
         name: recipe.name,
-        yield: recipe.yield.toString(),
+        yield: yieldStr,
+        yieldQuantity: yieldQuantity,
+        yieldWeight: yieldWeight,
         prepTime: recipe.prepTime.toString(),
         recipeIngredients: convertedIngredients
       })
@@ -104,12 +113,14 @@ export function CostPage() {
       setEditingIngredients([])
     } else {
       setEditingId(null)
-      setFormState({
-        name: '',
-        yield: '',
-        prepTime: '',
-        recipeIngredients: []
-      })
+    setFormState({
+      name: '',
+      yield: '',
+      yieldQuantity: '',
+      yieldWeight: '',
+      prepTime: '',
+      recipeIngredients: []
+    })
       setConfirmedIngredients([])
       setEditingIngredients([])
     }
@@ -145,9 +156,16 @@ export function CostPage() {
             quantity: ing.quantity?.toString() || ''
           }
         })
+        // Separar yield em quantidade e gramatura se houver yieldWeight no recipe
+        const yieldStr = recipe.yield.toString()
+        const yieldQuantity = recipe.yieldQuantity?.toString() || yieldStr
+        const yieldWeight = recipe.yieldWeight?.toString() || ''
+        
         setFormState({
           name: recipe.name,
-          yield: recipe.yield.toString(),
+          yield: yieldStr,
+          yieldQuantity: yieldQuantity,
+          yieldWeight: yieldWeight,
           prepTime: recipe.prepTime.toString(),
           recipeIngredients: convertedIngredients
         })
@@ -167,6 +185,8 @@ export function CostPage() {
     setFormState({
       name: '',
       yield: '',
+      yieldQuantity: '',
+      yieldWeight: '',
       prepTime: '',
       recipeIngredients: []
     })
@@ -317,7 +337,9 @@ export function CostPage() {
 
   // Calcular custos automaticamente
   const calculatedCosts = useMemo(() => {
-    if (!formState.yield || Number(formState.yield) <= 0) {
+    // Usar yieldQuantity se disponível, senão usar yield
+    const yieldValue = formState.yieldQuantity || formState.yield
+    if (!yieldValue || Number(yieldValue) <= 0) {
       return { totalCost: 0, usageCost: 0, unitCost: 0, suggestedPrice: 0, suggestedProfit: 0 }
     }
 
@@ -352,7 +374,7 @@ export function CostPage() {
       return acc + costOfUsage
     }, 0)
 
-    const yieldNum = Number(formState.yield)
+    const yieldNum = Number(yieldValue)
     // Calcular custo unitário com mais precisão
     const unitCost = yieldNum > 0 ? usageCost / yieldNum : 0
     const suggestedMargin = 0.45 // Margem padrão de 45%
@@ -366,10 +388,12 @@ export function CostPage() {
       suggestedPrice: Number(suggestedPrice.toFixed(2)),
       suggestedProfit: Number(suggestedProfit.toFixed(2))
     }
-  }, [confirmedIngredients, formState.yield])
+  }, [confirmedIngredients, formState.yield, formState.yieldQuantity])
 
   const handleSubmit = async () => {
-    const yieldNum = Number(formState.yield)
+    // Usar yieldQuantity se disponível, senão usar yield
+    const yieldValue = formState.yieldQuantity || formState.yield
+    const yieldNum = Number(yieldValue)
     const prepTimeNum = Number(formState.prepTime)
     const errors = {}
 
@@ -378,8 +402,8 @@ export function CostPage() {
       errors.name = 'Nome da receita é obrigatório'
     }
 
-    if (!formState.yield || Number.isNaN(yieldNum) || yieldNum <= 0) {
-      errors.yield = 'Rendimento deve ser um número maior que zero'
+    if (!yieldValue || Number.isNaN(yieldNum) || yieldNum <= 0) {
+      errors.yield = 'Quantidade de rendimento deve ser um número maior que zero'
     }
 
     if (!formState.prepTime || Number.isNaN(prepTimeNum) || prepTimeNum <= 0) {
@@ -438,6 +462,8 @@ export function CostPage() {
     const recipeData = {
       name: formState.name.trim(),
       yield: yieldNum,
+      yieldQuantity: formState.yieldQuantity ? Number(formState.yieldQuantity) : undefined,
+      yieldWeight: formState.yieldWeight ? Number(formState.yieldWeight) : undefined,
       prepTime: prepTimeNum,
       totalCost: calculatedCosts.totalCost,
       unitCost: calculatedCosts.unitCost,
@@ -530,7 +556,9 @@ export function CostPage() {
                     <tr key={recipe.id}>
                       <td className="recipe-name">{recipe.name}</td>
                       <td className="recipe-cost">R$ {recipe.unitCost.toFixed(2)}</td>
-                      <td className="recipe-yield">{recipe.yield} un.</td>
+                      <td className="recipe-yield">
+                        {recipe.yieldQuantity || recipe.yield} {recipe.yieldWeight ? `(${recipe.yieldWeight}g)` : 'un.'}
+                      </td>
                       <td>
                         <span
                           className="margin-badge"
@@ -606,22 +634,42 @@ export function CostPage() {
               />
               {formErrors.name && <span className="error-message">{formErrors.name}</span>}
             </label>
-            <label className="input-control">
-              <span>Rendimento (unidades)</span>
-              <input
-                type="number"
-                value={formState.yield}
-                onChange={(event) => {
-                  setFormState((prev) => ({ ...prev, yield: event.target.value }))
-                  if (formErrors.yield) setFormErrors((prev) => ({ ...prev, yield: '' }))
-                }}
-                placeholder="Ex.: 18"
-                min="1"
-                step="1"
-                className={formErrors.yield ? 'input-error' : ''}
-              />
-              {formErrors.yield && <span className="error-message">{formErrors.yield}</span>}
-            </label>
+            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+              <label className="input-control" style={{ flex: '1', minWidth: '200px' }}>
+                <span>Quantidade (unidades)</span>
+                <input
+                  type="number"
+                  value={formState.yieldQuantity}
+                  onChange={(event) => {
+                    const value = event.target.value
+                    setFormState((prev) => ({ 
+                      ...prev, 
+                      yieldQuantity: value,
+                      yield: value // Manter yield para compatibilidade
+                    }))
+                    if (formErrors.yield) setFormErrors((prev) => ({ ...prev, yield: '' }))
+                  }}
+                  placeholder="Ex.: 1 ou 4"
+                  min="1"
+                  step="1"
+                  className={formErrors.yield ? 'input-error' : ''}
+                />
+                {formErrors.yield && <span className="error-message">{formErrors.yield}</span>}
+              </label>
+              <label className="input-control" style={{ flex: '1', minWidth: '200px' }}>
+                <span>Gramatura (g)</span>
+                <input
+                  type="number"
+                  value={formState.yieldWeight}
+                  onChange={(event) => {
+                    setFormState((prev) => ({ ...prev, yieldWeight: event.target.value }))
+                  }}
+                  placeholder="Ex.: 400 ou 100"
+                  min="0"
+                  step="1"
+                />
+              </label>
+            </div>
             <label className="input-control">
               <span>Tempo de preparo (minutos)</span>
               <input

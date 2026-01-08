@@ -242,7 +242,10 @@ export function ProfitabilityPage() {
             <span className="metric-label">Lucro por Lote</span>
             <strong className="metric-value">{formatCurrency(metrics.batchProfit)}</strong>
             {selectedRecipe && (
-              <small className="metric-description">Rendimento: {selectedRecipe.yield || 0} unidades</small>
+              <small className="metric-description">
+                Rendimento: {selectedRecipe.yieldQuantity || selectedRecipe.yield || 0} 
+                {selectedRecipe.yieldWeight ? ` (${selectedRecipe.yieldWeight}g)` : ' unidades'}
+              </small>
             )}
             {openTooltip === 'batch' && (
               <div className="metric-tooltip">
@@ -312,7 +315,10 @@ export function ProfitabilityPage() {
             <div className="unit-calculation-separator">÷</div>
             <div className="unit-calculation-item">
               <span className="unit-calculation-label">Quantidade de Unidades:</span>
-              <strong className="unit-calculation-value">{selectedRecipe.yield || 0}</strong>
+              <strong className="unit-calculation-value">
+                {selectedRecipe.yieldQuantity || selectedRecipe.yield || 0}
+                {selectedRecipe.yieldWeight ? ` (${selectedRecipe.yieldWeight}g)` : ''}
+              </strong>
             </div>
             <div className="unit-calculation-separator">=</div>
             <div className="unit-calculation-item unit-calculation-result">
