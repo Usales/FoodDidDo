@@ -537,7 +537,7 @@ export function FixedCostsPage() {
           </select>
         </label>
         <CurrencyInput 
-          label="Valor mensal" 
+          label="Valor" 
           value={formState.value} 
           onChange={(value) => setFormState((prev) => ({ ...prev, value }))} 
         />
@@ -591,7 +591,7 @@ export function FixedCostsPage() {
           </select>
         </label>
         <CurrencyInput 
-          label="Valor mensal" 
+          label="Valor" 
           value={formState.value} 
           onChange={(value) => setFormState((prev) => ({ ...prev, value }))} 
         />
