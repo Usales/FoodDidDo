@@ -1583,10 +1583,10 @@ export function DashboardPage() {
           </div>
         </header>
 
-        {showForm && !editingId ? (
-          <div className="meal-form">
+        {showForm ? (
+          <div className={`meal-form meal-form-desktop ${editingId ? 'meal-form-edit' : ''}`}>
             <div className="meal-form-header">
-              <h3>Nova refeição</h3>
+              <h3>{editingId ? 'Editar refeição' : 'Nova refeição'}</h3>
               <button
                 type="button"
                 className="meal-form-close"
@@ -1724,8 +1724,24 @@ export function DashboardPage() {
               </label>
             </div>
             <div className="meal-form-actions">
+              {editingId && (
+                <button
+                  type="button"
+                  className="delete-meal-btn"
+                  onClick={() => {
+                    handleDelete(editingId)
+                    setShowForm(false)
+                    setEditingId(null)
+                    setFormData(initialForm)
+                    setShowFabMenu(false)
+                  }}
+                  title="Excluir refeição"
+                >
+                  <FiTrash2 size={18} />
+                </button>
+              )}
               <button type="button" className="primary-btn" onClick={handleSubmit}>
-                Salvar refeição
+                {editingId ? 'Atualizar refeição' : 'Salvar refeição'}
               </button>
             </div>
           </div>
@@ -1778,7 +1794,7 @@ export function DashboardPage() {
                 </div>
               </article>
               {showForm && editingId === meal.id && (
-                <div className="meal-form">
+                <div className="meal-form meal-form-mobile">
                   <div className="meal-form-header">
                     <h3>Editar refeição</h3>
                     <button

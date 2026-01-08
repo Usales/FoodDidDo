@@ -296,10 +296,31 @@
   display: contents;
 }
 
-.meal-list .meal-form {
+/* Desktop: mostrar formulário no topo, ocultar abaixo do card */
+.meal-form-desktop {
+  display: block;
+}
+
+.meal-form-mobile {
+  display: none;
+}
+
+.meal-list .meal-form-mobile {
+  display: none;
   grid-column: 1 / -1;
   margin-top: -0.5rem;
   margin-bottom: 0.5rem;
+}
+
+/* Mobile: ocultar formulário no topo, mostrar abaixo do card */
+@media (max-width: 720px) {
+  .meal-form-desktop {
+    display: none;
+  }
+
+  .meal-list .meal-form-mobile {
+    display: block;
+  }
 }
 
 .meal-card {
