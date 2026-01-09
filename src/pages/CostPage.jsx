@@ -26,6 +26,7 @@ export function CostPage() {
     yieldQuantity: '',
     yieldWeight: '',
     prepTime: '',
+    contributionMargin: '45.0',
     recipeIngredients: []
   })
   const [editingIngredients, setEditingIngredients] = useState([]) // Ingredientes em edição (lado esquerdo)
@@ -107,6 +108,7 @@ export function CostPage() {
         yieldQuantity: yieldQuantity,
         yieldWeight: yieldWeight,
         prepTime: recipe.prepTime.toString(),
+        contributionMargin: recipe.contributionMargin ? (recipe.contributionMargin * 100).toFixed(1) : '45.0',
         recipeIngredients: convertedIngredients
       })
       setConfirmedIngredients(convertedIngredients)
@@ -117,14 +119,15 @@ export function CostPage() {
       }
     } else {
       setEditingId(null)
-    setFormState({
-      name: '',
-      yield: '',
-      yieldQuantity: '',
-      yieldWeight: '',
-      prepTime: '',
-      recipeIngredients: []
-    })
+      setFormState({
+        name: '',
+        yield: '',
+        yieldQuantity: '',
+        yieldWeight: '',
+        prepTime: '',
+        contributionMargin: '45.0',
+        recipeIngredients: []
+      })
       setConfirmedIngredients([])
       setEditingIngredients([])
     }
@@ -164,6 +167,7 @@ export function CostPage() {
           yieldQuantity: yieldQuantity,
           yieldWeight: yieldWeight,
           prepTime: recipe.prepTime.toString(),
+          contributionMargin: recipe.contributionMargin ? (recipe.contributionMargin * 100).toFixed(1) : '45.0',
           recipeIngredients: convertedIngredients
         })
         setConfirmedIngredients(convertedIngredients)
@@ -191,6 +195,7 @@ export function CostPage() {
       yieldQuantity: '',
       yieldWeight: '',
       prepTime: '',
+      contributionMargin: '45.0',
       recipeIngredients: []
     })
     setEditingIngredients([])
@@ -392,7 +397,9 @@ export function CostPage() {
     const yieldNum = Number(yieldValue)
     // Calcular custo unitário com mais precisão
     const unitCost = yieldNum > 0 ? usageCost / yieldNum : 0
-    const suggestedMargin = 0.45 // Margem padrão de 45%
+    // Usar margem do formState ou padrão de 45%
+    const marginPercent = Number(formState.contributionMargin) || 45.0
+    const suggestedMargin = marginPercent / 100
     const suggestedPrice = unitCost > 0 ? unitCost / (1 - suggestedMargin) : 0
     const suggestedProfit = suggestedPrice - unitCost
 
@@ -403,7 +410,7 @@ export function CostPage() {
       suggestedPrice: Number(suggestedPrice.toFixed(2)),
       suggestedProfit: Number(suggestedProfit.toFixed(2))
     }
-  }, [confirmedIngredients, formState.yield, formState.yieldQuantity])
+  }, [confirmedIngredients, formState.yield, formState.yieldQuantity, formState.contributionMargin])
 
   const handleSubmit = async () => {
     // Usar yieldQuantity se disponível, senão usar yield
@@ -474,6 +481,10 @@ export function CostPage() {
       quantity: Number(ing.quantity) || 0
     }))
 
+    // Converter margem de percentual para decimal
+    const marginPercent = Number(formState.contributionMargin) || 45.0
+    const contributionMargin = marginPercent / 100
+
     const recipeData = {
       name: formState.name.trim(),
       yield: yieldNum,
@@ -482,7 +493,7 @@ export function CostPage() {
       prepTime: prepTimeNum,
       totalCost: calculatedCosts.totalCost,
       unitCost: calculatedCosts.unitCost,
-      contributionMargin: 0.45, // Margem padrão
+      contributionMargin: contributionMargin,
       ingredients: ingredientsData
     }
 
@@ -573,12 +584,18 @@ export function CostPage() {
                   <th>Custo unitário</th>
                   <th>Rendimento</th>
                   <th>Margem %</th>
+                  <th>Lucro</th>
+                  <th>Preço de Venda</th>
                   <th>Ações</th>
                 </tr>
               </thead>
               <tbody>
                 {recipes.map((recipe) => {
                   const marginPercent = (recipe.contributionMargin * 100).toFixed(1)
+                  // Calcular lucro: custo unitário × margem
+                  const profit = recipe.unitCost * recipe.contributionMargin
+                  // Calcular preço de venda: lucro + custo unitário (ou custo / (1 - margem))
+                  const sellingPrice = recipe.unitCost + profit
                   return (
                     <tr key={recipe.id}>
                       <td className="recipe-name">{recipe.name}</td>
@@ -594,6 +611,8 @@ export function CostPage() {
                           {marginPercent}%
                         </span>
                       </td>
+                      <td className="recipe-profit">R$ {profit.toFixed(2)}</td>
+                      <td className="recipe-price">R$ {sellingPrice.toFixed(2)}</td>
                       <td>
                         <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                           <button
@@ -733,6 +752,36 @@ export function CostPage() {
                 className={formErrors.prepTime ? 'input-error' : ''}
               />
               {formErrors.prepTime && <span className="error-message">{formErrors.prepTime}</span>}
+            </label>
+            <label className="input-control">
+              <span>Margem de lucro (%)</span>
+              <input
+                type="number"
+                value={formState.contributionMargin}
+                onChange={(event) => {
+                  const value = event.target.value
+                  setFormState((prev) => ({ ...prev, contributionMargin: value }))
+                }}
+                placeholder="Ex.: 45.0"
+                min="0"
+                max="100"
+                step="0.1"
+              />
+              {formState.contributionMargin && (
+                <div style={{ 
+                  marginTop: '0.5rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem'
+                }}>
+                  <span className="margin-badge" style={{ 
+                    color: getMarginColor(Number(formState.contributionMargin) / 100),
+                    fontSize: '0.9rem'
+                  }}>
+                    {Number(formState.contributionMargin).toFixed(1)}%
+                  </span>
+                </div>
+              )}
             </label>
 
             <div className="ingredients-section">

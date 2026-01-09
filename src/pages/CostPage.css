@@ -121,6 +121,16 @@
   color: var(--text-muted);
 }
 
+.recipe-profit {
+  font-weight: 600;
+  color: var(--success, #059669);
+}
+
+.recipe-price {
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
 .margin-badge {
   display: inline-flex;
   align-items: center;
