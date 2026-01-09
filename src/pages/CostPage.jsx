@@ -611,26 +611,16 @@ export function CostPage() {
                           {marginPercent}%
                         </span>
                       </td>
-                      <td className="recipe-profit">R$ {profit.toFixed(2)}</td>
+                      <td className="recipe-profit">{profit.toFixed(2)}</td>
                       <td className="recipe-price">R$ {sellingPrice.toFixed(2)}</td>
                       <td>
-                        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                          <button
-                            type="button"
-                            className="edit-btn"
-                            onClick={() => handleOpenModal(recipe)}
-                          >
-                            Editar
-                          </button>
-                          <button
-                            type="button"
-                            className="delete-btn"
-                            onClick={() => handleDeleteRecipe(recipe.id, recipe.name)}
-                            title="Excluir receita"
-                          >
-                            <FiTrash2 />
-                          </button>
-                        </div>
+                        <button
+                          type="button"
+                          className="edit-btn"
+                          onClick={() => handleOpenModal(recipe)}
+                        >
+                          Editar
+                        </button>
                       </td>
                     </tr>
                   )
@@ -653,9 +643,48 @@ export function CostPage() {
         onClose={handleCloseModal}
         footer={
           <>
-            <button className="ghost-btn" type="button" onClick={handleCloseModal}>
-              Cancelar
-            </button>
+            <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+              {editingId && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (window.confirm('Tem certeza que deseja excluir esta receita?')) {
+                      handleDeleteRecipe(editingId, formState.name)
+                      handleCloseModal()
+                    }
+                  }}
+                  title="Excluir receita"
+                  style={{
+                    background: 'transparent',
+                    border: '1px solid var(--error, #dc2626)',
+                    borderRadius: '0.85rem',
+                    padding: '0.5rem 1rem',
+                    fontSize: '0.9rem',
+                    fontWeight: 500,
+                    color: 'var(--error, #dc2626)',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'var(--error, #dc2626)'
+                    e.currentTarget.style.color = '#ffffff'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'transparent'
+                    e.currentTarget.style.color = 'var(--error, #dc2626)'
+                  }}
+                >
+                  <FiTrash2 />
+                  Excluir
+                </button>
+              )}
+              <button className="ghost-btn" type="button" onClick={handleCloseModal}>
+                Cancelar
+              </button>
+            </div>
             <button className="primary-btn" type="button" onClick={handleSubmit}>
               {editingId ? 'Atualizar' : 'Salvar'}
             </button>
