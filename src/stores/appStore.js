@@ -112,6 +112,16 @@ export const useAppStore = create(devtools((set, get) => ({
   
   updateRecipe: async (id, updates) => {
     try {
+      // Se for apenas uma atualização parcial (como includeInBudget), atualizar localmente
+      if (Object.keys(updates).length === 1 && updates.includeInBudget !== undefined) {
+        set((state) => ({
+          recipes: state.recipes.map((recipe) => 
+            recipe.id === id ? { ...recipe, includeInBudget: updates.includeInBudget } : recipe
+          )
+        }))
+        return get().recipes.find((r) => r.id === id)
+      }
+      // Atualização completa
       const updated = await api.updateRecipe(id, updates)
       set((state) => ({
         recipes: state.recipes.map((recipe) => (recipe.id === id ? updated : recipe))

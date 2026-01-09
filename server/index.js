@@ -28,7 +28,7 @@ const fastify = Fastify({
 // Registrar CORS
 await fastify.register(cors, {
   origin: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']
 })
 
 // Rotas de Ingredientes
@@ -113,7 +113,7 @@ fastify.get('/api/recipes', async (request, reply) => {
 
 fastify.post('/api/recipes', async (request, reply) => {
   try {
-    const { name, yield: recipeYield, prepTime, totalCost, unitCost, contributionMargin, ingredients } = request.body
+    const { name, yield: recipeYield, prepTime, totalCost, unitCost, contributionMargin, includeInBudget, ingredients } = request.body
     
     // Validar dados obrigatórios
     if (!name || !recipeYield || !ingredients || ingredients.length === 0) {
@@ -172,6 +172,7 @@ fastify.post('/api/recipes', async (request, reply) => {
         totalCost: Number(totalCost) || 0,
         unitCost: Number(unitCost) || 0,
         contributionMargin: contributionMargin ? Number(contributionMargin) : null,
+        includeInBudget: includeInBudget !== undefined ? (includeInBudget === true || includeInBudget === 'true') : true,
         ingredients: {
           create: ingredientConnections
         }
@@ -270,6 +271,7 @@ fastify.put('/api/recipes/:id', async (request, reply) => {
         totalCost: Number(totalCost) || 0,
         unitCost: Number(unitCost) || 0,
         contributionMargin: contributionMargin ? Number(contributionMargin) : null,
+        includeInBudget: request.body.includeInBudget !== undefined ? (request.body.includeInBudget === true || request.body.includeInBudget === 'true') : undefined,
         ingredients: {
           create: ingredientConnections
         }
@@ -293,6 +295,43 @@ fastify.put('/api/recipes/:id', async (request, reply) => {
     }
   } catch (error) {
     fastify.log.error(error)
+    return reply.status(500).send({ 
+      error: 'Erro ao atualizar receita', 
+      message: error.message 
+    })
+  }
+})
+
+fastify.patch('/api/recipes/:id/budget', async (request, reply) => {
+  try {
+    const { id } = request.params
+    const { includeInBudget } = request.body
+    
+    const recipe = await prisma.recipe.update({
+      where: { id },
+      data: {
+        includeInBudget: includeInBudget === true || includeInBudget === 'true'
+      },
+      include: {
+        ingredients: {
+          include: {
+            ingredient: true
+          }
+        }
+      }
+    })
+    
+    // Transformar para o formato esperado pelo frontend
+    return {
+      ...recipe,
+      ingredients: recipe.ingredients.map(ri => ({
+        ...ri.ingredient,
+        quantity: ri.quantity,
+        unit: ri.unit
+      }))
+    }
+  } catch (error) {
+    fastify.log.error('Erro ao atualizar includeInBudget:', error)
     return reply.status(500).send({ 
       error: 'Erro ao atualizar receita', 
       message: error.message 

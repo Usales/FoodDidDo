@@ -43,6 +43,7 @@ model Recipe {
   totalCost         Float
   unitCost          Float
   contributionMargin Float?
+  includeInBudget   Boolean  @default(true) // Se os gastos devem estar no orçamento do mês
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
   

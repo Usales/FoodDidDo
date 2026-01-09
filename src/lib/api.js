@@ -63,6 +63,7 @@ export const api = {
   getRecipes: () => request('/api/recipes'),
   createRecipe: (data) => request('/api/recipes', { method: 'POST', body: data }),
   updateRecipe: (id, data) => request(`/api/recipes/${id}`, { method: 'PUT', body: data }),
+  updateRecipeBudget: (id, includeInBudget) => request(`/api/recipes/${id}/budget`, { method: 'PATCH', body: { includeInBudget } }),
   deleteRecipe: (id) => request(`/api/recipes/${id}`, { method: 'DELETE' }),
 
   // Orçamentos

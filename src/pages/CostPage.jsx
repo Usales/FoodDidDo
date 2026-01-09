@@ -3,6 +3,8 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { useAppStore } from '../stores/appStore'
 import { FormModal } from '../components/ui/FormModal'
 import { CurrencyInput } from '../components/ui/CurrencyInput'
+import { ToggleSwitch } from '../components/ui/ToggleSwitch'
+import { api } from '../lib/api'
 import { FiEdit2, FiTrash2, FiCheck, FiX } from 'react-icons/fi'
 import './PageCommon.css'
 import './CostPage.css'
@@ -12,9 +14,13 @@ export function CostPage() {
   const navigate = useNavigate()
   const recipes = useAppStore((state) => state.recipes)
   const ingredients = useAppStore((state) => state.ingredients)
+  const warehouses = useAppStore((state) => state.warehouses)
   const addRecipe = useAppStore((state) => state.addRecipe)
   const updateRecipe = useAppStore((state) => state.updateRecipe)
   const deleteRecipe = useAppStore((state) => state.deleteRecipe)
+  const addWarehouse = useAppStore((state) => state.addWarehouse)
+  const addWarehouseItem = useAppStore((state) => state.addWarehouseItem)
+  const updateWarehouseItem = useAppStore((state) => state.updateWarehouseItem)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isModalExpanded, setIsModalExpanded] = useState(false)
   const [editingId, setEditingId] = useState(null)
@@ -27,6 +33,7 @@ export function CostPage() {
     yieldWeight: '',
     prepTime: '',
     contributionMargin: '45.0',
+    includeInBudget: true,
     recipeIngredients: []
   })
   const [editingIngredients, setEditingIngredients] = useState([]) // Ingredientes em edição (lado esquerdo)
@@ -109,6 +116,7 @@ export function CostPage() {
         yieldWeight: yieldWeight,
         prepTime: recipe.prepTime.toString(),
         contributionMargin: recipe.contributionMargin ? (recipe.contributionMargin * 100).toFixed(1) : '45.0',
+        includeInBudget: recipe.includeInBudget !== false,
         recipeIngredients: convertedIngredients
       })
       setConfirmedIngredients(convertedIngredients)
@@ -126,6 +134,7 @@ export function CostPage() {
         yieldWeight: '',
         prepTime: '',
         contributionMargin: '45.0',
+        includeInBudget: true,
         recipeIngredients: []
       })
       setConfirmedIngredients([])
@@ -168,6 +177,7 @@ export function CostPage() {
           yieldWeight: yieldWeight,
           prepTime: recipe.prepTime.toString(),
           contributionMargin: recipe.contributionMargin ? (recipe.contributionMargin * 100).toFixed(1) : '45.0',
+          includeInBudget: recipe.includeInBudget !== false,
           recipeIngredients: convertedIngredients
         })
         setConfirmedIngredients(convertedIngredients)
@@ -196,6 +206,7 @@ export function CostPage() {
       yieldWeight: '',
       prepTime: '',
       contributionMargin: '45.0',
+      includeInBudget: true,
       recipeIngredients: []
     })
     setEditingIngredients([])
@@ -412,6 +423,102 @@ export function CostPage() {
     }
   }, [confirmedIngredients, formState.yield, formState.yieldQuantity, formState.contributionMargin])
 
+  // Função para garantir que existe um warehouse padrão "Estoque"
+  const ensureDefaultWarehouse = async () => {
+    // Buscar do estado atual
+    let defaultWarehouse = warehouses.find((w) => w.name.toLowerCase() === 'estoque')
+    
+    if (!defaultWarehouse) {
+      defaultWarehouse = await addWarehouse({
+        name: 'Estoque',
+        capacity: undefined,
+        capacityUnit: undefined
+      })
+      // Após criar, o warehouse será atualizado no store automaticamente pelo addWarehouse
+      // Buscar novamente do estado atualizado
+      const updatedState = useAppStore.getState()
+      defaultWarehouse = updatedState.warehouses.find((w) => w.id === defaultWarehouse.id) || defaultWarehouse
+    }
+    
+    return defaultWarehouse
+  }
+
+  // Função para sincronizar ingredientes da receita com o estoque
+  // Adiciona apenas a quantidade que sobra (pacote - quantidade usada)
+  const syncIngredientsToStock = async (recipeIngredients, shouldAddToStock) => {
+    if (!shouldAddToStock) {
+      return // Não sincronizar se o checkbox não estiver marcado
+    }
+
+    try {
+      const defaultWarehouse = await ensureDefaultWarehouse()
+      
+      if (!defaultWarehouse) {
+        console.error('Erro: Não foi possível obter o warehouse padrão')
+        return
+      }
+      
+      // Buscar warehouse atualizado do estado para ter os items mais recentes
+      // Recarregar do estado atualizado após criar/atualizar warehouse
+      const currentState = useAppStore.getState()
+      const warehouseWithItems = currentState.warehouses.find((w) => w.id === defaultWarehouse.id)
+      const items = warehouseWithItems?.items || defaultWarehouse.items || []
+      
+      for (const ingredient of recipeIngredients) {
+        const { emoji, name, packageQty, totalValue, quantity } = ingredient
+        
+        // Verificar se já existe um item com o mesmo nome no warehouse
+        const existingItem = items.find(
+          (item) => item.name.toLowerCase() === name.toLowerCase()
+        )
+        
+        // Calcular custo unitário baseado no pacote
+        const unitCost = packageQty && packageQty > 0 && totalValue > 0 
+          ? totalValue / packageQty 
+          : 0
+        
+        // Calcular quantidade que sobra: pacote - quantidade usada
+        const remainingQuantity = packageQty && packageQty > 0 && quantity > 0
+          ? Math.max(0, packageQty - quantity)
+          : 0
+        
+        // Se não sobrou nada, não adicionar ao estoque
+        if (remainingQuantity <= 0) {
+          continue
+        }
+        
+        if (existingItem) {
+          // Adicionar a quantidade que sobra à quantidade existente
+          const newQuantity = existingItem.quantity + remainingQuantity
+          await updateWarehouseItem(defaultWarehouse.id, existingItem.id, {
+            emoji: emoji || existingItem.emoji,
+            name: name,
+            quantity: newQuantity, // Adicionar a quantidade que sobra
+            unit: 'g', // Assumir gramas como padrão
+            minIdeal: existingItem.minIdeal || 0,
+            unitCost: unitCost || existingItem.unitCost || 0,
+            category: existingItem.category,
+            notes: existingItem.notes
+          })
+        } else {
+          // Criar novo item no estoque com a quantidade que sobra
+          await addWarehouseItem(defaultWarehouse.id, {
+            emoji: emoji || '📦',
+            name: name,
+            quantity: remainingQuantity, // Usar apenas a quantidade que sobra
+            unit: 'g', // Assumir gramas como padrão
+            minIdeal: 0,
+            unitCost: unitCost,
+            category: undefined,
+            notes: undefined
+          })
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao sincronizar ingredientes com estoque:', error)
+    }
+  }
+
   const handleSubmit = async () => {
     // Usar yieldQuantity se disponível, senão usar yield
     const yieldValue = formState.yieldQuantity || formState.yield
@@ -450,6 +557,7 @@ export function CostPage() {
       errors.ingredients = `Preencha todos os ingredientes com nome e valor total válidos (${invalidIngredients.length} inválido${invalidIngredients.length > 1 ? 's' : ''})`
     }
 
+    // Validar custo
     if (calculatedCosts.totalCost <= 0) {
       errors.cost = 'O custo total deve ser maior que zero'
     }
@@ -485,15 +593,19 @@ export function CostPage() {
     const marginPercent = Number(formState.contributionMargin) || 45.0
     const contributionMargin = marginPercent / 100
 
+    // Usar sempre o custo total (não mais receita rápida)
+    const finalTotalCost = calculatedCosts.totalCost
+
     const recipeData = {
       name: formState.name.trim(),
       yield: yieldNum,
       yieldQuantity: formState.yieldQuantity ? Number(formState.yieldQuantity) : undefined,
       yieldWeight: formState.yieldWeight ? Number(formState.yieldWeight) : undefined,
       prepTime: prepTimeNum,
-      totalCost: calculatedCosts.totalCost,
+      totalCost: finalTotalCost,
       unitCost: calculatedCosts.unitCost,
       contributionMargin: contributionMargin,
+      includeInBudget: formState.includeInBudget !== undefined ? formState.includeInBudget : true,
       ingredients: ingredientsData
     }
 
@@ -513,12 +625,20 @@ export function CostPage() {
         console.log('Receita adicionada:', newRecipe)
       }
 
+      // Não sincronizar ingredientes automaticamente ao salvar
+      // Os ingredientes só serão consumidos quando a receita for executada
+
       // Limpar erros e fechar modal
       setFormErrors({})
       handleCloseModal()
       
       // Mostrar feedback de sucesso
-      alert(editingId ? 'Receita atualizada com sucesso!' : 'Receita adicionada com sucesso!')
+      const message = editingId 
+        ? 'Receita atualizada com sucesso!' 
+        : quickRecipe 
+          ? 'Receita rápida adicionada com sucesso! (custo de uso aplicado)'
+          : 'Receita adicionada com sucesso!'
+      alert(message)
     } catch (error) {
       console.error('Erro ao salvar receita:', error)
       setFormErrors({ submit: 'Erro ao salvar receita. Tente novamente.' })
@@ -580,6 +700,7 @@ export function CostPage() {
             <table className="recipes-table">
               <thead>
                 <tr>
+                  <th style={{ width: '60px', textAlign: 'center' }}>Orçamento</th>
                   <th>Nome</th>
                   <th>Custo unitário</th>
                   <th>Rendimento</th>
@@ -598,6 +719,22 @@ export function CostPage() {
                   const sellingPrice = recipe.unitCost + profit
                   return (
                     <tr key={recipe.id}>
+                      <td style={{ textAlign: 'center', verticalAlign: 'middle', padding: '1rem 0.5rem' }}>
+                        <ToggleSwitch
+                          checked={recipe.includeInBudget !== false}
+                          onChange={async (e) => {
+                            const newValue = e.target.checked
+                            try {
+                              await api.updateRecipeBudget(recipe.id, newValue)
+                              // Atualizar no store localmente
+                              updateRecipe(recipe.id, { includeInBudget: newValue })
+                            } catch (error) {
+                              console.error('Erro ao atualizar includeInBudget:', error)
+                              alert('Erro ao atualizar. Tente novamente.')
+                            }
+                          }}
+                        />
+                      </td>
                       <td className="recipe-name">{recipe.name}</td>
                       <td className="recipe-cost">R$ {recipe.unitCost.toFixed(2)}</td>
                       <td className="recipe-yield">
@@ -685,7 +822,7 @@ export function CostPage() {
                 Cancelar
               </button>
             </div>
-            <button className="primary-btn" type="button" onClick={handleSubmit}>
+            <button className="primary-btn" type="button" onClick={() => handleSubmit()}>
               {editingId ? 'Atualizar' : 'Salvar'}
             </button>
           </>
