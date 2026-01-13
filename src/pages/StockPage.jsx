@@ -361,8 +361,12 @@ export function StockPage() {
           </div>
         ) : (
           filteredWarehouses.map((warehouse) => {
+            if (!warehouse || !warehouse.id) {
+              console.error('Armazém inválido:', warehouse)
+              return null
+            }
             const isExpanded = expandedWarehouses.has(warehouse.id)
-            const itemCount = warehouse.items.length
+            const itemCount = (warehouse.items || []).length
 
             return (
               <div
@@ -461,7 +465,7 @@ export function StockPage() {
                       🔽 ITENS DO ARMAZÉM
                     </div>
 
-                    {warehouse.items.length === 0 ? (
+                    {(!warehouse.items || warehouse.items.length === 0) ? (
                       <div
                         style={{
                           padding: '2rem',
@@ -475,7 +479,11 @@ export function StockPage() {
                       </div>
                     ) : (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                        {warehouse.items.map((item) => {
+                        {(warehouse.items || []).map((item) => {
+                          if (!item || !item.id) {
+                            console.error('Item inválido:', item)
+                            return null
+                          }
                           const status = getItemStatus(item.quantity, item.minIdeal)
 
                           return (
