@@ -1425,20 +1425,17 @@ export function CostPage() {
                         <input
                           type="number"
                           value={item.packageQty || ''}
-                          onChange={(e) => {
-                            const value = e.target.value
-                            handleUpdateIngredient(index, 'packageQty', value)
-                          }}
-                          onBlur={(e) => {
-                            const value = e.target.value
-                            if (value && (isNaN(Number(value)) || Number(value) < 0)) {
-                              handleUpdateIngredient(index, 'packageQty', '')
-                            }
-                          }}
+                          readOnly
                           placeholder="Qtd. original do pacote"
                           min="0"
                           step="0.01"
                           className="ingredient-package-qty"
+                          style={{ 
+                            cursor: 'not-allowed',
+                            background: 'var(--bg-secondary)',
+                            opacity: 0.8
+                          }}
+                          title="Quantidade original do pacote (não editável)"
                         />
                         
                         {/* Campo para mostrar quantidade disponível (se ingrediente já foi consumido) */}
