@@ -144,26 +144,31 @@ export function StockPage() {
     })
   }
 
-  const handleAddWarehouse = () => {
+  const handleAddWarehouse = async () => {
     if (!warehouseForm.name.trim()) return
 
-    if (editingWarehouse) {
-      updateWarehouse(editingWarehouse.id, {
-        name: warehouseForm.name,
-        capacity: warehouseForm.capacity ? Number(warehouseForm.capacity) : undefined,
-        capacityUnit: warehouseForm.capacityUnit
-      })
-    } else {
-      addWarehouse({
-        name: warehouseForm.name,
-        capacity: warehouseForm.capacity ? Number(warehouseForm.capacity) : undefined,
-        capacityUnit: warehouseForm.capacityUnit
-      })
-    }
+    try {
+      if (editingWarehouse) {
+        await updateWarehouse(editingWarehouse.id, {
+          name: warehouseForm.name.trim(),
+          capacity: warehouseForm.capacity ? Number(warehouseForm.capacity) : undefined,
+          capacityUnit: warehouseForm.capacityUnit
+        })
+      } else {
+        await addWarehouse({
+          name: warehouseForm.name.trim(),
+          capacity: warehouseForm.capacity ? Number(warehouseForm.capacity) : undefined,
+          capacityUnit: warehouseForm.capacityUnit
+        })
+      }
 
-    setWarehouseForm({ name: '', capacity: '', capacityUnit: 'kg' })
-    setEditingWarehouse(null)
-    setIsWarehouseModalOpen(false)
+      setWarehouseForm({ name: '', capacity: '', capacityUnit: 'kg' })
+      setEditingWarehouse(null)
+      setIsWarehouseModalOpen(false)
+    } catch (error) {
+      console.error('Erro ao salvar armazém:', error)
+      alert(`Erro ao salvar armazém: ${error.message || 'Erro desconhecido'}`)
+    }
   }
 
   const handleEditWarehouse = (warehouse) => {
