@@ -113,8 +113,9 @@
 }
 
 .logout-btn:hover {
+  background: var(--primary-color);
   transform: translateY(-1px);
-  box-shadow: 0 16px 26px rgba(52, 65, 86, 0.18);
+  box-shadow: 0 16px 26px rgba(220, 38, 38, 0.3);
 }
 
 .main-shell-content {
