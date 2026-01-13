@@ -504,15 +504,35 @@ export function StockPage() {
                       </div>
                     ) : (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                        {(warehouse.items || []).map((item) => {
-                          if (!item || !item.id) {
-                            console.error('Item inválido:', item)
-                            return null
-                          }
+                        {(() => {
+                          // Consolidar itens duplicados (mesmo nome) somando as quantidades
+                          const itemsMap = new Map()
+                          ;(warehouse.items || []).forEach((item) => {
+                            if (!item || !item.id) return
+                            
+                            const itemName = item.name.toLowerCase().trim()
+                            if (itemsMap.has(itemName)) {
+                              // Se já existe, somar a quantidade
+                              const existing = itemsMap.get(itemName)
+                              itemsMap.set(itemName, {
+                                ...existing,
+                                quantity: existing.quantity + (Number(item.quantity) || 0),
+                                // Manter o primeiro item como base, mas somar quantidades
+                                id: existing.id // Manter o ID do primeiro
+                              })
+                            } else {
+                              // Primeira ocorrência deste item
+                              itemsMap.set(itemName, { ...item, quantity: Number(item.quantity) || 0 })
+                            }
+                          })
                           
-                          // Calcular saldo real (quantidade inicial - quantidade consumida)
-                          const realStock = calculateRealStock(item.name, item.quantity)
-                          const status = getItemStatus(realStock, 0) // Usar 0 como mínimo ideal para o status
+                          // Converter Map para Array
+                          const consolidatedItems = Array.from(itemsMap.values())
+                          
+                          return consolidatedItems.map((item) => {
+                            // Calcular saldo real (quantidade inicial consolidada - quantidade consumida)
+                            const realStock = calculateRealStock(item.name, item.quantity)
+                            const status = getItemStatus(realStock, 0) // Usar 0 como mínimo ideal para o status
 
                           return (
                             <div
@@ -592,7 +612,8 @@ export function StockPage() {
                               </div>
                             </div>
                           )
-                        })}
+                        })
+                        })()}
                       </div>
                     )}
 
