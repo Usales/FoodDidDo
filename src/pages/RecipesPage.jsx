@@ -50,10 +50,14 @@ export function RecipesPage() {
   const filteredRecipes = useMemo(() => {
     if (!selectedIngredients.length) return recipes
     return recipes.filter((recipe) => {
+      const recipeTitle = (recipe.title || '').toLowerCase()
       const recipeIngredients = (recipe.ingredientsList || '').toLowerCase()
-      return selectedIngredients.some((ingredient) => {
+      return selectedIngredients.every((ingredient) => {
         const searchIngredient = ingredient.toLowerCase().trim()
-        return recipeIngredients.includes(searchIngredient)
+        const inTitle = recipeTitle.includes(searchIngredient)
+        const inDescription = recipeIngredients.includes(searchIngredient)
+        // O ingrediente deve estar TANTO no título QUANTO na descrição
+        return inTitle && inDescription
       })
     })
   }, [recipes, selectedIngredients])
