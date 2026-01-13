@@ -386,7 +386,17 @@ export function CostPage() {
             
             if (consumedIngredient) {
               // Se já foi consumido, usar o packageQty atualizado (já subtraído)
-              updated.packageQty = consumedIngredient.packageQty || ''
+              // Buscar o menor packageQty entre todos os ingredientes confirmados com o mesmo nome
+              const allConsumed = confirmedIngredients.filter(
+                (ing) => ing.name && ing.name.toLowerCase() === searchValue
+              )
+              // Pegar o menor packageQty (que é o mais atualizado/reduzido)
+              const minPackageQty = allConsumed.reduce((min, ing) => {
+                const qty = Number(ing.packageQty) || 0
+                return qty < min ? qty : min
+              }, Number(consumedIngredient.packageQty) || Infinity)
+              
+              updated.packageQty = minPackageQty !== Infinity ? minPackageQty.toString() : (consumedIngredient.packageQty || '')
               updated.name = consumedIngredient.name
               // Manter o totalValue original do primeiro consumo (não recalcular)
               // Buscar o ingrediente cadastrado para obter o valor original
@@ -1357,7 +1367,31 @@ export function CostPage() {
                               <div
                                 key={sugIndex}
                                 onClick={() => {
-                                  handleUpdateIngredient(index, 'name', suggestion)
+                                  // Forçar atualização completa do ingrediente ao selecionar da lista
+                                  const consumedIngredient = confirmedIngredients.find(
+                                    (ing) => ing.name && ing.name.toLowerCase() === suggestion.toLowerCase()
+                                  )
+                                  
+                                  if (consumedIngredient) {
+                                    // Se já foi consumido, buscar o menor packageQty
+                                    const allConsumed = confirmedIngredients.filter(
+                                      (ing) => ing.name && ing.name.toLowerCase() === suggestion.toLowerCase()
+                                    )
+                                    const minPackageQty = allConsumed.reduce((min, ing) => {
+                                      const qty = Number(ing.packageQty) || 0
+                                      return qty < min ? qty : min
+                                    }, Number(consumedIngredient.packageQty) || Infinity)
+                                    
+                                    // Atualizar nome e packageQty
+                                    handleUpdateIngredient(index, 'name', suggestion)
+                                    // Aguardar um momento para garantir que o estado foi atualizado
+                                    setTimeout(() => {
+                                      handleUpdateIngredient(index, 'packageQty', minPackageQty !== Infinity ? minPackageQty.toString() : '')
+                                    }, 0)
+                                  } else {
+                                    handleUpdateIngredient(index, 'name', suggestion)
+                                  }
+                                  
                                   setIngredientNameSuggestions((prev) => {
                                     const updated = { ...prev }
                                     delete updated[index]
