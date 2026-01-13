@@ -1421,23 +1421,40 @@ export function CostPage() {
                       </div>
                       
                       {/* Linha 2: Qtd. original do pacote | Valor total */}
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                        <input
-                          type="number"
-                          value={item.packageQty || ''}
-                          readOnly
-                          placeholder="Qtd. original do pacote"
-                          min="0"
-                          step="0.01"
-                          className="ingredient-package-qty"
-                          style={{ 
-                            cursor: 'not-allowed',
-                            background: 'var(--bg-secondary)',
-                            opacity: 0.8
-                          }}
-                          title="Quantidade original do pacote (não editável)"
-                        />
-                        
+                      <input
+                        type="number"
+                        value={item.packageQty || ''}
+                        readOnly
+                        placeholder="Qtd. original do pacote"
+                        min="0"
+                        step="0.01"
+                        className="ingredient-package-qty"
+                        style={{ 
+                          cursor: 'not-allowed',
+                          background: 'var(--bg-secondary)',
+                          opacity: 0.8
+                        }}
+                        title="Quantidade original do pacote (não editável)"
+                      />
+                      
+                      <input
+                        type="number"
+                        value={item.totalValue || ''}
+                        readOnly
+                        placeholder="Valor total (R$)"
+                        min="0"
+                        step="0.01"
+                        className="ingredient-value"
+                        style={{ 
+                          cursor: 'not-allowed',
+                          background: 'var(--bg-secondary)',
+                          opacity: 0.8
+                        }}
+                        title="Valor total do pacote (não editável)"
+                      />
+                      
+                      {/* Linha 3: Disponível + Mg/Ml usados (ao lado um do outro) */}
+                      <div style={{ display: 'flex', gap: '0.75rem', gridColumn: 'span 2' }}>
                         {/* Campo para mostrar quantidade disponível (se ingrediente já foi consumido) */}
                         {(() => {
                           const consumedIngredient = confirmedIngredients.find(
@@ -1470,53 +1487,38 @@ export function CostPage() {
                                   opacity: 0.8,
                                   color: availableQty > 0 ? 'var(--text-primary)' : 'var(--error)',
                                   fontSize: '0.85rem',
-                                  padding: '0.5rem 0.75rem'
+                                  padding: '0.5rem 0.75rem',
+                                  flex: '1'
                                 }}
                                 title="Quantidade disponível para uso (original - consumido)"
                               />
                             )
                           }
-                          return null
+                          return <div style={{ flex: '1' }}></div>
                         })()}
+                        
+                        <input
+                          type="number"
+                          value={item.quantity || ''}
+                          onChange={(e) => {
+                            const value = e.target.value
+                            handleUpdateIngredient(index, 'quantity', value)
+                          }}
+                          onBlur={(e) => {
+                            // Garantir que o valor seja válido ao sair do campo
+                            const value = e.target.value
+                            if (value && (isNaN(Number(value)) || Number(value) < 0)) {
+                              handleUpdateIngredient(index, 'quantity', '')
+                            }
+                            // NÃO recalcular valor total - deve manter o valor original do pacote
+                          }}
+                          placeholder="Mg/Ml usados"
+                          min="0"
+                          step="0.01"
+                          className="ingredient-quantity"
+                          style={{ flex: '1' }}
+                        />
                       </div>
-                      
-                      <input
-                        type="number"
-                        value={item.totalValue || ''}
-                        readOnly
-                        placeholder="Valor total (R$)"
-                        min="0"
-                        step="0.01"
-                        className="ingredient-value"
-                        style={{ 
-                          cursor: 'not-allowed',
-                          background: 'var(--bg-secondary)',
-                          opacity: 0.8
-                        }}
-                        title="Valor total do pacote (não editável)"
-                      />
-                      
-                      {/* Linha 3: Mg/Ml usados | Botão excluir */}
-                      <input
-                        type="number"
-                        value={item.quantity || ''}
-                        onChange={(e) => {
-                          const value = e.target.value
-                          handleUpdateIngredient(index, 'quantity', value)
-                        }}
-                        onBlur={(e) => {
-                          // Garantir que o valor seja válido ao sair do campo
-                          const value = e.target.value
-                          if (value && (isNaN(Number(value)) || Number(value) < 0)) {
-                            handleUpdateIngredient(index, 'quantity', '')
-                          }
-                          // NÃO recalcular valor total - deve manter o valor original do pacote
-                        }}
-                        placeholder="Mg/Ml usados"
-                        min="0"
-                        step="0.01"
-                        className="ingredient-quantity"
-                      />
                       
                       <div className="ingredient-action-buttons">
                         <button
