@@ -1454,7 +1454,7 @@ export function CostPage() {
                       />
                       
                       {/* Linha 3: Disponível + Mg/Ml usados (ao lado um do outro) */}
-                      <div style={{ display: 'flex', gap: '0.75rem', gridColumn: 'span 2' }}>
+                      <div style={{ display: 'flex', gap: '0.75rem', gridColumn: 'span 2', alignItems: 'center' }}>
                         {/* Campo para mostrar quantidade disponível (se ingrediente já foi consumido) */}
                         {(() => {
                           const consumedIngredient = confirmedIngredients.find(
@@ -1520,7 +1520,7 @@ export function CostPage() {
                         />
                       </div>
                       
-                      <div className="ingredient-action-buttons">
+                      <div className="ingredient-action-buttons" style={{ gridColumn: '3', gridRow: '3', alignSelf: 'center', justifySelf: 'end', paddingRight: '0.5rem' }}>
                         <button
                           type="button"
                           className="cancel-ingredient-btn"
