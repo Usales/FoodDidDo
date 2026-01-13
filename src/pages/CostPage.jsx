@@ -1499,7 +1499,7 @@ export function CostPage() {
                         title="Valor total do pacote (não editável)"
                       />
                       
-                      {/* Linha 3: Mg/Ml usados | Quantidade restante disponível | Botão excluir */}
+                      {/* Linha 3: Mg/Ml usados | Botão excluir */}
                       <input
                         type="number"
                         value={item.quantity || ''}
@@ -1520,46 +1520,6 @@ export function CostPage() {
                         step="0.01"
                         className="ingredient-quantity"
                       />
-                      
-                      {/* Campo para mostrar quantidade restante disponível */}
-                      {(() => {
-                        // Verificar se o ingrediente já foi consumido
-                        const consumedIngredient = confirmedIngredients.find(
-                          (ing) => ing.name && item.name && ing.name.toLowerCase() === item.name.toLowerCase().trim()
-                        )
-                        
-                        if (consumedIngredient && item.name) {
-                          // Calcular quantidade restante disponível
-                          const foundIngredient = ingredients.find(
-                            (ing) => ing.name.toLowerCase() === item.name.toLowerCase().trim()
-                          )
-                          
-                          const totalConsumed = confirmedIngredients
-                            .filter((ing) => ing.name && ing.name.toLowerCase() === item.name.toLowerCase().trim())
-                            .reduce((sum, ing) => sum + (Number(ing.quantity) || 0), 0)
-                          
-                          const originalPackageQty = foundIngredient?.packageQty || Number(item.packageQty) || 0
-                          const remainingQty = Math.max(0, originalPackageQty - totalConsumed)
-                          
-                          return (
-                            <input
-                              type="number"
-                              value={remainingQty}
-                              readOnly
-                              placeholder="Disponível"
-                              className="ingredient-remaining"
-                              style={{
-                                cursor: 'not-allowed',
-                                background: 'var(--bg-secondary)',
-                                opacity: 0.8,
-                                color: remainingQty > 0 ? 'var(--text-primary)' : 'var(--error)'
-                              }}
-                              title="Quantidade restante disponível no pacote"
-                            />
-                          )
-                        }
-                        return null
-                      })()}
                       
                       <div className="ingredient-action-buttons">
                         <button
