@@ -10,7 +10,7 @@ const pantryIngredients = [
   { id: 5, name: 'Batata', emoji: '🥔' },
   { id: 6, name: 'Cebola', emoji: '🧅' },
   { id: 7, name: 'Alho', emoji: '🧄' },
-  { id: 8, name: 'Pimentão', emoji: '🫑' },
+  { id: 8, name: 'Pimentão', emoji: '🌶️' },
   { id: 9, name: 'Pepino', emoji: '🥒' },
   { id: 10, name: 'Alface', emoji: '🥬' },
   { id: 11, name: 'Espinafre', emoji: '🍃' },
