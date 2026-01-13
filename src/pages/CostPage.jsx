@@ -491,10 +491,16 @@ export function CostPage() {
         capacity: undefined,
         capacityUnit: undefined
       })
-      // Após criar, o warehouse será atualizado no store automaticamente pelo addWarehouse
+      // Após criar, recarregar os warehouses para ter os items atualizados
+      await useAppStore.getState().loadData()
       // Buscar novamente do estado atualizado
       const updatedState = useAppStore.getState()
       defaultWarehouse = updatedState.warehouses.find((w) => w.id === defaultWarehouse.id) || defaultWarehouse
+    }
+    
+    // Garantir que items seja sempre um array
+    if (!defaultWarehouse.items || !Array.isArray(defaultWarehouse.items)) {
+      defaultWarehouse.items = []
     }
     
     return defaultWarehouse
@@ -518,10 +524,17 @@ export function CostPage() {
         return
       }
       
-      // Buscar warehouse atualizado do estado
+      // Buscar warehouse atualizado do estado e garantir que items seja um array
       const currentState = useAppStore.getState()
       const warehouseWithItems = currentState.warehouses.find((w) => w.id === defaultWarehouse.id)
-      const items = warehouseWithItems?.items || defaultWarehouse.items || []
+      
+      // Garantir que items seja sempre um array válido
+      let items = []
+      if (warehouseWithItems?.items && Array.isArray(warehouseWithItems.items)) {
+        items = warehouseWithItems.items
+      } else if (defaultWarehouse.items && Array.isArray(defaultWarehouse.items)) {
+        items = defaultWarehouse.items
+      }
       
       let addedCount = 0
       let updatedCount = 0
@@ -610,7 +623,14 @@ export function CostPage() {
       // Buscar warehouse atualizado do estado para ter os items mais recentes
       const currentState = useAppStore.getState()
       const warehouseWithItems = currentState.warehouses.find((w) => w.id === defaultWarehouse.id)
-      const items = warehouseWithItems?.items || defaultWarehouse.items || []
+      
+      // Garantir que items seja sempre um array válido
+      let items = []
+      if (warehouseWithItems?.items && Array.isArray(warehouseWithItems.items)) {
+        items = warehouseWithItems.items
+      } else if (defaultWarehouse.items && Array.isArray(defaultWarehouse.items)) {
+        items = defaultWarehouse.items
+      }
       
       for (const ingredient of recipeIngredients) {
         const { emoji, name, packageQty, totalValue } = ingredient

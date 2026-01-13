@@ -554,6 +554,9 @@ fastify.post('/api/warehouses', async (request, reply) => {
       name: request.body.name,
       capacity: request.body.capacity,
       capacityUnit: request.body.capacityUnit
+    },
+    include: {
+      items: true
     }
   })
   return warehouse
