@@ -392,13 +392,22 @@ export const useAppStore = create(devtools((set, get) => ({
   
   restoreData: async (backupData) => {
     if (!backupData || !backupData.data) {
-      throw new Error('Formato de backup inválido')
+      throw new Error('Formato de backup inválido. O arquivo não contém dados válidos.')
+    }
+    
+    // Validar estrutura básica do backup
+    const requiredFields = ['budgets', 'ingredients', 'recipes', 'fixedCosts', 'cashflow', 'stockMovements', 'warehouses']
+    const hasData = requiredFields.some(field => backupData.data[field] && Array.isArray(backupData.data[field]))
+    
+    if (!hasData) {
+      throw new Error('Formato de backup inválido. O arquivo não contém dados reconhecíveis.')
     }
     
     try {
-      await api.restoreData(backupData)
+      const result = await api.restoreData(backupData)
       // Recarregar dados após restauração
       await get().loadData()
+      return result
     } catch (error) {
       console.error('Erro ao restaurar dados:', error)
       throw error

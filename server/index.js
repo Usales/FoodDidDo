@@ -610,123 +610,319 @@ fastify.delete('/api/warehouses/:warehouseId/items/:itemId', async (request, rep
 
 // Rota de backup/export
 fastify.get('/api/export', async (request, reply) => {
-  const [budgets, ingredients, recipes, fixedCosts, cashflow, stockMovements, warehouses] = await Promise.all([
-    prisma.budget.findMany(),
-    prisma.ingredient.findMany(),
-    prisma.recipe.findMany({
-      include: {
-        ingredients: {
-          include: { ingredient: true }
+  try {
+    const [budgets, ingredients, recipes, fixedCosts, cashflow, stockMovements, warehouses, pricing] = await Promise.all([
+      prisma.budget.findMany(),
+      prisma.ingredient.findMany(),
+      prisma.recipe.findMany({
+        include: {
+          ingredients: {
+            include: { ingredient: true }
+          }
         }
+      }),
+      prisma.fixedCost.findMany(),
+      prisma.cashflowEntry.findMany(),
+      prisma.stockMovement.findMany(),
+      prisma.warehouse.findMany({
+        include: { items: true }
+      }),
+      prisma.pricing.findMany()
+    ])
+    
+    return {
+      version: '1.0.0',
+      exportDate: new Date().toISOString(),
+      data: {
+        budgets: budgets || [],
+        ingredients: ingredients || [],
+        recipes: (recipes || []).map(r => ({
+          ...r,
+          ingredients: (r.ingredients || []).map(ri => ({
+            ...ri.ingredient,
+            quantity: ri.quantity,
+            unit: ri.unit
+          }))
+        })),
+        fixedCosts: fixedCosts || [],
+        cashflow: cashflow || [],
+        stockMovements: stockMovements || [],
+        warehouses: warehouses || [],
+        pricing: pricing || []
       }
-    }),
-    prisma.fixedCost.findMany(),
-    prisma.cashflowEntry.findMany(),
-    prisma.stockMovement.findMany(),
-    prisma.warehouse.findMany({
-      include: { items: true }
-    })
-  ])
-  
-  return {
-    version: '1.0.0',
-    exportDate: new Date().toISOString(),
-    data: {
-      budgets,
-      ingredients,
-      recipes: recipes.map(r => ({
-        ...r,
-        ingredients: r.ingredients.map(ri => ({
-          ...ri.ingredient,
-          quantity: ri.quantity,
-          unit: ri.unit
-        }))
-      })),
-      fixedCosts,
-      cashflow,
-      stockMovements,
-      warehouses
     }
+  } catch (error) {
+    fastify.log.error('Erro ao exportar dados:', error)
+    return reply.status(500).send({ 
+      error: 'Erro ao exportar dados', 
+      message: error.message 
+    })
   }
 })
 
 // Rota de restore/import
 fastify.post('/api/restore', async (request, reply) => {
-  const { data } = request.body
-  
-  // Limpar dados existentes
-  await Promise.all([
-    prisma.budget.deleteMany(),
-    prisma.recipeIngredient.deleteMany(),
-    prisma.recipe.deleteMany(),
-    prisma.ingredient.deleteMany(),
-    prisma.fixedCost.deleteMany(),
-    prisma.cashflowEntry.deleteMany(),
-    prisma.stockMovement.deleteMany(),
-    prisma.warehouseItem.deleteMany(),
-    prisma.warehouse.deleteMany()
-  ])
-  
-  // Restaurar dados
-  if (data.budgets) {
-    await prisma.budget.createMany({ data: data.budgets })
-  }
-  
-  if (data.ingredients) {
-    await prisma.ingredient.createMany({ data: data.ingredients })
-  }
-  
-  if (data.recipes) {
-    for (const recipe of data.recipes) {
-      const { ingredients, ...recipeData } = recipe
-      const created = await prisma.recipe.create({
-        data: recipeData
+  try {
+    const { data } = request.body
+    
+    if (!data || typeof data !== 'object') {
+      return reply.status(400).send({ 
+        error: 'Dados inválidos', 
+        message: 'O arquivo de backup não contém dados válidos' 
       })
-      
-      if (ingredients && ingredients.length > 0) {
-        await prisma.recipeIngredient.createMany({
-          data: ingredients.map(ing => ({
-            recipeId: created.id,
-            ingredientId: ing.id || ing.ingredientId,
-            quantity: ing.quantity,
-            unit: ing.unit || 'g'
+    }
+    
+    // Limpar dados existentes (em ordem para respeitar foreign keys)
+    await Promise.all([
+      prisma.recipeIngredient.deleteMany(),
+      prisma.stockMovement.deleteMany(),
+      prisma.warehouseItem.deleteMany(),
+      prisma.warehouse.deleteMany(),
+      prisma.recipe.deleteMany(),
+      prisma.ingredient.deleteMany(),
+      prisma.budget.deleteMany(),
+      prisma.fixedCost.deleteMany(),
+      prisma.cashflowEntry.deleteMany(),
+      prisma.pricing.deleteMany()
+    ])
+    
+    // Restaurar dados na ordem correta (respeitando dependências)
+    
+    // 1. Ingredientes primeiro (necessários para receitas)
+    if (data.ingredients && Array.isArray(data.ingredients)) {
+      if (data.ingredients.length > 0) {
+        await prisma.ingredient.createMany({ 
+          data: data.ingredients.map(ing => ({
+            id: ing.id,
+            name: ing.name,
+            category: ing.category,
+            packagePrice: ing.packagePrice,
+            packageQty: ing.packageQty,
+            unitCost: ing.unitCost,
+            stockQty: ing.stockQty || 0,
+            lowStockThreshold: ing.lowStockThreshold || 0,
+            createdAt: ing.createdAt ? new Date(ing.createdAt) : new Date(),
+            updatedAt: ing.updatedAt ? new Date(ing.updatedAt) : new Date()
           }))
         })
       }
     }
-  }
-  
-  if (data.fixedCosts) {
-    await prisma.fixedCost.createMany({ data: data.fixedCosts })
-  }
-  
-  if (data.cashflow) {
-    await prisma.cashflowEntry.createMany({ data: data.cashflow })
-  }
-  
-  if (data.stockMovements) {
-    await prisma.stockMovement.createMany({ data: data.stockMovements })
-  }
-  
-  if (data.warehouses) {
-    for (const warehouse of data.warehouses) {
-      const { items, ...warehouseData } = warehouse
-      const created = await prisma.warehouse.create({
-        data: warehouseData
-      })
-      
-      if (items && items.length > 0) {
-        await prisma.warehouseItem.createMany({
-          data: items.map(item => ({
-            ...item,
-            warehouseId: created.id
+    
+    // 2. Orçamentos
+    if (data.budgets && Array.isArray(data.budgets)) {
+      if (data.budgets.length > 0) {
+        await prisma.budget.createMany({ 
+          data: data.budgets.map(b => ({
+            id: b.id,
+            period: b.period,
+            amount: b.amount,
+            spent: b.spent || 0,
+            createdAt: b.createdAt ? new Date(b.createdAt) : new Date(),
+            updatedAt: b.updatedAt ? new Date(b.updatedAt) : new Date()
           }))
         })
       }
     }
+    
+    // 3. Receitas (dependem de ingredientes)
+    if (data.recipes && Array.isArray(data.recipes)) {
+      for (const recipe of data.recipes) {
+        const { ingredients, ...recipeData } = recipe
+        const created = await prisma.recipe.create({
+          data: {
+            id: recipeData.id,
+            name: recipeData.name,
+            yield: recipeData.yield,
+            prepTime: recipeData.prepTime,
+            totalCost: recipeData.totalCost,
+            unitCost: recipeData.unitCost,
+            contributionMargin: recipeData.contributionMargin,
+            includeInBudget: recipeData.includeInBudget !== undefined ? recipeData.includeInBudget : true,
+            createdAt: recipeData.createdAt ? new Date(recipeData.createdAt) : new Date(),
+            updatedAt: recipeData.updatedAt ? new Date(recipeData.updatedAt) : new Date()
+          }
+        })
+        
+        // Restaurar ingredientes da receita
+        if (ingredients && Array.isArray(ingredients) && ingredients.length > 0) {
+          // Buscar IDs dos ingredientes pelo nome (caso os IDs tenham mudado)
+          const ingredientConnections = await Promise.all(
+            ingredients.map(async (ing) => {
+              let ingredientId = ing.id || ing.ingredientId
+              
+              // Se não tiver ID válido, tentar buscar pelo nome
+              if (!ingredientId && ing.name) {
+                const foundIngredient = await prisma.ingredient.findFirst({
+                  where: { name: ing.name.trim() }
+                })
+                if (foundIngredient) {
+                  ingredientId = foundIngredient.id
+                }
+              }
+              
+              if (!ingredientId) {
+                throw new Error(`Ingrediente não encontrado: ${ing.name || 'sem nome'}`)
+              }
+              
+              return {
+                recipeId: created.id,
+                ingredientId: ingredientId,
+                quantity: Number(ing.quantity) || 0,
+                unit: ing.unit || 'g'
+              }
+            })
+          )
+          
+          await prisma.recipeIngredient.createMany({
+            data: ingredientConnections
+          })
+        }
+      }
+    }
+    
+    // 4. Custos Fixos
+    if (data.fixedCosts && Array.isArray(data.fixedCosts)) {
+      if (data.fixedCosts.length > 0) {
+        await prisma.fixedCost.createMany({ 
+          data: data.fixedCosts.map(fc => ({
+            id: fc.id,
+            name: fc.name,
+            type: fc.type,
+            value: fc.value,
+            allocationMethod: fc.allocationMethod,
+            createdAt: fc.createdAt ? new Date(fc.createdAt) : new Date(),
+            updatedAt: fc.updatedAt ? new Date(fc.updatedAt) : new Date()
+          }))
+        })
+      }
+    }
+    
+    // 5. Pricing
+    if (data.pricing && Array.isArray(data.pricing)) {
+      if (data.pricing.length > 0) {
+        await prisma.pricing.createMany({ 
+          data: data.pricing.map(p => ({
+            id: p.id,
+            recipeId: p.recipeId || null,
+            recipeName: p.recipeName || null,
+            price: p.price,
+            margin: p.margin || null,
+            createdAt: p.createdAt ? new Date(p.createdAt) : new Date(),
+            updatedAt: p.updatedAt ? new Date(p.updatedAt) : new Date()
+          }))
+        })
+      }
+    }
+    
+    // 6. Fluxo de Caixa
+    if (data.cashflow && Array.isArray(data.cashflow)) {
+      if (data.cashflow.length > 0) {
+        await prisma.cashflowEntry.createMany({ 
+          data: data.cashflow.map(cf => ({
+            id: cf.id,
+            type: cf.type,
+            amount: cf.amount,
+            description: cf.description,
+            date: cf.date ? new Date(cf.date) : new Date(),
+            category: cf.category || null,
+            createdAt: cf.createdAt ? new Date(cf.createdAt) : new Date(),
+            updatedAt: cf.updatedAt ? new Date(cf.updatedAt) : new Date()
+          }))
+        })
+      }
+    }
+    
+    // 7. Movimentações de Estoque (dependem de ingredientes)
+    if (data.stockMovements && Array.isArray(data.stockMovements)) {
+      if (data.stockMovements.length > 0) {
+        // Validar que os ingredientes existem antes de criar movimentações
+        const validMovements = await Promise.all(
+          data.stockMovements.map(async (sm) => {
+            let ingredientId = sm.ingredientId
+            // Se o ingrediente não existir pelo ID, tentar buscar pelo nome
+            if (sm.ingredient?.name) {
+              const foundIngredient = await prisma.ingredient.findFirst({
+                where: { name: sm.ingredient.name.trim() }
+              })
+              if (foundIngredient) {
+                ingredientId = foundIngredient.id
+              }
+            }
+            return ingredientId ? {
+              id: sm.id,
+              ingredientId: ingredientId,
+              type: sm.type,
+              quantity: sm.quantity,
+              reference: sm.reference || null,
+              createdAt: sm.createdAt ? new Date(sm.createdAt) : new Date()
+            } : null
+          })
+        )
+        
+        const movementsToCreate = validMovements.filter(m => m !== null)
+        if (movementsToCreate.length > 0) {
+          await prisma.stockMovement.createMany({ data: movementsToCreate })
+        }
+      }
+    }
+    
+    // 8. Armazéns e Itens (últimos, pois dependem de nada)
+    if (data.warehouses && Array.isArray(data.warehouses)) {
+      for (const warehouse of data.warehouses) {
+        const { items, ...warehouseData } = warehouse
+        const created = await prisma.warehouse.create({
+          data: {
+            id: warehouseData.id,
+            name: warehouseData.name,
+            capacity: warehouseData.capacity || null,
+            capacityUnit: warehouseData.capacityUnit || null,
+            createdAt: warehouseData.createdAt ? new Date(warehouseData.createdAt) : new Date(),
+            updatedAt: warehouseData.updatedAt ? new Date(warehouseData.updatedAt) : new Date()
+          }
+        })
+        
+        if (items && Array.isArray(items) && items.length > 0) {
+          await prisma.warehouseItem.createMany({
+            data: items.map(item => ({
+              id: item.id,
+              warehouseId: created.id,
+              emoji: item.emoji || null,
+              name: item.name,
+              quantity: item.quantity,
+              unit: item.unit,
+              minIdeal: item.minIdeal || null,
+              unitCost: item.unitCost || null,
+              category: item.category || null,
+              notes: item.notes || null,
+              createdAt: item.createdAt ? new Date(item.createdAt) : new Date(),
+              updatedAt: item.updatedAt ? new Date(item.updatedAt) : new Date()
+            }))
+          })
+        }
+      }
+    }
+    
+    return { 
+      success: true,
+      message: 'Dados restaurados com sucesso',
+      summary: {
+        budgets: data.budgets?.length || 0,
+        ingredients: data.ingredients?.length || 0,
+        recipes: data.recipes?.length || 0,
+        fixedCosts: data.fixedCosts?.length || 0,
+        pricing: data.pricing?.length || 0,
+        cashflow: data.cashflow?.length || 0,
+        stockMovements: data.stockMovements?.length || 0,
+        warehouses: data.warehouses?.length || 0
+      }
+    }
+  } catch (error) {
+    fastify.log.error('Erro ao restaurar dados:', error)
+    return reply.status(500).send({ 
+      error: 'Erro ao restaurar dados', 
+      message: error.message 
+    })
   }
-  
-  return { success: true }
 })
 
 // Iniciar servidor

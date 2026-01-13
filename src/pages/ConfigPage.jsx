@@ -32,9 +32,9 @@ export function ConfigPage() {
     setTheme(newTheme)
   }
 
-  const handleBackup = () => {
+  const handleBackup = async () => {
     try {
-      const backupData = exportData()
+      const backupData = await exportData()
       const jsonString = JSON.stringify(backupData, null, 2)
       const blob = new Blob([jsonString], { type: 'application/json' })
       const url = URL.createObjectURL(blob)
@@ -46,10 +46,24 @@ export function ConfigPage() {
       link.click()
       document.body.removeChild(link)
       URL.revokeObjectURL(url)
-      alert('✅ Backup exportado com sucesso! O arquivo foi salvo no seu computador.')
+      
+      // Mostrar resumo do backup
+      const data = backupData.data || {}
+      const summary = [
+        `📊 Orçamentos: ${data.budgets?.length || 0}`,
+        `🥘 Receitas: ${data.recipes?.length || 0}`,
+        `🥬 Ingredientes: ${data.ingredients?.length || 0}`,
+        `💰 Custos Fixos: ${data.fixedCosts?.length || 0}`,
+        `💵 Pricing: ${data.pricing?.length || 0}`,
+        `💸 Fluxo de Caixa: ${data.cashflow?.length || 0}`,
+        `📦 Estoque: ${data.warehouses?.length || 0} armazén(s)`,
+        `📋 Movimentações: ${data.stockMovements?.length || 0}`
+      ].join('\n')
+      
+      alert(`✅ Backup exportado com sucesso!\n\n${summary}\n\nO arquivo foi salvo no seu computador.`)
     } catch (error) {
       console.error('Erro ao exportar backup:', error)
-      alert('❌ Erro ao exportar backup. Tente novamente.')
+      alert(`❌ Erro ao exportar backup: ${error.message || 'Tente novamente.'}`)
     }
   }
 
@@ -82,10 +96,29 @@ export function ConfigPage() {
           `Deseja continuar?`
         
         if (window.confirm(confirmMessage)) {
-          restoreData(backupData)
-          alert('✅ Dados restaurados com sucesso! A página será recarregada.')
-          // Recarregar a página para aplicar as mudanças
-          window.location.reload()
+          try {
+            const result = await restoreData(backupData)
+            
+            // Mostrar resumo da restauração
+            const summary = result?.summary || {}
+            const summaryText = [
+              `📊 Orçamentos: ${summary.budgets || 0}`,
+              `🥘 Receitas: ${summary.recipes || 0}`,
+              `🥬 Ingredientes: ${summary.ingredients || 0}`,
+              `💰 Custos Fixos: ${summary.fixedCosts || 0}`,
+              `💵 Pricing: ${summary.pricing || 0}`,
+              `💸 Fluxo de Caixa: ${summary.cashflow || 0}`,
+              `📦 Armazéns: ${summary.warehouses || 0}`,
+              `📋 Movimentações: ${summary.stockMovements || 0}`
+            ].join('\n')
+            
+            alert(`✅ Dados restaurados com sucesso!\n\n${summaryText}\n\nA página será recarregada.`)
+            // Recarregar a página para aplicar as mudanças
+            window.location.reload()
+          } catch (error) {
+            console.error('Erro ao restaurar:', error)
+            alert(`❌ Erro ao restaurar backup: ${error.message || 'Verifique o console para mais detalhes.'}`)
+          }
         }
       } catch (error) {
         console.error('Erro ao restaurar backup:', error)
