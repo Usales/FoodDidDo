@@ -7,6 +7,7 @@ import './PageCommon.css'
 
 export function BudgetPage() {
   const budgets = useAppStore((state) => state.budgets)
+  const recipes = useAppStore((state) => state.recipes)
   const addBudget = useAppStore((state) => state.addBudget)
   const loadData = useAppStore((state) => state.loadData)
 
@@ -56,10 +57,29 @@ export function BudgetPage() {
 
   const summary = useMemo(() => {
     const total = budgets.reduce((acc, budget) => acc + budget.amount, 0)
-    const spent = budgets.reduce((acc, budget) => acc + budget.spent, 0)
+    
+    // Calcular gastos baseado no custo total das receitas com includeInBudget = true
+    const spentFromRecipes = recipes
+      .filter((recipe) => recipe.includeInBudget !== false)
+      .reduce((acc, recipe) => acc + (recipe.totalCost || 0), 0)
+    
+    // Usar o maior valor entre o spent do banco e o calculado das receitas
+    const spent = Math.max(
+      budgets.reduce((acc, budget) => acc + budget.spent, 0),
+      spentFromRecipes
+    )
+    
     const balance = total - spent
-    const latest = budgets[0]
-    const progress = latest && latest.amount > 0 ? Math.min(100, Math.round((latest.spent / latest.amount) * 100)) : 0
+    const latest = sortedBudgets[0] || budgets[0]
+    
+    // Calcular progresso do orçamento mais recente
+    let progress = 0
+    if (latest && latest.amount > 0) {
+      // Para o orçamento mais recente, usar o spent calculado das receitas
+      const latestSpent = spentFromRecipes
+      progress = Math.min(100, Math.round((latestSpent / latest.amount) * 100))
+    }
+    
     return {
       total,
       spent,
@@ -67,7 +87,7 @@ export function BudgetPage() {
       latest,
       progress
     }
-  }, [budgets])
+  }, [budgets, recipes, sortedBudgets])
 
   const handleCreateBudget = async () => {
     const numericAmount = Number(amount)
@@ -117,7 +137,7 @@ export function BudgetPage() {
             <header>
               <h3>{summary.latest.period}</h3>
               <span>
-                R$ {summary.latest.spent.toFixed(2)} de R$ {summary.latest.amount.toFixed(2)}
+                R$ {summary.spent.toFixed(2)} de R$ {summary.latest.amount.toFixed(2)}
               </span>
             </header>
             <div className="progress-track">
@@ -151,13 +171,23 @@ export function BudgetPage() {
               </thead>
               <tbody>
                 {sortedBudgets.map((budget) => {
-                  const remaining = budget.amount - budget.spent
-                  const percentage = budget.amount > 0 ? Math.min(100, Math.round((budget.spent / budget.amount) * 100)) : 0
+                  // Calcular gastos baseado no custo total das receitas com includeInBudget = true
+                  // Para o orçamento mais recente, usar o cálculo das receitas
+                  const isLatest = budget.id === (sortedBudgets[0]?.id || budgets[0]?.id)
+                  const spentFromRecipes = recipes
+                    .filter((recipe) => recipe.includeInBudget !== false)
+                    .reduce((acc, recipe) => acc + (recipe.totalCost || 0), 0)
+                  
+                  // Usar spent calculado das receitas se for o mais recente, senão usar o do banco
+                  const actualSpent = isLatest ? spentFromRecipes : budget.spent
+                  const remaining = budget.amount - actualSpent
+                  const percentage = budget.amount > 0 ? Math.min(100, Math.round((actualSpent / budget.amount) * 100)) : 0
+                  
                   return (
                     <tr key={budget.id}>
                       <td className="budget-period">{budget.period}</td>
                       <td className="budget-amount">R$ {budget.amount.toFixed(2)}</td>
-                      <td className="budget-spent">R$ {budget.spent.toFixed(2)}</td>
+                      <td className="budget-spent">R$ {actualSpent.toFixed(2)}</td>
                       <td className="budget-remaining">R$ {remaining.toFixed(2)}</td>
                       <td className="budget-percentage">{percentage}%</td>
                       <td className="budget-progress-cell">
