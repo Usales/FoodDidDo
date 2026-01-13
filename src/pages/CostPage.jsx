@@ -41,6 +41,7 @@ export function CostPage() {
   const [editingConfirmedIndex, setEditingConfirmedIndex] = useState(null) // Índice do ingrediente confirmado sendo editado
   const [editingConfirmedData, setEditingConfirmedData] = useState(null) // Dados temporários do ingrediente sendo editado
   const [openEmojiPicker, setOpenEmojiPicker] = useState(null) // index do ingrediente com picker aberto
+  const [ingredientNameSuggestions, setIngredientNameSuggestions] = useState({}) // Sugestões de nomes por índice
   
   // Emojis comuns para picker
   const commonEmojis = [
@@ -312,8 +313,45 @@ export function CostPage() {
       }))
       return
     }
+    
+    const ingredientName = ingredient.name.trim()
+    const quantityUsed = Number(ingredient.quantity) || 0
+    const currentPackageQty = Number(ingredient.packageQty) || 0
+    
+    // Atualizar packageQty dos ingredientes já confirmados com o mesmo nome
+    setConfirmedIngredients((prev) => {
+      return prev.map((confirmed) => {
+        if (confirmed.name && confirmed.name.toLowerCase() === ingredientName.toLowerCase()) {
+          // Se já existe, subtrair a quantidade usada do packageQty
+          const updatedPackageQty = Math.max(0, (Number(confirmed.packageQty) || 0) - quantityUsed)
+          return {
+            ...confirmed,
+            packageQty: updatedPackageQty.toString()
+          }
+        }
+        return confirmed
+      })
+    })
+    
+    // Se o ingrediente já existe nos confirmados, atualizar o packageQty antes de adicionar
+    const existingConfirmed = confirmedIngredients.find(
+      (ing) => ing.name && ing.name.toLowerCase() === ingredientName.toLowerCase()
+    )
+    
+    let updatedIngredient = { ...ingredient }
+    if (existingConfirmed) {
+      // Se já existe, subtrair a quantidade usada do packageQty original
+      const originalPackageQty = Number(existingConfirmed.packageQty) || currentPackageQty
+      const updatedPackageQty = Math.max(0, originalPackageQty - quantityUsed)
+      updatedIngredient.packageQty = updatedPackageQty.toString()
+    } else {
+      // Se é novo, subtrair a quantidade usada do packageQty inicial
+      const updatedPackageQty = Math.max(0, currentPackageQty - quantityUsed)
+      updatedIngredient.packageQty = updatedPackageQty.toString()
+    }
+    
     // Mover da lista de edição para a lista de confirmados
-    setConfirmedIngredients((prev) => [...prev, ingredient])
+    setConfirmedIngredients((prev) => [...prev, updatedIngredient])
     setEditingIngredients((prev) => prev.filter((_, i) => i !== index))
     setOpenEmojiPicker(null)
     setIsModalExpanded(true)
@@ -329,22 +367,65 @@ export function CostPage() {
         if (i === index) {
           const updated = { ...item, [field]: value }
           
-          // Se atualizou o nome, verificar se corresponde a um ingrediente cadastrado
+          // Se atualizou o nome, verificar se corresponde a um ingrediente cadastrado ou já consumido
           if (field === 'name') {
-            const foundIngredient = ingredients.find(
-              (ing) => ing.name.toLowerCase() === value.toLowerCase().trim()
+            const searchValue = value.toLowerCase().trim()
+            
+            // Primeiro, verificar se existe nos ingredientes já confirmados (consumidos)
+            const consumedIngredient = confirmedIngredients.find(
+              (ing) => ing.name && ing.name.toLowerCase() === searchValue
             )
-            if (foundIngredient) {
-              // Se encontrou ingrediente, preencher quantidade original do pacote
-              updated.packageQty = foundIngredient.packageQty?.toString() || ''
+            
+            if (consumedIngredient) {
+              // Se já foi consumido, usar o packageQty atualizado (já subtraído)
+              updated.packageQty = consumedIngredient.packageQty || ''
+              updated.name = consumedIngredient.name
               // Se tem quantidade usada, calcular valor total
               if (updated.quantity) {
                 const quantity = Number(updated.quantity) || 0
-                updated.totalValue = (foundIngredient.unitCost * quantity).toFixed(2)
+                // Tentar encontrar o ingrediente cadastrado para obter unitCost
+                const foundIngredient = ingredients.find(
+                  (ing) => ing.name.toLowerCase() === searchValue
+                )
+                if (foundIngredient) {
+                  updated.totalValue = (foundIngredient.unitCost * quantity).toFixed(2)
+                }
               }
-              // Normalizar o nome para o nome exato do ingrediente cadastrado
-              updated.name = foundIngredient.name
+            } else {
+              // Se não foi consumido ainda, verificar se corresponde a um ingrediente cadastrado
+              const foundIngredient = ingredients.find(
+                (ing) => ing.name.toLowerCase() === searchValue
+              )
+              if (foundIngredient) {
+                // Se encontrou ingrediente, preencher quantidade original do pacote
+                updated.packageQty = foundIngredient.packageQty?.toString() || ''
+                // Se tem quantidade usada, calcular valor total
+                if (updated.quantity) {
+                  const quantity = Number(updated.quantity) || 0
+                  updated.totalValue = (foundIngredient.unitCost * quantity).toFixed(2)
+                }
+                // Normalizar o nome para o nome exato do ingrediente cadastrado
+                updated.name = foundIngredient.name
+              }
             }
+            
+            // Atualizar sugestões
+            const suggestions = []
+            // Adicionar ingredientes já consumidos
+            confirmedIngredients.forEach((ing) => {
+              if (ing.name && ing.name.toLowerCase().includes(searchValue) && searchValue.length > 0) {
+                suggestions.push(ing.name)
+              }
+            })
+            // Adicionar ingredientes cadastrados
+            ingredients.forEach((ing) => {
+              if (ing.name && ing.name.toLowerCase().includes(searchValue) && searchValue.length > 0) {
+                if (!suggestions.includes(ing.name)) {
+                  suggestions.push(ing.name)
+                }
+              }
+            })
+            setIngredientNameSuggestions((prev) => ({ ...prev, [index]: suggestions }))
           }
           
           // Se atualizou a quantidade original do pacote, não precisa recalcular
@@ -1210,16 +1291,103 @@ export function CostPage() {
                         </div>
                       </div>
                       
-                      {/* Linha 1: Nome do ingrediente (ocupa 2 colunas) */}
-                      <input
-                        type="text"
-                        value={item.name || ''}
-                        onChange={(e) =>
-                          handleUpdateIngredient(index, 'name', e.target.value)
-                        }
-                        placeholder="Nome do ingrediente"
-                        className="ingredient-name"
-                      />
+                      {/* Linha 1: Nome do ingrediente (ocupa 2 colunas) - Combobox */}
+                      <div style={{ position: 'relative', gridColumn: 'span 2' }}>
+                        <input
+                          type="text"
+                          value={item.name || ''}
+                          onChange={(e) =>
+                            handleUpdateIngredient(index, 'name', e.target.value)
+                          }
+                          onFocus={(e) => {
+                            // Mostrar sugestões ao focar
+                            const searchValue = (item.name || '').toLowerCase().trim()
+                            const suggestions = []
+                            confirmedIngredients.forEach((ing) => {
+                              if (ing.name && ing.name.toLowerCase().includes(searchValue)) {
+                                suggestions.push(ing.name)
+                              }
+                            })
+                            ingredients.forEach((ing) => {
+                              if (ing.name && ing.name.toLowerCase().includes(searchValue)) {
+                                if (!suggestions.includes(ing.name)) {
+                                  suggestions.push(ing.name)
+                                }
+                              }
+                            })
+                            setIngredientNameSuggestions((prev) => ({ ...prev, [index]: suggestions }))
+                          }}
+                          onBlur={(e) => {
+                            // Esconder sugestões após um pequeno delay para permitir clique
+                            setTimeout(() => {
+                              setIngredientNameSuggestions((prev) => {
+                                const updated = { ...prev }
+                                delete updated[index]
+                                return updated
+                              })
+                            }, 200)
+                          }}
+                          placeholder="Nome do ingrediente"
+                          className="ingredient-name"
+                          list={`ingredient-suggestions-${index}`}
+                        />
+                        {ingredientNameSuggestions[index] && ingredientNameSuggestions[index].length > 0 && (
+                          <div
+                            style={{
+                              position: 'absolute',
+                              top: '100%',
+                              left: 0,
+                              right: 0,
+                              background: 'var(--bg-card)',
+                              border: '1px solid var(--border-primary)',
+                              borderRadius: '8px',
+                              marginTop: '0.25rem',
+                              maxHeight: '200px',
+                              overflowY: 'auto',
+                              zIndex: 1000,
+                              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)'
+                            }}
+                          >
+                            {ingredientNameSuggestions[index].map((suggestion, sugIndex) => (
+                              <div
+                                key={sugIndex}
+                                onClick={() => {
+                                  handleUpdateIngredient(index, 'name', suggestion)
+                                  setIngredientNameSuggestions((prev) => {
+                                    const updated = { ...prev }
+                                    delete updated[index]
+                                    return updated
+                                  })
+                                }}
+                                style={{
+                                  padding: '0.75rem 1rem',
+                                  cursor: 'pointer',
+                                  borderBottom: '1px solid var(--border-primary)',
+                                  transition: 'background 0.2s'
+                                }}
+                                onMouseEnter={(e) => {
+                                  e.target.style.background = 'var(--bg-secondary)'
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.target.style.background = 'transparent'
+                                }}
+                              >
+                                {suggestion}
+                                {confirmedIngredients.some((ing) => ing.name === suggestion) && (
+                                  <span style={{ 
+                                    marginLeft: '0.5rem', 
+                                    fontSize: '0.75rem', 
+                                    color: 'var(--text-muted)',
+                                    fontStyle: 'italic'
+                                  }}>
+                                    (já consumido)
+                                  </span>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                       
                       {/* Linha 2: Qtd. original do pacote | Valor total */}
                       <input
