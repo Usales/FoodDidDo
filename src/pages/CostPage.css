@@ -221,7 +221,8 @@
 .ingredient-name,
 .ingredient-value,
 .ingredient-quantity,
-.ingredient-package-qty {
+.ingredient-package-qty,
+.ingredient-remaining {
   color: rgba(17, 24, 39, 0.92) !important;
   background: #ffffff !important;
   border: 1px solid rgba(148, 163, 184, 0.4) !important;
@@ -235,7 +236,8 @@
 .dark-theme .ingredient-name,
 .dark-theme .ingredient-value,
 .dark-theme .ingredient-quantity,
-.dark-theme .ingredient-package-qty {
+.dark-theme .ingredient-package-qty,
+.dark-theme .ingredient-remaining {
   color: var(--text-primary) !important;
   background: var(--bg-secondary) !important;
   border-color: var(--border-primary) !important;
@@ -244,21 +246,24 @@
 .ingredient-name::placeholder,
 .ingredient-value::placeholder,
 .ingredient-quantity::placeholder,
-.ingredient-package-qty::placeholder {
+.ingredient-package-qty::placeholder,
+.ingredient-remaining::placeholder {
   color: rgba(148, 163, 184, 0.7) !important;
 }
 
 .dark-theme .ingredient-name::placeholder,
 .dark-theme .ingredient-value::placeholder,
 .dark-theme .ingredient-quantity::placeholder,
-.dark-theme .ingredient-package-qty::placeholder {
+.dark-theme .ingredient-package-qty::placeholder,
+.dark-theme .ingredient-remaining::placeholder {
   color: var(--text-muted) !important;
 }
 
 .ingredient-name:focus,
 .ingredient-value:focus,
 .ingredient-quantity:focus,
-.ingredient-package-qty:focus {
+.ingredient-package-qty:focus,
+.ingredient-remaining:focus {
   outline: none;
   border-color: var(--primary-color) !important;
   box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1) !important;
@@ -268,7 +273,8 @@
 .dark-theme .ingredient-name:focus,
 .dark-theme .ingredient-value:focus,
 .dark-theme .ingredient-quantity:focus,
-.dark-theme .ingredient-package-qty:focus {
+.dark-theme .ingredient-package-qty:focus,
+.dark-theme .ingredient-remaining:focus {
   color: var(--text-primary) !important;
 }
 
@@ -311,6 +317,7 @@
 .ingredient-item {
   display: grid;
   grid-template-columns: auto 1fr 1fr;
+  gap: 0.75rem;
   grid-template-rows: auto auto auto;
   gap: 0.75rem;
   align-items: start;
