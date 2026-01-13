@@ -585,6 +585,14 @@ export function StockPage() {
                                     <span>
                                       Saldo: <strong>{realStock.toLocaleString('pt-BR')}</strong> {item.unit}
                                     </span>
+                                    {item.unitCost && item.unitCost > 0 && (
+                                      <>
+                                        <span>•</span>
+                                        <span>
+                                          Custo de compra: <strong>{formatCurrency(realStock * item.unitCost)}</strong>
+                                        </span>
+                                      </>
+                                    )}
                                   </div>
                                 </div>
                               </div>
