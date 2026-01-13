@@ -500,79 +500,90 @@ export function CostPage() {
     return defaultWarehouse
   }
 
-  // Função para sincronizar ingredientes da receita com o estoque
-  // Adiciona apenas a quantidade que sobra (pacote - quantidade usada)
-  const syncIngredientsToStock = async (recipeIngredients, shouldAddToStock) => {
-    if (!shouldAddToStock) {
-      return // Não sincronizar se o checkbox não estiver marcado
-    }
-
+  // Função para adicionar ingredientes da receita ao estoque automaticamente
+  // Adiciona a quantidade total do pacote ao estoque
+  const addIngredientsToStock = async (recipeIngredients) => {
     try {
+      // Garantir que existe um armazém "Estoque"
       const defaultWarehouse = await ensureDefaultWarehouse()
       
       if (!defaultWarehouse) {
-        console.error('Erro: Não foi possível obter o warehouse padrão')
+        console.error('Erro: Não foi possível criar ou obter o armazém padrão')
         return
       }
       
       // Buscar warehouse atualizado do estado para ter os items mais recentes
-      // Recarregar do estado atualizado após criar/atualizar warehouse
       const currentState = useAppStore.getState()
       const warehouseWithItems = currentState.warehouses.find((w) => w.id === defaultWarehouse.id)
       const items = warehouseWithItems?.items || defaultWarehouse.items || []
       
       for (const ingredient of recipeIngredients) {
-        const { emoji, name, packageQty, totalValue, quantity } = ingredient
+        const { emoji, name, packageQty, totalValue } = ingredient
         
-        // Verificar se já existe um item com o mesmo nome no warehouse
-        const existingItem = items.find(
-          (item) => item.name.toLowerCase() === name.toLowerCase()
+        // Buscar ingrediente cadastrado para obter unidade e outras informações
+        const foundIngredient = ingredients.find(
+          (ing) => ing.name.toLowerCase() === name.toLowerCase().trim()
         )
         
-        // Calcular custo unitário baseado no pacote
-        const unitCost = packageQty && packageQty > 0 && totalValue > 0 
-          ? totalValue / packageQty 
-          : 0
+        // Usar quantidade do pacote, ou quantidade usada se não houver pacote
+        const quantityToAdd = packageQty && Number(packageQty) > 0 
+          ? Number(packageQty) 
+          : (Number(ingredient.quantity) || 0)
         
-        // Calcular quantidade que sobra: pacote - quantidade usada
-        const remainingQuantity = packageQty && packageQty > 0 && quantity > 0
-          ? Math.max(0, packageQty - quantity)
-          : 0
-        
-        // Se não sobrou nada, não adicionar ao estoque
-        if (remainingQuantity <= 0) {
+        // Se não houver quantidade, pular
+        if (quantityToAdd <= 0) {
           continue
         }
         
+        // Verificar se já existe um item com o mesmo nome no warehouse
+        const existingItem = items.find(
+          (item) => item.name.toLowerCase() === name.toLowerCase().trim()
+        )
+        
+        // Calcular custo unitário baseado no pacote
+        const packageQtyNum = Number(packageQty) || 0
+        const totalValueNum = Number(totalValue) || 0
+        const unitCost = packageQtyNum > 0 && totalValueNum > 0 
+          ? totalValueNum / packageQtyNum 
+          : (foundIngredient?.unitCost || (totalValueNum > 0 && quantityToAdd > 0 ? totalValueNum / quantityToAdd : 0))
+        
+        // Determinar unidade: usar do ingrediente cadastrado, ou do item existente, ou 'g' como padrão
+        const itemUnit = foundIngredient?.packageQty ? 
+          (foundIngredient.packageQty > 0 ? 'g' : 'g') : // Assumir gramas para ingredientes com packageQty
+          (existingItem?.unit || 'g')
+        
         if (existingItem) {
-          // Adicionar a quantidade que sobra à quantidade existente
-          const newQuantity = existingItem.quantity + remainingQuantity
+          // Adicionar a quantidade à quantidade existente
+          const newQuantity = existingItem.quantity + quantityToAdd
           await updateWarehouseItem(defaultWarehouse.id, existingItem.id, {
             emoji: emoji || existingItem.emoji,
-            name: name,
-            quantity: newQuantity, // Adicionar a quantidade que sobra
-            unit: 'g', // Assumir gramas como padrão
+            name: name.trim(),
+            quantity: newQuantity,
+            unit: itemUnit,
             minIdeal: existingItem.minIdeal || 0,
             unitCost: unitCost || existingItem.unitCost || 0,
             category: existingItem.category,
             notes: existingItem.notes
           })
         } else {
-          // Criar novo item no estoque com a quantidade que sobra
+          // Criar novo item no estoque
           await addWarehouseItem(defaultWarehouse.id, {
             emoji: emoji || '📦',
-            name: name,
-            quantity: remainingQuantity, // Usar apenas a quantidade que sobra
-            unit: 'g', // Assumir gramas como padrão
+            name: name.trim(),
+            quantity: quantityToAdd,
+            unit: itemUnit,
             minIdeal: 0,
             unitCost: unitCost,
-            category: undefined,
+            category: foundIngredient?.category,
             notes: undefined
           })
         }
       }
+      
+      console.log('Ingredientes adicionados ao estoque com sucesso')
     } catch (error) {
-      console.error('Erro ao sincronizar ingredientes com estoque:', error)
+      console.error('Erro ao adicionar ingredientes ao estoque:', error)
+      // Não lançar erro para não interromper o fluxo de criação da receita
     }
   }
 
@@ -680,10 +691,10 @@ export function CostPage() {
         }
         await addRecipe(newRecipe)
         console.log('Receita adicionada:', newRecipe)
+        
+        // Adicionar ingredientes ao estoque automaticamente ao criar nova receita
+        await addIngredientsToStock(confirmedIngredients)
       }
-
-      // Não sincronizar ingredientes automaticamente ao salvar
-      // Os ingredientes só serão consumidos quando a receita for executada
 
       // Limpar rascunho ao salvar com sucesso
       clearDraft()
@@ -697,7 +708,7 @@ export function CostPage() {
         ? 'Receita atualizada com sucesso!' 
         : quickRecipe 
           ? 'Receita rápida adicionada com sucesso! (custo de uso aplicado)'
-          : 'Receita adicionada com sucesso!'
+          : 'Receita adicionada com sucesso! Ingredientes adicionados ao estoque.'
       alert(message)
     } catch (error) {
       console.error('Erro ao salvar receita:', error)
