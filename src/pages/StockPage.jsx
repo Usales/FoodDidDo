@@ -99,32 +99,35 @@ export function StockPage() {
 
   // Buscador inteligente
   const filteredWarehouses = useMemo(() => {
-    if (!searchQuery.trim()) return warehouses
+    if (!searchQuery.trim()) return warehouses || []
 
     const query = searchQuery.toLowerCase().trim()
 
-    return warehouses
+    return (warehouses || [])
+      .filter(warehouse => warehouse && warehouse.id && warehouse.name)
       .map((warehouse) => {
         // Verificar se o armazém corresponde
-        const warehouseMatches = warehouse.name.toLowerCase().includes(query)
+        const warehouseMatches = (warehouse.name || '').toLowerCase().includes(query)
 
         // Filtrar itens do armazém
-        const filteredItems = warehouse.items.filter((item) => {
+        const items = warehouse.items || []
+        const filteredItems = items.filter((item) => {
+          if (!item || !item.name) return false
           const itemMatches =
-            item.name.toLowerCase().includes(query) ||
-            item.emoji.includes(query) ||
-            item.category?.toLowerCase().includes(query) ||
-            getItemStatus(item.quantity, item.minIdeal).label.toLowerCase().includes(query) ||
-            query === 'ok' && item.quantity >= item.minIdeal ||
-            query === 'baixo' && item.quantity < item.minIdeal && item.quantity > 0 ||
-            query === 'crítico' && item.quantity === 0
+            (item.name || '').toLowerCase().includes(query) ||
+            (item.emoji || '').includes(query) ||
+            (item.category || '').toLowerCase().includes(query) ||
+            getItemStatus(item.quantity || 0, item.minIdeal || 0).label.toLowerCase().includes(query) ||
+            query === 'ok' && (item.quantity || 0) >= (item.minIdeal || 0) ||
+            query === 'baixo' && (item.quantity || 0) < (item.minIdeal || 0) && (item.quantity || 0) > 0 ||
+            query === 'crítico' && (item.quantity || 0) === 0
 
           return itemMatches
         })
 
         // Se o armazém corresponde ou tem itens que correspondem, incluir
         if (warehouseMatches || filteredItems.length > 0) {
-          return { ...warehouse, items: warehouseMatches ? warehouse.items : filteredItems }
+          return { ...warehouse, items: warehouseMatches ? items : filteredItems }
         }
 
         return null
