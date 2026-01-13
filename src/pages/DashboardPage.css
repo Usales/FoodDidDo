@@ -590,6 +590,7 @@
 }
 
 .fab-button:hover {
+  background: var(--primary-dark);
   transform: scale(1.1);
   box-shadow: 0 6px 16px rgba(220, 38, 38, 0.5);
 }
