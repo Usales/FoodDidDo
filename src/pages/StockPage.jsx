@@ -55,6 +55,7 @@ const units = ['g', 'kg', 'ml', 'L', 'un']
 
 export function StockPage() {
   const warehouses = useAppStore((state) => state.warehouses)
+  const recipes = useAppStore((state) => state.recipes)
   const addWarehouse = useAppStore((state) => state.addWarehouse)
   const updateWarehouse = useAppStore((state) => state.updateWarehouse)
   const deleteWarehouse = useAppStore((state) => state.deleteWarehouse)
@@ -134,6 +135,29 @@ export function StockPage() {
       })
       .filter(Boolean)
   }, [warehouses, searchQuery])
+
+  // Função para calcular o saldo real (quantidade inicial - quantidade consumida)
+  const calculateRealStock = useMemo(() => {
+    return (itemName, initialQuantity) => {
+      // Buscar todas as receitas que usam este ingrediente
+      const consumedQuantity = recipes.reduce((total, recipe) => {
+        if (!recipe.ingredients || !Array.isArray(recipe.ingredients)) {
+          return total
+        }
+        
+        // Somar todas as quantidades consumidas deste ingrediente em todas as receitas
+        const recipeConsumption = recipe.ingredients
+          .filter(ing => ing.name && ing.name.toLowerCase() === itemName.toLowerCase())
+          .reduce((sum, ing) => sum + (Number(ing.quantity) || 0), 0)
+        
+        return total + recipeConsumption
+      }, 0)
+      
+      // Saldo real = quantidade inicial - quantidade consumida
+      const realStock = Math.max(0, initialQuantity - consumedQuantity)
+      return realStock
+    }
+  }, [recipes])
 
   const toggleWarehouse = (warehouseId) => {
     setExpandedWarehouses((prev) => {
@@ -487,7 +511,10 @@ export function StockPage() {
                             console.error('Item inválido:', item)
                             return null
                           }
-                          const status = getItemStatus(item.quantity, item.minIdeal)
+                          
+                          // Calcular saldo real (quantidade inicial - quantidade consumida)
+                          const realStock = calculateRealStock(item.name, item.quantity)
+                          const status = getItemStatus(realStock, 0) // Usar 0 como mínimo ideal para o status
 
                           return (
                             <div
@@ -538,16 +565,8 @@ export function StockPage() {
                                     }}
                                   >
                                     <span>
-                                      Saldo: <strong>{item.quantity.toLocaleString('pt-BR')}</strong> {item.unit}
+                                      Saldo: <strong>{realStock.toLocaleString('pt-BR')}</strong> {item.unit}
                                     </span>
-                                    <span>•</span>
-                                    <span>
-                                      Mínimo ideal: <strong>{item.minIdeal.toLocaleString('pt-BR')}</strong> {item.unit}
-                </span>
-                                    <span>•</span>
-                <span>
-                                      Custo unitário: <strong>{formatCurrency(item.unitCost)}</strong>
-                </span>
                                   </div>
                                 </div>
                               </div>
