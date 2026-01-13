@@ -317,38 +317,46 @@ export function CostPage() {
     const ingredientName = ingredient.name.trim()
     const quantityUsed = Number(ingredient.quantity) || 0
     const currentPackageQty = Number(ingredient.packageQty) || 0
+    const totalValue = Number(ingredient.totalValue) || 0
+    
+    // Verificar se o ingrediente já existe nos confirmados
+    const existingConfirmed = confirmedIngredients.find(
+      (ing) => ing.name && ing.name.toLowerCase() === ingredientName.toLowerCase()
+    )
+    
+    let updatedIngredient = { ...ingredient }
+    
+    if (existingConfirmed) {
+      // Se já existe, usar o packageQty já reduzido e manter o totalValue original
+      const alreadyReducedPackageQty = Number(existingConfirmed.packageQty) || 0
+      const updatedPackageQty = Math.max(0, alreadyReducedPackageQty - quantityUsed)
+      updatedIngredient.packageQty = updatedPackageQty.toString()
+      // Manter o totalValue original (não alterar)
+      updatedIngredient.totalValue = existingConfirmed.totalValue || totalValue
+    } else {
+      // Se é novo, subtrair a quantidade usada do packageQty inicial
+      const updatedPackageQty = Math.max(0, currentPackageQty - quantityUsed)
+      updatedIngredient.packageQty = updatedPackageQty.toString()
+      // Manter o totalValue original
+      updatedIngredient.totalValue = totalValue.toString()
+    }
     
     // Atualizar packageQty dos ingredientes já confirmados com o mesmo nome
     setConfirmedIngredients((prev) => {
       return prev.map((confirmed) => {
         if (confirmed.name && confirmed.name.toLowerCase() === ingredientName.toLowerCase()) {
           // Se já existe, subtrair a quantidade usada do packageQty
-          const updatedPackageQty = Math.max(0, (Number(confirmed.packageQty) || 0) - quantityUsed)
+          const currentQty = Number(confirmed.packageQty) || 0
+          const updatedPackageQty = Math.max(0, currentQty - quantityUsed)
           return {
             ...confirmed,
             packageQty: updatedPackageQty.toString()
+            // Manter totalValue original (não alterar)
           }
         }
         return confirmed
       })
     })
-    
-    // Se o ingrediente já existe nos confirmados, atualizar o packageQty antes de adicionar
-    const existingConfirmed = confirmedIngredients.find(
-      (ing) => ing.name && ing.name.toLowerCase() === ingredientName.toLowerCase()
-    )
-    
-    let updatedIngredient = { ...ingredient }
-    if (existingConfirmed) {
-      // Se já existe, subtrair a quantidade usada do packageQty original
-      const originalPackageQty = Number(existingConfirmed.packageQty) || currentPackageQty
-      const updatedPackageQty = Math.max(0, originalPackageQty - quantityUsed)
-      updatedIngredient.packageQty = updatedPackageQty.toString()
-    } else {
-      // Se é novo, subtrair a quantidade usada do packageQty inicial
-      const updatedPackageQty = Math.max(0, currentPackageQty - quantityUsed)
-      updatedIngredient.packageQty = updatedPackageQty.toString()
-    }
     
     // Mover da lista de edição para a lista de confirmados
     setConfirmedIngredients((prev) => [...prev, updatedIngredient])
@@ -380,17 +388,20 @@ export function CostPage() {
               // Se já foi consumido, usar o packageQty atualizado (já subtraído)
               updated.packageQty = consumedIngredient.packageQty || ''
               updated.name = consumedIngredient.name
-              // Se tem quantidade usada, calcular valor total
-              if (updated.quantity) {
-                const quantity = Number(updated.quantity) || 0
-                // Tentar encontrar o ingrediente cadastrado para obter unitCost
-                const foundIngredient = ingredients.find(
-                  (ing) => ing.name.toLowerCase() === searchValue
-                )
-                if (foundIngredient) {
-                  updated.totalValue = (foundIngredient.unitCost * quantity).toFixed(2)
-                }
+              // Manter o totalValue original do primeiro consumo (não recalcular)
+              // Buscar o ingrediente cadastrado para obter o valor original
+              const foundIngredient = ingredients.find(
+                (ing) => ing.name.toLowerCase() === searchValue
+              )
+              if (foundIngredient && foundIngredient.packagePrice) {
+                // Usar o valor original do pacote completo
+                updated.totalValue = foundIngredient.packagePrice.toFixed(2)
+              } else if (consumedIngredient.totalValue) {
+                // Se não encontrar, usar o totalValue do primeiro consumo
+                updated.totalValue = consumedIngredient.totalValue
               }
+              // Limpar a quantidade usada para que o usuário preencha o novo consumo
+              updated.quantity = ''
             } else {
               // Se não foi consumido ainda, verificar se corresponde a um ingrediente cadastrado
               const foundIngredient = ingredients.find(
@@ -399,11 +410,8 @@ export function CostPage() {
               if (foundIngredient) {
                 // Se encontrou ingrediente, preencher quantidade original do pacote
                 updated.packageQty = foundIngredient.packageQty?.toString() || ''
-                // Se tem quantidade usada, calcular valor total
-                if (updated.quantity) {
-                  const quantity = Number(updated.quantity) || 0
-                  updated.totalValue = (foundIngredient.unitCost * quantity).toFixed(2)
-                }
+                // Preencher valor total original do pacote
+                updated.totalValue = foundIngredient.packagePrice?.toFixed(2) || ''
                 // Normalizar o nome para o nome exato do ingrediente cadastrado
                 updated.name = foundIngredient.name
               }
@@ -430,15 +438,12 @@ export function CostPage() {
           
           // Se atualizou a quantidade original do pacote, não precisa recalcular
           
-          // Se atualizou a quantidade usada e tem um ingrediente cadastrado, recalcular valor total
+          // Se atualizou a quantidade usada, NÃO recalcular valor total
+          // O valor total deve manter o valor original do pacote completo
+          // Apenas validar se a quantidade é válida
           if (field === 'quantity') {
-            const foundIngredient = ingredients.find(
-              (ing) => ing.name.toLowerCase() === (updated.name || '').toLowerCase().trim()
-            )
-            if (foundIngredient) {
-              const quantity = Number(value) || 0
-              updated.totalValue = (foundIngredient.unitCost * quantity).toFixed(2)
-            }
+            // Não alterar totalValue - deve manter o valor original do pacote
+            // A quantidade é apenas para registrar quanto será usado agora
           }
           
           return updated
@@ -1442,19 +1447,8 @@ export function CostPage() {
                           const value = e.target.value
                           if (value && (isNaN(Number(value)) || Number(value) < 0)) {
                             handleUpdateIngredient(index, 'quantity', '')
-                          } else {
-                            // Recalcular valor total quando sair do campo de quantidade
-                            const currentItem = editingIngredients[index]
-                            if (currentItem && currentItem.name) {
-                              const foundIngredient = ingredients.find(
-                                (ing) => ing.name.toLowerCase() === currentItem.name.toLowerCase().trim()
-                              )
-                              if (foundIngredient && value) {
-                                const quantity = Number(value) || 0
-                                handleUpdateIngredient(index, 'totalValue', (foundIngredient.unitCost * quantity).toFixed(2))
-                              }
-                            }
                           }
+                          // NÃO recalcular valor total - deve manter o valor original do pacote
                         }}
                         placeholder="Mg/Ml usados"
                         min="0"
