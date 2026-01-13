@@ -395,11 +395,8 @@ export function CostPage() {
               const originalPackageQty = foundIngredient?.packageQty || Number(consumedIngredient.packageQty) || 0
               updated.packageQty = originalPackageQty.toString()
               updated.name = consumedIngredient.name
+              
               // Manter o totalValue original do primeiro consumo (não recalcular)
-              // Buscar o ingrediente cadastrado para obter o valor original
-              const foundIngredient = ingredients.find(
-                (ing) => ing.name.toLowerCase() === searchValue
-              )
               if (foundIngredient && foundIngredient.packagePrice) {
                 // Usar o valor original do pacote completo
                 updated.totalValue = foundIngredient.packagePrice.toFixed(2)
