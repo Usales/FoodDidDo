@@ -385,22 +385,15 @@ export function CostPage() {
             )
             
             if (consumedIngredient) {
-              // Se já foi consumido, calcular o packageQty restante
+              // Se já foi consumido, manter o packageQty original (congelado)
               // Buscar o ingrediente cadastrado para obter o packageQty original
               const foundIngredient = ingredients.find(
                 (ing) => ing.name.toLowerCase() === searchValue
               )
               
-              // Calcular total consumido de todos os ingredientes confirmados com o mesmo nome
-              const totalConsumed = confirmedIngredients
-                .filter((ing) => ing.name && ing.name.toLowerCase() === searchValue)
-                .reduce((sum, ing) => sum + (Number(ing.quantity) || 0), 0)
-              
-              // PackageQty restante = original - total consumido
+              // Manter sempre o packageQty original (não reduzir)
               const originalPackageQty = foundIngredient?.packageQty || Number(consumedIngredient.packageQty) || 0
-              const remainingPackageQty = Math.max(0, originalPackageQty - totalConsumed)
-              
-              updated.packageQty = remainingPackageQty.toString()
+              updated.packageQty = originalPackageQty.toString()
               updated.name = consumedIngredient.name
               // Manter o totalValue original do primeiro consumo (não recalcular)
               // Buscar o ingrediente cadastrado para obter o valor original
@@ -1380,23 +1373,17 @@ export function CostPage() {
                                   handleUpdateIngredient(index, 'name', suggestion)
                                   
                                   if (consumedIngredient) {
-                                    // Se já foi consumido, calcular packageQty restante
+                                    // Se já foi consumido, manter packageQty original (congelado)
                                     const foundIngredient = ingredients.find(
                                       (ing) => ing.name.toLowerCase() === suggestion.toLowerCase()
                                     )
                                     
-                                    // Calcular total consumido
-                                    const totalConsumed = confirmedIngredients
-                                      .filter((ing) => ing.name && ing.name.toLowerCase() === suggestion.toLowerCase())
-                                      .reduce((sum, ing) => sum + (Number(ing.quantity) || 0), 0)
-                                    
-                                    // PackageQty restante = original - total consumido
+                                    // Manter sempre o packageQty original
                                     const originalPackageQty = foundIngredient?.packageQty || Number(consumedIngredient.packageQty) || 0
-                                    const remainingPackageQty = Math.max(0, originalPackageQty - totalConsumed)
                                     
                                     // Aguardar um momento para garantir que o estado foi atualizado
                                     setTimeout(() => {
-                                      handleUpdateIngredient(index, 'packageQty', remainingPackageQty.toString())
+                                      handleUpdateIngredient(index, 'packageQty', originalPackageQty.toString())
                                     }, 10)
                                   }
                                   
@@ -1437,24 +1424,67 @@ export function CostPage() {
                       </div>
                       
                       {/* Linha 2: Qtd. original do pacote | Valor total */}
-                      <input
-                        type="number"
-                        value={item.packageQty || ''}
-                        onChange={(e) => {
-                          const value = e.target.value
-                          handleUpdateIngredient(index, 'packageQty', value)
-                        }}
-                        onBlur={(e) => {
-                          const value = e.target.value
-                          if (value && (isNaN(Number(value)) || Number(value) < 0)) {
-                            handleUpdateIngredient(index, 'packageQty', '')
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                        <input
+                          type="number"
+                          value={item.packageQty || ''}
+                          onChange={(e) => {
+                            const value = e.target.value
+                            handleUpdateIngredient(index, 'packageQty', value)
+                          }}
+                          onBlur={(e) => {
+                            const value = e.target.value
+                            if (value && (isNaN(Number(value)) || Number(value) < 0)) {
+                              handleUpdateIngredient(index, 'packageQty', '')
+                            }
+                          }}
+                          placeholder="Qtd. original do pacote"
+                          min="0"
+                          step="0.01"
+                          className="ingredient-package-qty"
+                        />
+                        
+                        {/* Campo para mostrar quantidade disponível (se ingrediente já foi consumido) */}
+                        {(() => {
+                          const consumedIngredient = confirmedIngredients.find(
+                            (ing) => ing.name && item.name && ing.name.toLowerCase() === item.name.toLowerCase().trim()
+                          )
+                          
+                          if (consumedIngredient && item.name) {
+                            // Calcular quantidade disponível
+                            const foundIngredient = ingredients.find(
+                              (ing) => ing.name.toLowerCase() === item.name.toLowerCase().trim()
+                            )
+                            
+                            const totalConsumed = confirmedIngredients
+                              .filter((ing) => ing.name && ing.name.toLowerCase() === item.name.toLowerCase().trim())
+                              .reduce((sum, ing) => sum + (Number(ing.quantity) || 0), 0)
+                            
+                            const originalPackageQty = foundIngredient?.packageQty || Number(item.packageQty) || 0
+                            const availableQty = Math.max(0, originalPackageQty - totalConsumed)
+                            
+                            return (
+                              <input
+                                type="number"
+                                value={availableQty}
+                                readOnly
+                                placeholder="Disponível"
+                                className="ingredient-available"
+                                style={{
+                                  cursor: 'not-allowed',
+                                  background: 'var(--bg-secondary)',
+                                  opacity: 0.8,
+                                  color: availableQty > 0 ? 'var(--text-primary)' : 'var(--error)',
+                                  fontSize: '0.85rem',
+                                  padding: '0.5rem 0.75rem'
+                                }}
+                                title="Quantidade disponível para uso (original - consumido)"
+                              />
+                            )
                           }
-                        }}
-                        placeholder="Qtd. original do pacote"
-                        min="0"
-                        step="0.01"
-                        className="ingredient-package-qty"
-                      />
+                          return null
+                        })()}
+                      </div>
                       
                       <input
                         type="number"
