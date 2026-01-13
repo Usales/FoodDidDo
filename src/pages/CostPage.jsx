@@ -80,6 +80,49 @@ export function CostPage() {
     }
   }, [recipes])
 
+  // Funções para salvar e carregar rascunho
+  const saveDraft = () => {
+    if (!editingId) {
+      const draft = {
+        formState,
+        confirmedIngredients,
+        editingIngredients,
+        isModalExpanded
+      }
+      localStorage.setItem('recipeDraft', JSON.stringify(draft))
+    }
+  }
+
+  const loadDraft = () => {
+    try {
+      const draftStr = localStorage.getItem('recipeDraft')
+      if (draftStr) {
+        const draft = JSON.parse(draftStr)
+        setFormState(draft.formState || {
+          name: '',
+          yield: '',
+          yieldQuantity: '',
+          yieldWeight: '',
+          prepTime: '',
+          contributionMargin: '45.0',
+          includeInBudget: true,
+          recipeIngredients: []
+        })
+        setConfirmedIngredients(draft.confirmedIngredients || [])
+        setEditingIngredients(draft.editingIngredients || [])
+        setIsModalExpanded(draft.isModalExpanded || false)
+        return true
+      }
+    } catch (error) {
+      console.error('Erro ao carregar rascunho:', error)
+    }
+    return false
+  }
+
+  const clearDraft = () => {
+    localStorage.removeItem('recipeDraft')
+  }
+
   const handleOpenModal = (recipe = null) => {
     if (recipe) {
       setEditingId(recipe.id)
@@ -127,18 +170,22 @@ export function CostPage() {
       }
     } else {
       setEditingId(null)
-      setFormState({
-        name: '',
-        yield: '',
-        yieldQuantity: '',
-        yieldWeight: '',
-        prepTime: '',
-        contributionMargin: '45.0',
-        includeInBudget: true,
-        recipeIngredients: []
-      })
-      setConfirmedIngredients([])
-      setEditingIngredients([])
+      // Tentar carregar rascunho, se não houver, usar valores padrão
+      const hasDraft = loadDraft()
+      if (!hasDraft) {
+        setFormState({
+          name: '',
+          yield: '',
+          yieldQuantity: '',
+          yieldWeight: '',
+          prepTime: '',
+          contributionMargin: '45.0',
+          includeInBudget: true,
+          recipeIngredients: []
+        })
+        setConfirmedIngredients([])
+        setEditingIngredients([])
+      }
     }
     setIsModalOpen(true)
   }
@@ -195,22 +242,32 @@ export function CostPage() {
   }, [location.state?.editRecipeId, recipes])
 
   const handleCloseModal = () => {
+    // Salvar rascunho antes de fechar (apenas se não estiver editando)
+    if (!editingId) {
+      saveDraft()
+    }
+    
     setIsModalOpen(false)
     setIsModalExpanded(false)
     setEditingId(null)
     setFormErrors({})
-    setFormState({
-      name: '',
-      yield: '',
-      yieldQuantity: '',
-      yieldWeight: '',
-      prepTime: '',
-      contributionMargin: '45.0',
-      includeInBudget: true,
-      recipeIngredients: []
-    })
-    setEditingIngredients([])
-    setConfirmedIngredients([])
+    
+    // Só limpar se não estiver salvando rascunho (ou seja, se estiver editando)
+    if (editingId) {
+      setFormState({
+        name: '',
+        yield: '',
+        yieldQuantity: '',
+        yieldWeight: '',
+        prepTime: '',
+        contributionMargin: '45.0',
+        includeInBudget: true,
+        recipeIngredients: []
+      })
+      setEditingIngredients([])
+      setConfirmedIngredients([])
+    }
+    
     setEditingConfirmedIndex(null)
     setEditingConfirmedData(null)
     setOpenEmojiPicker(null)
@@ -628,6 +685,9 @@ export function CostPage() {
       // Não sincronizar ingredientes automaticamente ao salvar
       // Os ingredientes só serão consumidos quando a receita for executada
 
+      // Limpar rascunho ao salvar com sucesso
+      clearDraft()
+      
       // Limpar erros e fechar modal
       setFormErrors({})
       handleCloseModal()
