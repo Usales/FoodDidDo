@@ -76,7 +76,7 @@ export function ConfigPage() {
     if (!file) return
 
     const reader = new FileReader()
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       try {
         const jsonContent = e.target?.result
         if (typeof jsonContent !== 'string') {
