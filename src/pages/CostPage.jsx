@@ -1417,21 +1417,17 @@ export function CostPage() {
                       <input
                         type="number"
                         value={item.totalValue || ''}
-                        onChange={(e) => {
-                          const value = e.target.value
-                          handleUpdateIngredient(index, 'totalValue', value)
-                        }}
-                        onBlur={(e) => {
-                          // Garantir que o valor seja válido ao sair do campo
-                          const value = e.target.value
-                          if (value && (isNaN(Number(value)) || Number(value) <= 0)) {
-                            handleUpdateIngredient(index, 'totalValue', '')
-                          }
-                        }}
+                        readOnly
                         placeholder="Valor total (R$)"
                         min="0"
                         step="0.01"
                         className="ingredient-value"
+                        style={{ 
+                          cursor: 'not-allowed',
+                          background: 'var(--bg-secondary)',
+                          opacity: 0.8
+                        }}
+                        title="Valor total do pacote (não editável)"
                       />
                       
                       {/* Linha 3: Mg/Ml usados | Botão excluir */}
