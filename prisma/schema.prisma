@@ -11,12 +11,12 @@ datasource db {
 }
 
 model Budget {
-  id          String   @id @default(uuid())
-  period      String
-  amount      Float
-  spent       Float    @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String   @id @default(uuid())
+  period    String
+  amount    Float
+  spent     Float    @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Ingredient {
@@ -30,24 +30,24 @@ model Ingredient {
   lowStockThreshold Float    @default(0)
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
-  
+
   recipeIngredients RecipeIngredient[]
   stockMovements    StockMovement[]
 }
 
 model Recipe {
-  id                String   @id @default(uuid())
-  name              String
-  yield             Int
-  prepTime          Int      // em minutos
-  totalCost         Float
-  unitCost          Float
+  id                 String   @id @default(uuid())
+  name               String
+  yield              Int
+  prepTime           Int // em minutos
+  totalCost          Float
+  unitCost           Float
   contributionMargin Float?
-  includeInBudget   Boolean  @default(true) // Se os gastos devem estar no orçamento do mês
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  
-  ingredients       RecipeIngredient[]
+  includeInBudget    Boolean  @default(true) // Se os gastos devem estar no orçamento do mês
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  ingredients RecipeIngredient[]
 }
 
 model RecipeIngredient {
@@ -57,10 +57,10 @@ model RecipeIngredient {
   quantity     Float
   unit         String   @default("g")
   createdAt    DateTime @default(now())
-  
-  recipe       Recipe     @relation(fields: [recipeId], references: [id], onDelete: Cascade)
-  ingredient   Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
-  
+
+  recipe     Recipe     @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  ingredient Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
+
   @@unique([recipeId, ingredientId])
 }
 
@@ -76,28 +76,28 @@ model Meal {
 }
 
 model Pricing {
-  id          String   @id @default(uuid())
-  recipeId    String?
-  recipeName  String?
-  price       Float
-  margin      Float?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id         String   @id @default(uuid())
+  recipeId   String?
+  recipeName String?
+  price      Float
+  margin     Float?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
 
 model FixedCost {
-  id              String   @id @default(uuid())
-  name            String
-  type            String   // 'fixo' ou 'indireto'
-  value           Float
-  allocationMethod String  // 'mensal', 'por hora', 'por lote'
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id               String   @id @default(uuid())
+  name             String
+  type             String // 'fixo' ou 'indireto'
+  value            Float
+  allocationMethod String // 'mensal', 'por hora', 'por lote'
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 }
 
 model CashflowEntry {
   id          String   @id @default(uuid())
-  type        String   // 'entrada' ou 'saida'
+  type        String // 'entrada' ou 'saida'
   amount      Float
   description String
   date        DateTime
@@ -107,25 +107,25 @@ model CashflowEntry {
 }
 
 model StockMovement {
-  id          String   @id @default(uuid())
+  id           String   @id @default(uuid())
   ingredientId String
-  type        String   // 'entrada' ou 'saida'
-  quantity    Float
-  reference   String?
-  createdAt   DateTime @default(now())
-  
-  ingredient  Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
+  type         String // 'entrada' ou 'saida'
+  quantity     Float
+  reference    String?
+  createdAt    DateTime @default(now())
+
+  ingredient Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
 }
 
 model Warehouse {
-  id          String   @id @default(uuid())
-  name        String
-  capacity    Float?
+  id           String   @id @default(uuid())
+  name         String
+  capacity     Float?
   capacityUnit String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  items       WarehouseItem[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  items WarehouseItem[]
 }
 
 model WarehouseItem {
@@ -141,6 +141,140 @@ model WarehouseItem {
   notes       String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  
-  warehouse   Warehouse @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
+
+  warehouse Warehouse @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
+}
+
+// ============================================
+// MODELOS PARA SISTEMA DE PAGAMENTOS E VENDAS
+// ============================================
+// TODO: Implementar integração com Mercado Pago / PagSeguro / Asaas
+// TODO: Implementar webhooks para atualização de status de pagamento
+// TODO: Implementar página de checkout no frontend
+
+model Customer {
+  id        String   @id @default(uuid())
+  name      String
+  email     String?
+  cpfCnpj   String? // CPF ou CNPJ para emissão de nota fiscal
+  phone     String?
+  address   String?
+  city      String?
+  state     String? // UF (ex: SP, RJ)
+  zipCode   String? // CEP
+  notes     String? // Observações sobre o cliente
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  orders Order[]
+
+  @@index([email])
+  @@index([cpfCnpj])
+}
+
+model Order {
+  id          String   @id @default(uuid())
+  customerId  String? // Cliente pode ser opcional (venda avulsa)
+  orderNumber String? // Número do pedido (ex: PED-001)
+  status      String   @default("pending") // 'pending', 'confirmed', 'preparing', 'ready', 'delivered', 'cancelled'
+  total       Float
+  subtotal    Float // Total antes de taxas/descontos
+  discount    Float    @default(0)
+  tax         Float    @default(0) // Impostos
+  deliveryFee Float    @default(0) // Taxa de entrega
+  notes       String? // Observações do pedido
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  customer Customer?   @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  items    OrderItem[]
+  payment  Payment?
+  invoice  Invoice?
+
+  @@index([customerId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model OrderItem {
+  id         String   @id @default(uuid())
+  orderId    String
+  recipeId   String? // Pode estar relacionado a uma receita
+  recipeName String? // Nome do produto/receita (para histórico)
+  name       String // Nome do item
+  quantity   Float
+  unitPrice  Float
+  totalPrice Float // quantity * unitPrice
+  notes      String? // Observações do item
+  createdAt  DateTime @default(now())
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+}
+
+// TODO: Integrar com Mercado Pago (PIX, Cartão, Boleto)
+// TODO: Integrar com PagSeguro
+// TODO: Integrar com Asaas (PIX)
+// TODO: Implementar webhook para receber notificações de pagamento
+model Payment {
+  id             String    @id @default(uuid())
+  orderId        String    @unique // Um pedido tem um pagamento
+  amount         Float
+  method         String // 'pix', 'credit_card', 'debit_card', 'boleto', 'cash', 'other'
+  status         String    @default("pending") // 'pending', 'processing', 'paid', 'failed', 'refunded', 'cancelled'
+  provider       String? // 'mercadopago', 'pagseguro', 'asaas', 'manual'
+  providerId     String? // ID da transação no gateway de pagamento
+  qrCode         String? // QR Code para PIX (base64 ou URL)
+  qrCodeText     String? // Texto do QR Code PIX
+  barcode        String? // Código de barras para boleto
+  barcodeUrl     String? // URL do código de barras
+  pixCopyPaste   String? // Código PIX para copiar e colar
+  expirationDate DateTime? // Data de expiração (para PIX/boleto)
+  paidAt         DateTime? // Data/hora do pagamento confirmado
+  failureReason  String? // Motivo da falha (se status = 'failed')
+  metadata       String? // JSON com dados adicionais do gateway
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+  @@index([providerId])
+  @@index([createdAt])
+}
+
+// TODO: Integrar com Focus NFe (NFe/NFCe)
+// TODO: Integrar com Bling
+// TODO: Integrar com TecnoSpeed
+// TODO: Implementar geração de XML e PDF
+// TODO: Implementar cancelamento de nota fiscal
+model Invoice {
+  id                 String    @id @default(uuid())
+  orderId            String    @unique // Um pedido tem uma nota fiscal
+  type               String // 'NFe' (Nota Fiscal Eletrônica) ou 'NFCe' (Nota Fiscal de Consumidor Eletrônica)
+  number             String? // Número da nota fiscal
+  series             String? // Série da nota fiscal
+  accessKey          String? // Chave de acesso (44 dígitos)
+  status             String    @default("pending") // 'pending', 'issued', 'cancelled', 'error'
+  provider           String? // 'focus', 'bling', 'tecnospeed', 'direct'
+  providerId         String? // ID da nota no provedor
+  xml                String? // XML da nota fiscal (armazenado como texto)
+  xmlUrl             String? // URL do XML (se armazenado externamente)
+  pdfUrl             String? // URL do PDF da nota fiscal
+  pdfBase64          String? // PDF em base64 (alternativa)
+  cancellationReason String? // Motivo do cancelamento
+  cancelledAt        DateTime? // Data do cancelamento
+  issuedAt           DateTime? // Data de emissão
+  errorMessage       String? // Mensagem de erro (se status = 'error')
+  metadata           String? // JSON com dados adicionais do provedor
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([accessKey])
+  @@index([number])
+  @@index([status])
+  @@index([createdAt])
 }
