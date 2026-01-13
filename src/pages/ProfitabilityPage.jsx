@@ -11,20 +11,34 @@ export function ProfitabilityPage() {
   const [selectedRecipeId, setSelectedRecipeId] = useState(recipes[0]?.id ?? null)
   const [price, setPrice] = useState('6')
   const [openTooltip, setOpenTooltip] = useState(null)
+  const [editableYield, setEditableYield] = useState('')
   const tooltipRefs = useRef({})
 
   const selectedRecipe = useMemo(() => recipes.find((recipe) => recipe.id === selectedRecipeId), [recipes, selectedRecipeId])
   const priceNumber = Number(price) || 0
+  
+  // Atualizar editableYield quando a receita mudar
+  useEffect(() => {
+    if (selectedRecipe) {
+      setEditableYield(String(selectedRecipe.yieldQuantity || selectedRecipe.yield || 0))
+    }
+  }, [selectedRecipe])
+
+  // Usar yield editável ou o valor da receita
+  const currentYield = useMemo(() => {
+    const editableValue = Number(editableYield) || 0
+    return editableValue > 0 ? editableValue : (selectedRecipe?.yieldQuantity || selectedRecipe?.yield || 1)
+  }, [editableYield, selectedRecipe])
 
   // Calcular custo fixo rateado por unidade (simplificado)
   const fixedCostPerUnit = useMemo(() => {
-    if (!selectedRecipe || !selectedRecipe.yield) return 0
+    if (!selectedRecipe || !currentYield) return 0
     // Soma custos fixos que são rateados por lote
     const perBatchCosts = fixedCosts
       .filter(cost => cost.allocationMethod === 'por lote')
       .reduce((sum, cost) => sum + (cost.value || 0), 0)
-    return perBatchCosts / selectedRecipe.yield
-  }, [fixedCosts, selectedRecipe])
+    return perBatchCosts / currentYield
+  }, [fixedCosts, selectedRecipe, currentYield])
 
   const metrics = useMemo(() => {
     if (!selectedRecipe) {
@@ -39,7 +53,7 @@ export function ProfitabilityPage() {
       }
     }
     const totalCost = selectedRecipe.totalCost || 0
-    const recipeYield = selectedRecipe.yield || 1
+    const recipeYield = currentYield
     // Calcular custo unitário base a partir do totalCost para garantir consistência
     const baseUnitCost = recipeYield > 0 ? totalCost / recipeYield : (selectedRecipe.unitCost || 0)
     const fixedCostRateado = fixedCostPerUnit
@@ -57,7 +71,7 @@ export function ProfitabilityPage() {
       fixedCostRateado,
       baseUnitCost
     }
-  }, [priceNumber, selectedRecipe, fixedCostPerUnit])
+  }, [priceNumber, selectedRecipe, fixedCostPerUnit, currentYield])
 
   // Fechar tooltip ao clicar fora
   useEffect(() => {
@@ -314,11 +328,31 @@ export function ProfitabilityPage() {
             </div>
             <div className="unit-calculation-separator">÷</div>
             <div className="unit-calculation-item">
-              <span className="unit-calculation-label">Quantidade de Unidades:</span>
-              <strong className="unit-calculation-value">
-                {selectedRecipe.yieldQuantity || selectedRecipe.yield || 0}
-                {selectedRecipe.yieldWeight ? ` (${selectedRecipe.yieldWeight}g)` : ''}
-              </strong>
+              <span className="unit-calculation-label">Número de fatias:</span>
+              <input
+                type="number"
+                className="unit-calculation-value unit-calculation-input"
+                value={editableYield}
+                onChange={(e) => setEditableYield(e.target.value)}
+                min="1"
+                step="1"
+                style={{
+                  fontSize: '1rem',
+                  fontWeight: 700,
+                  color: 'var(--text-primary)',
+                  border: '1px solid var(--border-primary)',
+                  borderRadius: '6px',
+                  padding: '0.5rem',
+                  background: 'var(--bg-card)',
+                  width: '100%',
+                  textAlign: 'center'
+                }}
+              />
+              {selectedRecipe.yieldWeight && (
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
+                  ({selectedRecipe.yieldWeight}g)
+                </span>
+              )}
             </div>
             <div className="unit-calculation-separator">=</div>
             <div className="unit-calculation-item unit-calculation-result">
