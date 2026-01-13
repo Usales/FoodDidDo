@@ -127,7 +127,24 @@ export function RecipesPage() {
             {paginatedRecipes.map((recipe) => (
               <article key={recipe.id} className="recipe-card">
                 <div className="recipe-card-image">
-                  <img src={recipe.image} alt={recipe.title} loading="lazy" />
+                  <img 
+                    src={recipe.image || ''}
+                    alt={recipe.title} 
+                    loading="lazy"
+                    onError={(e) => {
+                      console.error('Erro ao carregar imagem:', recipe.image)
+                      // Tenta usar BASE_URL se o caminho direto falhar
+                      if (recipe.image && !e.target.src.includes(import.meta.env.BASE_URL)) {
+                        const baseUrl = import.meta.env.BASE_URL || '/'
+                        const imagePath = recipe.image.startsWith('/') 
+                          ? recipe.image.substring(1) 
+                          : recipe.image
+                        e.target.src = `${baseUrl}${imagePath}`
+                      } else {
+                        e.target.style.display = 'none'
+                      }
+                    }}
+                  />
                   <span className="recipe-source-badge">{recipe.source ?? 'Receita'}</span>
                 </div>
                 <div className="recipe-card-content">
