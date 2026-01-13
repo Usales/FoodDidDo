@@ -989,8 +989,6 @@ export function CostPage() {
                   setFormState((prev) => ({ ...prev, contributionMargin: value }))
                 }}
                 placeholder="Ex.: 45.0"
-                min="0"
-                max="100"
                 step="0.1"
               />
               {formState.contributionMargin && (
