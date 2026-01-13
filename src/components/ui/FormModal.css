@@ -33,6 +33,11 @@
 
 .form-modal-expanded {
   width: min(1280px, 95%);
+  overflow-y: visible;
+}
+
+.form-modal-backdrop:has(.form-modal-expanded) {
+  overflow-y: visible;
 }
 
 .form-modal-header {
