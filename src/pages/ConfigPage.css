@@ -131,6 +131,7 @@
 }
 
 .config-btn-primary:hover {
+  background: var(--primary-dark);
   transform: translateY(-1px);
   box-shadow: 0 10px 20px rgba(220, 38, 38, 0.25);
 }
