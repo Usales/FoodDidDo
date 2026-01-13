@@ -500,6 +500,101 @@ export function CostPage() {
     return defaultWarehouse
   }
 
+  // Função para adicionar ingredientes de uma receita existente ao estoque
+  // Usa os dados dos ingredientes cadastrados (packageQty, packagePrice, etc.)
+  const addRecipeIngredientsToStock = async (recipe) => {
+    try {
+      if (!recipe || !recipe.ingredients || recipe.ingredients.length === 0) {
+        alert('Esta receita não possui ingredientes cadastrados.')
+        return
+      }
+
+      // Garantir que existe um armazém "Estoque"
+      const defaultWarehouse = await ensureDefaultWarehouse()
+      
+      if (!defaultWarehouse) {
+        console.error('Erro: Não foi possível criar ou obter o armazém padrão')
+        alert('Erro ao acessar o estoque. Tente novamente.')
+        return
+      }
+      
+      // Buscar warehouse atualizado do estado
+      const currentState = useAppStore.getState()
+      const warehouseWithItems = currentState.warehouses.find((w) => w.id === defaultWarehouse.id)
+      const items = warehouseWithItems?.items || defaultWarehouse.items || []
+      
+      let addedCount = 0
+      let updatedCount = 0
+      
+      for (const recipeIngredient of recipe.ingredients) {
+        // recipe.ingredients vem do backend no formato: { ...ingredient, quantity, unit }
+        const ingredient = recipeIngredient
+        const name = ingredient.name?.trim()
+        
+        if (!name) continue
+        
+        // Usar packageQty do ingrediente cadastrado, ou quantity da receita como fallback
+        const packageQty = ingredient.packageQty || ingredient.quantity || 0
+        const quantityToAdd = Number(packageQty) || 0
+        
+        if (quantityToAdd <= 0) continue
+        
+        // Verificar se já existe um item com o mesmo nome no warehouse
+        const existingItem = items.find(
+          (item) => item.name.toLowerCase() === name.toLowerCase()
+        )
+        
+        // Calcular custo unitário
+        const packagePrice = Number(ingredient.packagePrice) || 0
+        const unitCost = packageQty > 0 && packagePrice > 0 
+          ? packagePrice / packageQty 
+          : (Number(ingredient.unitCost) || 0)
+        
+        // Determinar unidade (usar unit da receita ou 'g' como padrão)
+        const itemUnit = ingredient.unit || 'g'
+        
+        if (existingItem) {
+          // Adicionar a quantidade à quantidade existente
+          const newQuantity = existingItem.quantity + quantityToAdd
+          await updateWarehouseItem(defaultWarehouse.id, existingItem.id, {
+            emoji: ingredient.emoji || existingItem.emoji || '📦',
+            name: name,
+            quantity: newQuantity,
+            unit: itemUnit,
+            minIdeal: existingItem.minIdeal || 0,
+            unitCost: unitCost || existingItem.unitCost || 0,
+            category: ingredient.category || existingItem.category,
+            notes: existingItem.notes
+          })
+          updatedCount++
+        } else {
+          // Criar novo item no estoque
+          await addWarehouseItem(defaultWarehouse.id, {
+            emoji: ingredient.emoji || '📦',
+            name: name,
+            quantity: quantityToAdd,
+            unit: itemUnit,
+            minIdeal: 0,
+            unitCost: unitCost,
+            category: ingredient.category,
+            notes: undefined
+          })
+          addedCount++
+        }
+      }
+      
+      const message = addedCount > 0 || updatedCount > 0
+        ? `Ingredientes adicionados ao estoque: ${addedCount} novos, ${updatedCount} atualizados.`
+        : 'Nenhum ingrediente foi adicionado ao estoque.'
+      
+      alert(message)
+      console.log('Ingredientes da receita adicionados ao estoque:', { addedCount, updatedCount })
+    } catch (error) {
+      console.error('Erro ao adicionar ingredientes da receita ao estoque:', error)
+      alert(`Erro ao adicionar ingredientes ao estoque: ${error.message || 'Tente novamente.'}`)
+    }
+  }
+
   // Função para adicionar ingredientes da receita ao estoque automaticamente
   // Adiciona a quantidade total do pacote ao estoque
   const addIngredientsToStock = async (recipeIngredients) => {
@@ -822,13 +917,24 @@ export function CostPage() {
                       <td className="recipe-profit">{profit.toFixed(2)}</td>
                       <td className="recipe-price">R$ {sellingPrice.toFixed(2)}</td>
                       <td>
-                        <button
-                          type="button"
-                          className="edit-btn"
-                          onClick={() => handleOpenModal(recipe)}
-                        >
-                          Editar
-                        </button>
+                        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                          <button
+                            type="button"
+                            className="edit-btn"
+                            onClick={() => handleOpenModal(recipe)}
+                          >
+                            Editar
+                          </button>
+                          <button
+                            type="button"
+                            className="edit-btn"
+                            onClick={() => addRecipeIngredientsToStock(recipe)}
+                            title="Adicionar ingredientes ao estoque"
+                            style={{ fontSize: '0.85rem', padding: '0.4rem 0.75rem' }}
+                          >
+                            📦 Estoque
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   )
