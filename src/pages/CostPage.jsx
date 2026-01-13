@@ -1421,40 +1421,23 @@ export function CostPage() {
                       </div>
                       
                       {/* Linha 2: Qtd. original do pacote | Valor total */}
-                      <input
-                        type="number"
-                        value={item.packageQty || ''}
-                        readOnly
-                        placeholder="Qtd. original do pacote"
-                        min="0"
-                        step="0.01"
-                        className="ingredient-package-qty"
-                        style={{ 
-                          cursor: 'not-allowed',
-                          background: 'var(--bg-secondary)',
-                          opacity: 0.8
-                        }}
-                        title="Quantidade original do pacote (não editável)"
-                      />
-                      
-                      <input
-                        type="number"
-                        value={item.totalValue || ''}
-                        readOnly
-                        placeholder="Valor total (R$)"
-                        min="0"
-                        step="0.01"
-                        className="ingredient-value"
-                        style={{ 
-                          cursor: 'not-allowed',
-                          background: 'var(--bg-secondary)',
-                          opacity: 0.8
-                        }}
-                        title="Valor total do pacote (não editável)"
-                      />
-                      
-                      {/* Linha 3: Disponível + Mg/Ml usados (ao lado um do outro) */}
-                      <div style={{ display: 'flex', gap: '0.75rem', gridColumn: 'span 2', alignItems: 'center' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                        <input
+                          type="number"
+                          value={item.packageQty || ''}
+                          readOnly
+                          placeholder="Qtd. original do pacote"
+                          min="0"
+                          step="0.01"
+                          className="ingredient-package-qty"
+                          style={{ 
+                            cursor: 'not-allowed',
+                            background: 'var(--bg-secondary)',
+                            opacity: 0.8
+                          }}
+                          title="Quantidade original do pacote (não editável)"
+                        />
+                        
                         {/* Campo para mostrar quantidade disponível (se ingrediente já foi consumido) */}
                         {(() => {
                           const consumedIngredient = confirmedIngredients.find(
@@ -1487,16 +1470,16 @@ export function CostPage() {
                                   opacity: 0.8,
                                   color: availableQty > 0 ? 'var(--text-primary)' : 'var(--error)',
                                   fontSize: '0.85rem',
-                                  padding: '0.5rem 0.75rem',
-                                  flex: '1'
+                                  padding: '0.5rem 0.75rem'
                                 }}
                                 title="Quantidade disponível para uso (original - consumido)"
                               />
                             )
                           }
-                          return <div style={{ flex: '1' }}></div>
+                          return null
                         })()}
                         
+                        {/* Mg/Ml usados - alinhado abaixo de Qtd. original do pacote */}
                         <input
                           type="number"
                           value={item.quantity || ''}
@@ -1516,11 +1499,26 @@ export function CostPage() {
                           min="0"
                           step="0.01"
                           className="ingredient-quantity"
-                          style={{ flex: '1' }}
                         />
                       </div>
                       
-                      <div className="ingredient-action-buttons" style={{ gridColumn: '3', gridRow: '3', alignSelf: 'center', justifySelf: 'end', paddingRight: '0.5rem' }}>
+                      <input
+                        type="number"
+                        value={item.totalValue || ''}
+                        readOnly
+                        placeholder="Valor total (R$)"
+                        min="0"
+                        step="0.01"
+                        className="ingredient-value"
+                        style={{ 
+                          cursor: 'not-allowed',
+                          background: 'var(--bg-secondary)',
+                          opacity: 0.8
+                        }}
+                        title="Valor total do pacote (não editável)"
+                      />
+                      
+                      <div className="ingredient-action-buttons">
                         <button
                           type="button"
                           className="cancel-ingredient-btn"
