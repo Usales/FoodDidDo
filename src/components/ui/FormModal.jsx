@@ -1,10 +1,11 @@
+import { createPortal } from 'react-dom'
 import PropTypes from 'prop-types'
 import './FormModal.css'
 
 export function FormModal({ isOpen, title, description, onClose, children, footer, isExpanded = false }) {
   if (!isOpen) return null
 
-  return (
+  const modalContent = (
     <div className="form-modal-backdrop" role="presentation" onClick={onClose}>
       <div
         className={`form-modal ${isExpanded ? 'form-modal-expanded' : ''}`}
@@ -27,6 +28,9 @@ export function FormModal({ isOpen, title, description, onClose, children, foote
       </div>
     </div>
   )
+
+  // Renderizar o modal diretamente no body usando Portal
+  return createPortal(modalContent, document.body)
 }
 
 FormModal.propTypes = {
