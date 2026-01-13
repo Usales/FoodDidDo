@@ -52,7 +52,7 @@ export function RecipesPage() {
     return recipes.filter((recipe) => {
       const recipeTitle = (recipe.title || '').toLowerCase()
       const recipeIngredients = (recipe.ingredientsList || '').toLowerCase()
-      return selectedIngredients.every((ingredient) => {
+      return selectedIngredients.some((ingredient) => {
         const searchIngredient = ingredient.toLowerCase().trim()
         const inTitle = recipeTitle.includes(searchIngredient)
         const inDescription = recipeIngredients.includes(searchIngredient)
