@@ -47,6 +47,38 @@
   gap: 1rem;
 }
 
+/* Alinhamento de ícone + texto nos botões do cabeçalho */
+.cashflow-header-actions .primary-btn,
+.cashflow-header-actions .secondary-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  line-height: 1;
+}
+
+.cashflow-header-actions .primary-btn svg,
+.cashflow-header-actions .secondary-btn svg {
+  display: block;
+  flex-shrink: 0;
+}
+
+/* Alinhamento de ícone + texto (botão "Filtros" e afins) */
+.cashflow-page .page-header .primary-btn,
+.cashflow-page .page-header .secondary-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  line-height: 1;
+}
+
+.cashflow-page .page-header .primary-btn svg,
+.cashflow-page .page-header .secondary-btn svg {
+  display: block;
+  flex-shrink: 0;
+}
+
 /* Saldo Atual e Abertura */
 .cashflow-balance-grid {
   display: grid;
