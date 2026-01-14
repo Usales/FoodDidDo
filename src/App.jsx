@@ -7,7 +7,6 @@ import { MainLayout } from './components/layout/MainLayout'
 import { useAppStore } from './stores/appStore'
 import {
   DashboardPage,
-  CashboxPage,
   BudgetPage,
   IngredientsPage,
   RecipesPage,
@@ -40,7 +39,6 @@ function AppRoutes() {
         <Route element={<MainLayout onLogout={logout} user={user} />}>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/caixa" element={<CashboxPage />} />
           <Route path="/ingredientes" element={<IngredientsPage />} />
           <Route path="/grocery" element={<Navigate to="/ingredientes" replace />} />
           <Route path="/geladeira" element={<Navigate to="/ingredientes" replace />} />

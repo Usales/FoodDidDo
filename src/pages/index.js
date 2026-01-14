@@ -1,5 +1,4 @@
 export { DashboardPage } from './DashboardPage'
-export { CashboxPage } from './CashboxPage'
 export { BudgetPage } from './BudgetPage'
 export { IngredientsPage } from './IngredientsPage'
 export { RecipesPage } from './RecipesPage'

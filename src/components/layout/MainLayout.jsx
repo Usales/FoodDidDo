@@ -14,8 +14,7 @@ import {
   AiOutlineLineChart,
   AiOutlineFileText,
   AiOutlineSetting,
-  AiOutlineRise,
-  AiOutlineWallet
+  AiOutlineRise
 } from 'react-icons/ai'
 import { FiLogOut, FiSearch, FiChevronDown, FiMenu, FiX } from 'react-icons/fi'
 import { HiMoon, HiSun } from 'react-icons/hi'
@@ -28,7 +27,6 @@ const navigation = [
     section: 'Visão Geral',
     items: [
       { path: '/dashboard', label: 'Home', icon: <AiOutlineHome /> },
-      { path: '/caixa', label: 'Caixa', icon: <AiOutlineWallet /> },
       { path: '/orcamento', label: 'Orçamentos', icon: <AiOutlineDollarCircle /> },
       { path: '/ingredientes', label: 'Ingredientes', icon: <AiOutlineShoppingCart /> },
       { path: '/receitas', label: 'Receitas', icon: <AiOutlineBook /> }
