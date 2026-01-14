@@ -15,6 +15,7 @@ const PAYMENT_METHODS = [
 
 export function CashboxPage() {
   const recipes = useAppStore((state) => state.recipes)
+  const pricing = useAppStore((state) => state.pricing)
   const addCashflowEntry = useAppStore((state) => state.addCashflowEntry)
   const loadData = useAppStore((state) => state.loadData)
 
@@ -51,6 +52,13 @@ export function CashboxPage() {
     }
   }, [cart, discount, receivedAmount])
 
+  const getDefaultPriceForRecipe = (recipe) => {
+    const priced = pricing?.find((p) => p.recipeId === recipe.id)
+    if (priced && typeof priced.price === 'number') return priced.price
+    if (recipe.unitCost) return recipe.unitCost * 1.5
+    return 0
+  }
+
   // Adicionar produto ao carrinho
   const handleAddProduct = (recipe) => {
     const existingItem = cart.find(item => item.id === recipe.id)
@@ -62,8 +70,8 @@ export function CashboxPage() {
           : item
       ))
     } else {
-      // Usar preço do pricing se disponível, senão usar unitCost * 1.5 como padrão
-      const price = recipe.unitCost ? recipe.unitCost * 1.5 : 0
+      // Usar preço do Pricing se disponível, senão usar unitCost * 1.5 como padrão
+      const price = getDefaultPriceForRecipe(recipe)
       setCart([...cart, {
         id: recipe.id,
         name: recipe.name,
@@ -216,7 +224,7 @@ export function CashboxPage() {
                   <div className="cashbox-product-content">
                     <strong>{recipe.name}</strong>
                     <span className="cashbox-product-price">
-                      {formatCurrency(recipe.unitCost ? recipe.unitCost * 1.5 : 0)}
+                      {formatCurrency(getDefaultPriceForRecipe(recipe))}
                     </span>
                   </div>
                   <FiPlus size={20} className="cashbox-product-add" />

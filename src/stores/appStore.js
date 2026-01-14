@@ -23,20 +23,22 @@ export const useAppStore = create(devtools((set, get) => ({
   loadData: async () => {
     set({ isLoading: true, error: null })
     try {
-      const [budgets, ingredients, recipes, fixedCosts, cashflow, stockMovements, warehouses] = await Promise.all([
+      const [budgets, ingredients, recipes, fixedCosts, cashflow, stockMovements, warehouses, pricing] = await Promise.all([
         api.getBudgets(),
         api.getIngredients(),
         api.getRecipes(),
         api.getFixedCosts(),
         api.getCashflow(),
         api.getStockMovements(),
-        api.getWarehouses()
+        api.getWarehouses(),
+        api.getPricing()
       ])
       
       set({
         budgets,
         ingredients,
         recipes,
+        pricing,
         fixedCosts,
         cashflow,
         stockMovements,

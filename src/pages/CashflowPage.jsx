@@ -152,9 +152,24 @@ export function CashflowPage() {
 
   // Calcular saldo atual do caixa
   const currentBalance = useMemo(() => {
-    if (!cashboxData.isOpen) return 0
-    return cashboxData.openingAmount + summary.income - summary.expense
-  }, [cashboxData.isOpen, cashboxData.openingAmount, summary.income, summary.expense])
+    if (cashboxData.isOpen) {
+      return cashboxData.openingAmount + summary.income - summary.expense
+    }
+
+    // Se o caixa estiver fechado e houver um fechamento registrado, exibir o saldo final do último fechamento
+    if (!cashboxData.isOpen && cashboxData.closingDate) {
+      return cashboxData.closingBalance || 0
+    }
+
+    return 0
+  }, [
+    cashboxData.isOpen,
+    cashboxData.openingAmount,
+    cashboxData.closingDate,
+    cashboxData.closingBalance,
+    summary.income,
+    summary.expense
+  ])
 
   // Orçamento atual (último orçamento)
   const currentBudget = useMemo(() => {
@@ -445,14 +460,12 @@ export function CashflowPage() {
                 </strong>
               </div>
             )}
-            {cashboxData.isOpen && (
-              <div className="cashflow-report-item total">
-                <span>Saldo Final do Caixa:</span>
-                <strong style={{ color: currentBalance >= 0 ? 'var(--success)' : 'var(--error)' }}>
-                  {formatCurrency(currentBalance)}
-                </strong>
-              </div>
-            )}
+            <div className="cashflow-report-item total">
+              <span>Saldo Final do Caixa:</span>
+              <strong style={{ color: currentBalance >= 0 ? 'var(--success)' : 'var(--error)' }}>
+                {formatCurrency(currentBalance)}
+              </strong>
+            </div>
           </div>
         </div>
       </section>
@@ -731,6 +744,7 @@ export function CashflowPage() {
             )}
           </div>
         </div>
+      </section>
 
       {/* Modal de Abertura de Caixa */}
       <FormModal
