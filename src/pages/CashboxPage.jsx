@@ -172,8 +172,6 @@ export function CashboxPage() {
       alert(
         `✅ Venda finalizada com sucesso!\n\n` +
         `Total: R$ ${totals.total.toFixed(2)}\n` +
-        `Custo (estimado): R$ ${totals.cost.toFixed(2)}\n` +
-        `Lucro (estimado): R$ ${totals.profit.toFixed(2)}\n` +
         `Forma de pagamento: ${PAYMENT_METHODS.find(m => m.value === selectedPaymentMethod)?.label || 'Outros'}`
       )
     } catch (error) {
@@ -266,6 +264,18 @@ export function CashboxPage() {
             )}
           </div>
 
+          {/* Resumo rápido: Produto e Qtd (mesma cor do "Subtotal:") */}
+          {cart.length > 0 && (
+            <div className="cashbox-cart-brief-list">
+              {cart.map((item) => (
+                <div key={item.id} className="cashbox-cart-brief-row">
+                  <span className="cashbox-cart-brief-name">{item.name}</span>
+                  <span className="cashbox-cart-brief-qty">Qtd: {item.quantity}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
           {/* Itens do Carrinho */}
           <div className="cashbox-cart-items">
             {cart.length > 0 ? (
@@ -355,12 +365,6 @@ export function CashboxPage() {
                 <div className="cashbox-total-row total">
                   <span>Total:</span>
                   <strong>{formatCurrency(totals.total)}</strong>
-                </div>
-                <div className="cashbox-total-row">
-                  <span>Lucro (estimado):</span>
-                  <strong style={{ color: totals.profit >= 0 ? 'var(--success)' : 'var(--error)' }}>
-                    {formatCurrency(totals.profit)}
-                  </strong>
                 </div>
               </div>
 

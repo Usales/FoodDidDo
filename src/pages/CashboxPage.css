@@ -160,6 +160,34 @@
   box-shadow: var(--shadow-lg);
 }
 
+.cashbox-cart-brief-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin: 0.25rem 0 0.75rem 0;
+}
+
+.cashbox-cart-brief-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.cashbox-cart-brief-name,
+.cashbox-cart-brief-qty {
+  font-size: 0.95rem;
+  color: var(--text-muted); /* mesma cor do "Subtotal:" */
+}
+
+.cashbox-cart-brief-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .cashbox-cart-items {
   flex: 1;
   overflow-y: auto;
