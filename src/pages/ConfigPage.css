@@ -226,6 +226,64 @@
   padding: 0.5rem 0;
 }
 
+.config-section-description {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  margin: 0 0 1rem 0;
+  line-height: 1.5;
+}
+
+/* Seção 3: Configurações da Tela Home */
+.config-dashboard-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.config-dashboard-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border-primary);
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.config-dashboard-item:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.config-dashboard-item-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.config-dashboard-item-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.config-dashboard-item-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.config-dashboard-item-description {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.5;
+}
+
 /* Responsividade */
 @media (max-width: 768px) {
   .config-page {
