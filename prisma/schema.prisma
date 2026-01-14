@@ -99,6 +99,8 @@ model CashflowEntry {
   id          String   @id @default(uuid())
   type        String // 'entrada' ou 'saida'
   amount      Float
+  cost        Float?
+  profit      Float?
   description String
   date        DateTime
   category    String?

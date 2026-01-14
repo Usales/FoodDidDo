@@ -42,13 +42,17 @@ export function CashboxPage() {
     const total = Math.max(0, subtotal - discountValue)
     const received = Number(receivedAmount) || 0
     const change = received - total
+    const cost = cart.reduce((sum, item) => sum + ((item.unitCost || 0) * item.quantity), 0)
+    const profit = total - cost
 
     return {
       subtotal,
       discount: discountValue,
       total,
       received,
-      change: change > 0 ? change : 0
+      change: change > 0 ? change : 0,
+      cost,
+      profit
     }
   }, [cart, discount, receivedAmount])
 
@@ -76,6 +80,7 @@ export function CashboxPage() {
         id: recipe.id,
         name: recipe.name,
         price: price,
+        unitCost: recipe.unitCost || 0,
         quantity: 1
       }])
     }
@@ -148,6 +153,8 @@ export function CashboxPage() {
         type: 'entrada',
         description: `Venda: ${itemsDescription}`,
         amount: totals.total,
+        cost: totals.cost,
+        profit: totals.profit,
         date: new Date().toISOString(),
         category: `Venda - ${PAYMENT_METHODS.find(m => m.value === selectedPaymentMethod)?.label || 'Outros'}`
       })
@@ -162,7 +169,13 @@ export function CashboxPage() {
       setSelectedPaymentMethod('dinheiro')
       setSearchQuery('')
 
-      alert(`✅ Venda finalizada com sucesso!\n\nTotal: R$ ${totals.total.toFixed(2)}\nForma de pagamento: ${PAYMENT_METHODS.find(m => m.value === selectedPaymentMethod)?.label || 'Outros'}`)
+      alert(
+        `✅ Venda finalizada com sucesso!\n\n` +
+        `Total: R$ ${totals.total.toFixed(2)}\n` +
+        `Custo (estimado): R$ ${totals.cost.toFixed(2)}\n` +
+        `Lucro (estimado): R$ ${totals.profit.toFixed(2)}\n` +
+        `Forma de pagamento: ${PAYMENT_METHODS.find(m => m.value === selectedPaymentMethod)?.label || 'Outros'}`
+      )
     } catch (error) {
       console.error('Erro ao finalizar venda:', error)
       alert('❌ Erro ao finalizar venda. Tente novamente.')
@@ -342,6 +355,12 @@ export function CashboxPage() {
                 <div className="cashbox-total-row total">
                   <span>Total:</span>
                   <strong>{formatCurrency(totals.total)}</strong>
+                </div>
+                <div className="cashbox-total-row">
+                  <span>Lucro (estimado):</span>
+                  <strong style={{ color: totals.profit >= 0 ? 'var(--success)' : 'var(--error)' }}>
+                    {formatCurrency(totals.profit)}
+                  </strong>
                 </div>
               </div>
 

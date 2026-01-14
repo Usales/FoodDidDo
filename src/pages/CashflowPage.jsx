@@ -150,6 +150,24 @@ export function CashflowPage() {
     }
   }, [filteredCashflow])
 
+  const salesSummary = useMemo(() => {
+    const sales = filteredCashflow.filter((e) => {
+      const isSaleByCategory = typeof e.category === 'string' && e.category.startsWith('Venda')
+      const isSaleByDescription = typeof e.description === 'string' && e.description.startsWith('Venda:')
+      return e.type === 'entrada' && (isSaleByCategory || isSaleByDescription)
+    })
+
+    const salesWithProfit = sales.filter((e) => typeof e.profit === 'number')
+    const totalProfit = salesWithProfit.reduce((sum, e) => sum + e.profit, 0)
+    const count = salesWithProfit.length
+
+    return {
+      count,
+      totalProfit,
+      avgProfit: count > 0 ? totalProfit / count : 0
+    }
+  }, [filteredCashflow])
+
   // Calcular saldo atual do caixa
   const currentBalance = useMemo(() => {
     if (cashboxData.isOpen) {
@@ -436,6 +454,12 @@ export function CashflowPage() {
               <span>Diferença:</span>
               <strong style={{ color: summary.balance >= 0 ? 'var(--success)' : 'var(--error)' }}>
                 {summary.balance >= 0 ? '+' : ''}{formatCurrency(summary.balance)}
+              </strong>
+            </div>
+            <div className="cashflow-report-item">
+              <span>Lucro médio por venda:</span>
+              <strong style={{ color: salesSummary.avgProfit >= 0 ? 'var(--success)' : 'var(--error)' }}>
+                {formatCurrency(salesSummary.avgProfit)}
               </strong>
             </div>
             {summary.profit > 0 && (

@@ -822,6 +822,8 @@ fastify.post('/api/restore', async (request, reply) => {
             id: cf.id,
             type: cf.type,
             amount: cf.amount,
+            cost: typeof cf.cost === 'number' ? cf.cost : null,
+            profit: typeof cf.profit === 'number' ? cf.profit : null,
             description: cf.description,
             date: cf.date ? new Date(cf.date) : new Date(),
             category: cf.category || null,
