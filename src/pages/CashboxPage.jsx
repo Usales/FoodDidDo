@@ -9,8 +9,7 @@ const PAYMENT_METHODS = [
   { value: 'dinheiro', label: 'Dinheiro', icon: '💵' },
   { value: 'cartao_credito', label: 'Cartão de Crédito', icon: '💳' },
   { value: 'cartao_debito', label: 'Cartão de Débito', icon: '💳' },
-  { value: 'pix', label: 'PIX', icon: '📱' },
-  { value: 'outros', label: 'Outros', icon: '💰' }
+  { value: 'pix', label: 'PIX', icon: '📱' }
 ]
 
 export function CashboxPage() {
@@ -270,7 +269,32 @@ export function CashboxPage() {
               {cart.map((item) => (
                 <div key={item.id} className="cashbox-cart-brief-row">
                   <span className="cashbox-cart-brief-name">{item.name}</span>
-                  <span className="cashbox-cart-brief-qty">Qtd: {item.quantity}</span>
+                  <div className="cashbox-cart-brief-qty">
+                    <button
+                      type="button"
+                      className="cashbox-cart-brief-qty-btn"
+                      onClick={() => handleUpdateQuantity(item.id, -1)}
+                      aria-label="Diminuir quantidade"
+                    >
+                      <FiMinus size={12} />
+                    </button>
+                    <input
+                      type="number"
+                      className="cashbox-cart-brief-qty-input"
+                      value={item.quantity}
+                      onChange={(e) => handleUpdateQuantityManual(item.id, e.target.value)}
+                      min="1"
+                      aria-label="Quantidade"
+                    />
+                    <button
+                      type="button"
+                      className="cashbox-cart-brief-qty-btn"
+                      onClick={() => handleUpdateQuantity(item.id, 1)}
+                      aria-label="Aumentar quantidade"
+                    >
+                      <FiPlus size={12} />
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
