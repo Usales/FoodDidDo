@@ -534,29 +534,329 @@
 }
 
 /* Responsividade */
+@media (max-width: 1024px) {
+  .cashflow-table-header,
+  .cashflow-table-row {
+    grid-template-columns: 100px 90px 1fr 130px 70px;
+    gap: 0.75rem;
+    padding: 0.875rem 1rem;
+  }
+
+  .cashflow-balance-grid {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  }
+}
+
 @media (max-width: 768px) {
-  .cashflow-status-card {
+  .cashflow-page {
+    gap: 1.5rem;
+  }
+
+  .cashflow-header {
     flex-direction: column;
     align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+  }
+
+  .cashflow-header-title h1 {
+    font-size: 1.5rem;
+  }
+
+  .cashflow-header-actions {
+    width: 100%;
+  }
+
+  .cashflow-header-actions button {
+    flex: 1;
+  }
+
+  .cashflow-balance-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .cashflow-balance-card {
+    padding: 1rem;
+  }
+
+  .cashflow-balance-value {
+    font-size: 1.75rem;
+  }
+
+  .cashflow-section-title {
+    font-size: 1.25rem;
+  }
+
+  /* Converter tabela em cards em mobile */
+  .cashflow-movements-table {
+    border-radius: 8px;
+  }
+
+  .cashflow-table-header {
+    display: none;
+  }
+
+  .cashflow-table-body {
+    max-height: none;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .cashflow-table-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1rem;
+    border-bottom: 2px solid var(--border-primary);
+    background: var(--bg-card);
+  }
+
+  .cashflow-table-row:last-child {
+    border-bottom: none;
+  }
+
+  .cashflow-table-col {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0.5rem 0;
+  }
+
+  .cashflow-table-col.date::before {
+    content: 'Data: ';
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+
+  .cashflow-table-col.type::before {
+    content: 'Tipo: ';
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+
+  .cashflow-table-col.origin {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 0.75rem 0;
+  }
+
+  .cashflow-table-col.origin::before {
+    content: 'Origem: ';
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    width: 100%;
+    margin-bottom: 0.25rem;
+  }
+
+  .cashflow-table-col.value::before {
+    content: 'Valor: ';
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+
+  .cashflow-table-col.actions {
+    justify-content: flex-end;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border-primary);
+    margin-top: 0.5rem;
+  }
+
+  .cashflow-table-col.actions::before {
+    display: none;
   }
 
   .cashflow-info-grid {
     grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .cashflow-info-card {
+    padding: 1rem;
   }
 
   .cashflow-budget-content {
     grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .cashflow-budget-card {
+    padding: 1rem;
   }
 
   .cashflow-report-grid {
     grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .cashflow-report-card {
+    padding: 1rem;
+  }
+
+  .cashflow-report-item {
+    padding: 0.875rem;
+  }
+
+  .cashflow-report-item strong {
+    font-size: 1.25rem;
   }
 
   .cashflow-filters {
     flex-direction: column;
+    gap: 0.75rem;
+    padding: 1rem;
   }
 
   .cashflow-filter-group {
     width: 100%;
+    min-width: 100%;
+  }
+
+  .summary-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .summary-card {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .cashflow-page {
+    gap: 1rem;
+  }
+
+  .cashflow-header {
+    padding: 0.875rem 1rem;
+    border-radius: 8px;
+  }
+
+  .cashflow-header-title h1 {
+    font-size: 1.25rem;
+    margin-bottom: 0.375rem;
+  }
+
+  .cashflow-status-indicator {
+    gap: 0.5rem;
+  }
+
+  .cashflow-status-icon-small {
+    width: 28px;
+    height: 28px;
+  }
+
+  .cashflow-header-actions {
+    flex-direction: column;
+  }
+
+  .cashflow-header-actions button {
+    width: 100%;
+  }
+
+  .cashflow-balance-card {
+    padding: 0.875rem;
+  }
+
+  .cashflow-balance-label {
+    font-size: 0.8rem;
+  }
+
+  .cashflow-balance-value {
+    font-size: 1.5rem;
+  }
+
+  .cashflow-balance-note {
+    font-size: 0.75rem;
+  }
+
+  .cashflow-section-title {
+    font-size: 1.1rem;
+  }
+
+  .cashflow-table-row {
+    padding: 0.875rem;
+  }
+
+  .cashflow-type-badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+  }
+
+  .cashflow-origin-content strong {
+    font-size: 0.875rem;
+  }
+
+  .cashflow-origin-category {
+    font-size: 0.7rem;
+  }
+
+  .cashflow-action-btn {
+    width: 28px;
+    height: 28px;
+  }
+
+  .cashflow-action-menu {
+    min-width: 100px;
+    padding: 0.375rem;
+  }
+
+  .cashflow-action-menu-item {
+    padding: 0.375rem 0.5rem;
+    font-size: 0.8rem;
+  }
+
+  .cashflow-info-card,
+  .cashflow-budget-card,
+  .cashflow-report-card {
+    padding: 0.875rem;
+    border-radius: 8px;
+  }
+
+  .cashflow-info-card h3,
+  .cashflow-budget-card h3,
+  .cashflow-report-card h3 {
+    font-size: 1rem;
+  }
+
+  .cashflow-report-item strong {
+    font-size: 1.1rem;
+  }
+
+  .cashflow-filters {
+    padding: 0.875rem;
+    border-radius: 8px;
+  }
+
+  .cashflow-filter-group label {
+    font-size: 0.8rem;
+  }
+
+  .cashflow-filter-group select,
+  .cashflow-filter-group input {
+    padding: 0.625rem;
+    font-size: 0.875rem;
+  }
+
+  .summary-card {
+    padding: 0.875rem;
+  }
+
+  .summary-card span {
+    font-size: 0.8rem;
+  }
+
+  .summary-card strong {
+    font-size: 1.25rem;
+  }
+
+  .summary-card small {
+    font-size: 0.75rem;
   }
 }
