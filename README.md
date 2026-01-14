@@ -2,7 +2,9 @@
 
 ## 📋 Sobre o Projeto
 
-O **FoodDidDo** é uma aplicação web moderna desenvolvida em React que combina descoberta de receitas inteligente com gestão pessoal de refeições. O aplicativo permite aos usuários descobrir receitas baseadas nos ingredientes disponíveis e gerenciar suas refeições diárias de forma organizada.
+O **FoodDidDo** é uma aplicação web moderna desenvolvida em React voltada para **gestão de alimentação e operação**, combinando organização de refeições/receitas com recursos de gestão (custos, precificação, estoque e rotinas financeiras).
+
+Atualmente o projeto está sendo conduzido por uma **empresa unipessoal**, com **apenas 1 funcionário** responsável pelo desenvolvimento e manutenção.
 
 ## 🎯 Funcionalidades Principais
 
@@ -196,7 +198,7 @@ Este projeto foi desenvolvido **anteriormente** à produção da atividade do pr
 - **Status**: Desenvolvimento independente anterior à atividade acadêmica
 
 ### 🔄 Evolução do Projeto
-O FoodDidDo representa um projeto pessoal de desenvolvimento web que demonstra:
+O FoodDidDo representa a evolução de um projeto que hoje segue em direção a um produto de uma **empresa unipessoal**, demonstrando:
 - Conhecimento em React e JavaScript moderno
 - Integração com APIs externas
 - Design responsivo e UX/UI
@@ -226,14 +228,19 @@ O FoodDidDo representa um projeto pessoal de desenvolvimento web que demonstra:
 
 ## 🤝 Contribuições
 
-Este é um projeto pessoal, mas sugestões e melhorias são sempre bem-vindas!
+Sugestões e melhorias são bem-vindas!
+
+- **Bugs e melhorias**: abra uma issue com o máximo de detalhes possível.
+- **Pull Requests**: podem ser aceitos conforme alinhamento prévio (escopo, padrão de código e prioridade), já que o projeto é mantido por **empresa unipessoal**.
 
 ## 📄 Licença
 
-Este projeto é de uso pessoal e educacional.
+© FoodDidDo. **Todos os direitos reservados.**
 
-## 👨‍💻 Desenvolvedor
+Este repositório faz parte de um projeto conduzido por uma **empresa unipessoal** (1 funcionário). O uso, cópia, modificação e distribuição do código e/ou marca **não são permitidos sem autorização prévia e expressa** do responsável pelo projeto.
 
-**Gabriel Henriques Sales** - Desenvolvimento completo
+## 👨‍💻 Responsável (empresa unipessoal)
+
+**Gabriel Henriques Sales** — Responsável pelo desenvolvimento e manutenção (único colaborador)
 
 ---
