@@ -5,6 +5,13 @@ import { FiEdit3, FiTrash2, FiPlus, FiClock, FiDollarSign, FiThermometer } from 
 import './PageCommon.css'
 import './DashboardPage.css'
 
+const DASHBOARD_SETTINGS_KEY = 'dashboardSettings'
+const defaultDashboardSettings = {
+  showStatusPanel: true,
+  showBusinessInsights: true,
+  showMealSection: true
+}
+
 const defaultMeals = [
   {
     id: 'meal-1',
@@ -1195,6 +1202,20 @@ export function DashboardPage() {
   const [editingId, setEditingId] = useState(null)
   const [showFabMenu, setShowFabMenu] = useState(false)
   const ingredientsTimerRef = useRef(null)
+  const [dashboardSettings, setDashboardSettings] = useState(defaultDashboardSettings)
+
+  // Carregar configurações do dashboard do localStorage
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(DASHBOARD_SETTINGS_KEY)
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        setDashboardSettings({ ...defaultDashboardSettings, ...parsed })
+      }
+    } catch (error) {
+      console.error('Erro ao carregar configurações do dashboard:', error)
+    }
+  }, [])
 
   useEffect(() => {
     const stored = localStorage.getItem('fooddiddo_meals')
@@ -1535,6 +1556,7 @@ export function DashboardPage() {
   return (
     <div className="dashboard-page page">
       {/* Painel de Status Diário */}
+      {dashboardSettings.showStatusPanel && (
       <section className="dashboard-status-panel">
         <div className="status-panel-header">
           <h2>Hoje</h2>
@@ -1553,8 +1575,9 @@ export function DashboardPage() {
           </div>
         </div>
       </section>
+      )}
 
-      {businessInsights && (
+      {dashboardSettings.showBusinessInsights && businessInsights && (
         <section className="page-stack business-insights">
           <div className="insights-content">
             <h2>💡 Oportunidade de Negócio</h2>
@@ -1571,6 +1594,7 @@ export function DashboardPage() {
         </section>
       )}
 
+      {dashboardSettings.showMealSection && (
       <section className="page-stack meal-section">
         <header className="meal-section-header">
           <div>
@@ -1956,6 +1980,7 @@ export function DashboardPage() {
           ))}
         </div>
       </section>
+      )}
 
       {/* Floating Action Button */}
       <div className="fab-container">
