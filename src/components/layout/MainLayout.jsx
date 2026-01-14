@@ -29,6 +29,7 @@ const navigation = [
     items: [
       { path: '/dashboard', label: 'Home', icon: <AiOutlineHome /> },
       { path: '/caixa', label: 'Caixa', icon: <AiOutlineWallet /> },
+      { path: '/fluxo-caixa', label: 'Fluxo de Caixa', icon: <AiOutlineLineChart /> },
       { path: '/orcamento', label: 'Orçamentos', icon: <AiOutlineDollarCircle /> },
       { path: '/ingredientes', label: 'Ingredientes', icon: <AiOutlineShoppingCart /> },
       { path: '/receitas', label: 'Receitas', icon: <AiOutlineBook /> }
@@ -49,7 +50,6 @@ const navigation = [
     section: 'Operação',
     items: [
       { path: '/estoque', label: 'Estoque', icon: <AiOutlineInbox /> },
-      { path: '/financeiro', label: 'Financeiro', icon: <AiOutlineLineChart /> },
       { path: '/relatorios', label: 'Relatórios', icon: <AiOutlineFileText /> },
       { path: '/config', label: 'Configurações', icon: <AiOutlineSetting /> }
     ]

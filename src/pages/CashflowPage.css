@@ -1,0 +1,356 @@
+/* CashflowPage Styles */
+
+.cashflow-page {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* Status do Caixa */
+.cashflow-status-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-primary);
+  border-radius: 12px;
+  padding: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  box-shadow: var(--shadow-lg);
+}
+
+.cashflow-status-header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.cashflow-status-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  background: var(--bg-secondary);
+}
+
+.cashflow-status-info h2 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.cashflow-status-badge {
+  display: inline-block;
+  padding: 0.375rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.cashflow-status-badge.open {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--success);
+}
+
+.cashflow-status-badge.closed {
+  background: var(--bg-secondary);
+  color: var(--text-muted);
+}
+
+.cashflow-status-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+/* Relatório Consolidado */
+.cashflow-report-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-primary);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-md);
+}
+
+.cashflow-report-card h3 {
+  margin: 0 0 1.5rem 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cashflow-report-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.cashflow-report-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  border: 1px solid var(--border-primary);
+}
+
+.cashflow-report-item.profit {
+  border-left: 4px solid var(--success);
+}
+
+.cashflow-report-item.loss {
+  border-left: 4px solid var(--error);
+}
+
+.cashflow-report-item.total {
+  border-left: 4px solid var(--primary-color);
+  background: var(--bg-card);
+}
+
+.cashflow-report-item span {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.cashflow-report-item strong {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* Informações de Abertura e Fechamento */
+.cashflow-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.cashflow-info-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-primary);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-md);
+}
+
+.cashflow-info-card h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cashflow-info-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.cashflow-info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border-primary);
+}
+
+.cashflow-info-item:last-child {
+  border-bottom: none;
+}
+
+.cashflow-info-item span {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.cashflow-info-item strong {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Orçamento */
+.cashflow-budget-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-primary);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-md);
+}
+
+.cashflow-budget-card h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cashflow-budget-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.cashflow-budget-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.cashflow-budget-item span {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.cashflow-budget-item strong {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* Filtros */
+.cashflow-filters {
+  background: var(--bg-card);
+  border: 1px solid var(--border-primary);
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  gap: 1rem;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.cashflow-filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 150px;
+}
+
+.cashflow-filter-group label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.cashflow-filter-group select,
+.cashflow-filter-group input {
+  padding: 0.75rem;
+  border: 1px solid var(--border-primary);
+  border-radius: 8px;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 0.95rem;
+}
+
+.cashflow-filter-group select:focus,
+.cashflow-filter-group input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+/* Categoria nas movimentações */
+.cashflow-category {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border-primary);
+}
+
+.cashflow-category span {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  padding: 0.25rem 0.5rem;
+  background: var(--bg-secondary);
+  border-radius: 4px;
+}
+
+/* Resumo de Fechamento */
+.cashflow-close-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+}
+
+.cashflow-close-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--border-primary);
+}
+
+.cashflow-close-item:last-child {
+  border-bottom: none;
+}
+
+.cashflow-close-item.total {
+  padding-top: 1rem;
+  border-top: 2px solid var(--border-primary);
+  margin-top: 0.5rem;
+}
+
+.cashflow-close-item span {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+}
+
+.cashflow-close-item strong {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .cashflow-status-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .cashflow-info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cashflow-budget-content {
+    grid-template-columns: 1fr;
+  }
+
+  .cashflow-report-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cashflow-filters {
+    flex-direction: column;
+  }
+
+  .cashflow-filter-group {
+    width: 100%;
+  }
+}
