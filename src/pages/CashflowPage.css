@@ -6,12 +6,12 @@
   gap: 2rem;
 }
 
-/* Status do Caixa */
-.cashflow-status-card {
+/* Cabeçalho */
+.cashflow-header {
   background: var(--bg-card);
   border: 1px solid var(--border-primary);
   border-radius: 12px;
-  padding: 2rem;
+  padding: 1.5rem 2rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -19,27 +19,240 @@
   box-shadow: var(--shadow-lg);
 }
 
-.cashflow-status-header {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
+.cashflow-header-title h1 {
+  margin: 0 0 0.5rem 0;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary);
 }
 
-.cashflow-status-icon {
+.cashflow-status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.cashflow-status-icon-small {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 64px;
-  height: 64px;
-  border-radius: 12px;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
   background: var(--bg-secondary);
 }
 
-.cashflow-status-info h2 {
-  margin: 0 0 0.5rem 0;
+.cashflow-header-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+/* Saldo Atual e Abertura */
+.cashflow-balance-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.cashflow-balance-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-primary);
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  box-shadow: var(--shadow-md);
+}
+
+.cashflow-balance-label {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+.cashflow-balance-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.cashflow-balance-note {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: 0.25rem;
+}
+
+/* Título de Seção */
+.cashflow-section-title {
+  margin: 0 0 1rem 0;
   font-size: 1.5rem;
   font-weight: 700;
   color: var(--text-primary);
+}
+
+/* Tabela de Movimentações */
+.cashflow-movements-table {
+  background: var(--bg-card);
+  border: 1px solid var(--border-primary);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+
+.cashflow-table-header {
+  display: grid;
+  grid-template-columns: 120px 100px 1fr 150px 80px;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  background: var(--bg-secondary);
+  border-bottom: 2px solid var(--border-primary);
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.cashflow-table-body {
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.cashflow-table-row {
+  display: grid;
+  grid-template-columns: 120px 100px 1fr 150px 80px;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border-primary);
+  align-items: center;
+  transition: background 0.2s ease;
+}
+
+.cashflow-table-row:hover {
+  background: var(--bg-secondary);
+}
+
+.cashflow-table-row:last-child {
+  border-bottom: none;
+}
+
+.cashflow-table-col {
+  display: flex;
+  align-items: center;
+}
+
+.cashflow-type-badge {
+  display: inline-block;
+  padding: 0.375rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.cashflow-type-badge.entry {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--success);
+}
+
+.cashflow-type-badge.exit {
+  background: rgba(220, 38, 38, 0.15);
+  color: var(--error);
+}
+
+.cashflow-origin-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.cashflow-origin-content strong {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.cashflow-origin-category {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  padding: 0.125rem 0.5rem;
+  background: var(--bg-secondary);
+  border-radius: 4px;
+  display: inline-block;
+  width: fit-content;
+}
+
+.cashflow-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: 1px solid var(--border-primary);
+  border-radius: 6px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cashflow-action-btn:hover {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border-color: var(--primary-color);
+}
+
+.cashflow-action-menu {
+  position: absolute;
+  top: 2.5rem;
+  right: 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border-primary);
+  border-radius: 8px;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.5rem;
+  min-width: 120px;
+  z-index: 10;
+}
+
+.cashflow-action-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  text-align: left;
+}
+
+.cashflow-action-menu-item:hover {
+  background: var(--bg-secondary);
+}
+
+.cashflow-action-menu-item.delete {
+  color: var(--error);
+}
+
+.cashflow-action-menu-item.delete:hover {
+  background: rgba(220, 38, 38, 0.1);
+}
+
+.cashflow-action-menu-divider {
+  height: 1px;
+  background: var(--border-primary);
+  margin: 0.25rem 0;
 }
 
 .cashflow-status-badge {
@@ -273,19 +486,12 @@
   box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
 }
 
-/* Categoria nas movimentações */
-.cashflow-category {
-  margin-top: 0.5rem;
-  padding-top: 0.5rem;
-  border-top: 1px solid var(--border-primary);
-}
-
-.cashflow-category span {
-  font-size: 0.75rem;
+.cashflow-empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
   color: var(--text-muted);
-  padding: 0.25rem 0.5rem;
-  background: var(--bg-secondary);
-  border-radius: 4px;
+  font-size: 0.95rem;
+  grid-column: 1 / -1;
 }
 
 /* Resumo de Fechamento */

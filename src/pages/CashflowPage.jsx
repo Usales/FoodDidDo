@@ -307,25 +307,25 @@ export function CashflowPage() {
 
   return (
     <div className="page cashflow-page">
-      {/* Status do Caixa */}
+      {/* Cabeçalho: Título e Controles do Caixa */}
       <section className="page-stack">
-        <div className="cashflow-status-card">
-          <div className="cashflow-status-header">
-            <div className="cashflow-status-icon">
-              {cashboxData.isOpen ? (
-                <FiUnlock size={32} style={{ color: 'var(--success)' }} />
-              ) : (
-                <FiLock size={32} style={{ color: 'var(--text-muted)' }} />
-              )}
-            </div>
-            <div className="cashflow-status-info">
-              <h2>Status do Caixa</h2>
+        <div className="cashflow-header">
+          <div className="cashflow-header-title">
+            <h1>Fluxo de Caixa</h1>
+            <div className="cashflow-status-indicator">
+              <div className="cashflow-status-icon-small">
+                {cashboxData.isOpen ? (
+                  <FiUnlock size={20} style={{ color: 'var(--success)' }} />
+                ) : (
+                  <FiLock size={20} style={{ color: 'var(--text-muted)' }} />
+                )}
+              </div>
               <span className={`cashflow-status-badge ${cashboxData.isOpen ? 'open' : 'closed'}`}>
-                {cashboxData.isOpen ? 'Aberto' : 'Fechado'}
+                {cashboxData.isOpen ? 'Caixa Aberto' : 'Caixa Fechado'}
               </span>
             </div>
           </div>
-          <div className="cashflow-status-actions">
+          <div className="cashflow-header-actions">
             {!cashboxData.isOpen ? (
               <button className="primary-btn" type="button" onClick={() => setIsOpenModalOpen(true)}>
                 <FiUnlock size={18} />
@@ -341,8 +341,37 @@ export function CashflowPage() {
         </div>
       </section>
 
+      {/* Saldo Atual e Abertura */}
+      <section className="page-stack">
+        <div className="cashflow-balance-grid">
+          <div className="cashflow-balance-card">
+            <span className="cashflow-balance-label">Saldo Atual do Caixa</span>
+            <strong className="cashflow-balance-value" style={{ color: currentBalance >= 0 ? 'var(--success)' : 'var(--error)' }}>
+              {formatCurrency(currentBalance)}
+            </strong>
+            {cashboxData.isOpen && (
+              <small className="cashflow-balance-note">
+                Abertura: {formatCurrency(cashboxData.openingAmount)} • {formatDateTime(cashboxData.openingDate)}
+              </small>
+            )}
+          </div>
+          <div className="cashflow-balance-card">
+            <span className="cashflow-balance-label">Valor de Abertura</span>
+            <strong className="cashflow-balance-value">
+              {formatCurrency(cashboxData.openingAmount)}
+            </strong>
+            {cashboxData.openingDate && (
+              <small className="cashflow-balance-note">
+                {formatDateTime(cashboxData.openingDate)}
+              </small>
+            )}
+          </div>
+        </div>
+      </section>
+
       {/* Resumo Financeiro */}
       <section className="page-stack">
+        <h2 className="cashflow-section-title">Resumo Financeiro</h2>
         <div className="summary-grid">
           <div className="summary-card">
             <span>Total de Entradas</span>
@@ -359,13 +388,11 @@ export function CashflowPage() {
             <small>{summary.exitsCount} registro(s)</small>
           </div>
           <div className="summary-card">
-            <span>Saldo Atual</span>
-            <strong style={{ color: currentBalance >= 0 ? 'var(--success)' : 'var(--error)' }}>
-              {formatCurrency(currentBalance)}
+            <span>Resultado do Período</span>
+            <strong style={{ color: summary.balance >= 0 ? 'var(--success)' : 'var(--error)' }}>
+              {summary.balance >= 0 ? '+' : ''}{formatCurrency(summary.balance)}
             </strong>
-            {cashboxData.isOpen && (
-              <small>Caixa aberto</small>
-            )}
+            <small>{summary.balance >= 0 ? 'Lucro' : 'Prejuízo'}</small>
           </div>
         </div>
       </section>
@@ -515,10 +542,10 @@ export function CashflowPage() {
         </section>
       )}
 
-      {/* Filtros */}
+      {/* Filtros e Ações */}
       <section className="page-stack">
         <div className="page-header">
-          <h2>Fluxo de Caixa</h2>
+          <h2 className="cashflow-section-title">Movimentações</h2>
           <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
             <button
               type="button"
@@ -528,8 +555,11 @@ export function CashflowPage() {
               <FiFilter size={18} />
               Filtros
             </button>
-            <button className="primary-btn" type="button" onClick={() => setIsModalOpen(true)}>
-              Registrar lançamento
+            <button className="primary-btn" type="button" onClick={() => {
+              setFormState({ ...formState, type: 'saída' })
+              setIsModalOpen(true)
+            }}>
+              Adicionar Despesa
             </button>
           </div>
         </div>
@@ -563,6 +593,53 @@ export function CashflowPage() {
                 onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
               />
             </div>
+            <div className="cashflow-filter-group">
+              <label>Período</label>
+              <select
+                value=""
+                onChange={(e) => {
+                  if (e.target.value) {
+                    const today = new Date()
+                    let startDate = ''
+                    let endDate = today.toISOString().split('T')[0]
+                    
+                    switch(e.target.value) {
+                      case 'hoje':
+                        startDate = endDate
+                        break
+                      case 'semana':
+                        const weekAgo = new Date(today)
+                        weekAgo.setDate(today.getDate() - 7)
+                        startDate = weekAgo.toISOString().split('T')[0]
+                        break
+                      case 'mes':
+                        const monthAgo = new Date(today)
+                        monthAgo.setMonth(today.getMonth() - 1)
+                        startDate = monthAgo.toISOString().split('T')[0]
+                        break
+                      case 'trimestre':
+                        const quarterAgo = new Date(today)
+                        quarterAgo.setMonth(today.getMonth() - 3)
+                        startDate = quarterAgo.toISOString().split('T')[0]
+                        break
+                      case 'ano':
+                        const yearAgo = new Date(today)
+                        yearAgo.setFullYear(today.getFullYear() - 1)
+                        startDate = yearAgo.toISOString().split('T')[0]
+                        break
+                    }
+                    setFilters({ ...filters, startDate, endDate })
+                  }
+                }}
+              >
+                <option value="">Selecione um período</option>
+                <option value="hoje">Hoje</option>
+                <option value="semana">Últimos 7 dias</option>
+                <option value="mes">Último mês</option>
+                <option value="trimestre">Último trimestre</option>
+                <option value="ano">Último ano</option>
+              </select>
+            </div>
             <button
               type="button"
               className="ghost-btn"
@@ -576,140 +653,84 @@ export function CashflowPage() {
 
       {/* Lista de Movimentações */}
       <section className="page-stack">
-        <div className="card-grid">
-          {filteredCashflow.length > 0 ? (
-            filteredCashflow.map((entry) => (
-              <article key={entry.id} className="card-tile" style={{ position: 'relative' }}>
-                <header>
-                  <h3>{typeLabels[entry.type] ?? entry.type}</h3>
-                  <span className="pill">{new Date(entry.date).toLocaleDateString('pt-BR')}</span>
-                </header>
-                <div className="divider" />
-                <div className="cashflow-meta">
-                  <span>{entry.description}</span>
-                  <strong style={{ color: entry.type === 'entrada' ? 'var(--brand-aqua-dark)' : entry.type === 'orçamento' ? 'var(--brand-orange, #ff9800)' : 'var(--brand-red)' }}>
-                    {entry.type === 'entrada' ? '+' : entry.type === 'orçamento' ? '' : '-'} R$ {entry.amount.toFixed(2)}
-                  </strong>
-                </div>
-                {entry.category && (
-                  <div className="cashflow-category">
-                    <span>{entry.category}</span>
+        <div className="cashflow-movements-table">
+          <div className="cashflow-table-header">
+            <div className="cashflow-table-col date">Data</div>
+            <div className="cashflow-table-col type">Tipo</div>
+            <div className="cashflow-table-col origin">Origem</div>
+            <div className="cashflow-table-col value">Valor</div>
+            <div className="cashflow-table-col actions">Ações</div>
+          </div>
+          <div className="cashflow-table-body">
+            {filteredCashflow.length > 0 ? (
+              filteredCashflow.map((entry) => (
+                <div key={entry.id} className="cashflow-table-row">
+                  <div className="cashflow-table-col date">
+                    {new Date(entry.date).toLocaleDateString('pt-BR', {
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: 'numeric'
+                    })}
                   </div>
-                )}
-                <div ref={menuRef} style={{ position: 'absolute', top: '1rem', right: '1rem' }}>
-                  <button
-                    type="button"
-                    onClick={() => handleEditClick(entry.id)}
-                    style={{
-                      background: 'transparent',
-                      border: 'none',
-                      cursor: 'pointer',
-                      padding: '0.5rem',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: 'var(--text-secondary)',
-                      borderRadius: '4px',
-                      transition: 'all 0.2s'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = 'var(--input-bg)'
-                      e.currentTarget.style.color = 'var(--text-primary)'
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = 'transparent'
-                      e.currentTarget.style.color = 'var(--text-secondary)'
-                    }}
-                  >
-                    <FiEdit3 size={18} />
-                  </button>
-                  {expandedCardId === entry.id && (
-                    <div
-                      style={{
-                        position: 'absolute',
-                        top: '2.5rem',
-                        right: '0',
-                        background: 'var(--panel-bg)',
-                        border: '1px solid var(--border-color)',
-                        borderRadius: '8px',
-                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '0.25rem',
-                        padding: '0.5rem',
-                        minWidth: '120px',
-                        zIndex: 10
-                      }}
-                    >
-                      <button
-                        type="button"
-                        onClick={() => handleEdit(entry)}
-                        style={{
-                          background: 'transparent',
-                          border: 'none',
-                          cursor: 'pointer',
-                          padding: '0.5rem 0.75rem',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.5rem',
-                          color: 'var(--text-primary)',
-                          borderRadius: '4px',
-                          fontSize: '0.875rem',
-                          transition: 'background 0.2s'
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.background = 'var(--input-bg)'
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.background = 'transparent'
-                        }}
-                      >
-                        <FiEdit3 size={16} />
-                        Editar
-                      </button>
-                      <div
-                        style={{
-                          height: '1px',
-                          background: 'var(--border-color)',
-                          margin: '0.25rem 0'
-                        }}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => handleDelete(entry.id)}
-                        style={{
-                          background: 'transparent',
-                          border: 'none',
-                          cursor: 'pointer',
-                          padding: '0.5rem 0.75rem',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.5rem',
-                          color: 'var(--brand-red)',
-                          borderRadius: '4px',
-                          fontSize: '0.875rem',
-                          transition: 'background 0.2s'
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.background = 'var(--input-bg)'
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.background = 'transparent'
-                        }}
-                      >
-                        <FiTrash2 size={16} />
-                        Deletar
-                      </button>
+                  <div className="cashflow-table-col type">
+                    <span className={`cashflow-type-badge ${entry.type === 'entrada' ? 'entry' : 'exit'}`}>
+                      {entry.type === 'entrada' ? 'Entrada' : 'Saída'}
+                    </span>
+                  </div>
+                  <div className="cashflow-table-col origin">
+                    <div className="cashflow-origin-content">
+                      <strong>{entry.description}</strong>
+                      {entry.category && (
+                        <span className="cashflow-origin-category">{entry.category}</span>
+                      )}
                     </div>
-                  )}
+                  </div>
+                  <div className="cashflow-table-col value">
+                    <strong style={{ color: entry.type === 'entrada' ? 'var(--success)' : 'var(--error)' }}>
+                      {entry.type === 'entrada' ? '+' : '-'} {formatCurrency(entry.amount)}
+                    </strong>
+                  </div>
+                  <div className="cashflow-table-col actions">
+                    <div ref={menuRef} style={{ position: 'relative' }}>
+                      <button
+                        type="button"
+                        onClick={() => handleEditClick(entry.id)}
+                        className="cashflow-action-btn"
+                      >
+                        <FiEdit3 size={18} />
+                      </button>
+                      {expandedCardId === entry.id && (
+                        <div className="cashflow-action-menu">
+                          <button
+                            type="button"
+                            onClick={() => handleEdit(entry)}
+                            className="cashflow-action-menu-item"
+                          >
+                            <FiEdit3 size={16} />
+                            Editar
+                          </button>
+                          <div className="cashflow-action-menu-divider" />
+                          <button
+                            type="button"
+                            onClick={() => handleDelete(entry.id)}
+                            className="cashflow-action-menu-item delete"
+                          >
+                            <FiTrash2 size={16} />
+                            Deletar
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
-              </article>
-            ))
-          ) : (
-            <div className="card-tile">Nenhum lançamento encontrado com os filtros aplicados.</div>
-          )}
+              ))
+            ) : (
+              <div className="cashflow-empty-state">
+                Nenhuma movimentação encontrada com os filtros aplicados.
+              </div>
+            )}
+          </div>
         </div>
-      </section>
 
       {/* Modal de Abertura de Caixa */}
       <FormModal
