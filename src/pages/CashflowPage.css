@@ -6,6 +6,16 @@
   gap: 2rem;
 }
 
+/* Identificação das camadas (rótulos) */
+.cashflow-layer-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 700;
+  margin: 0 0 0.75rem 0;
+}
+
 /* CAMADA 1 — Status do Caixa */
 .cashflow-status-bar {
   display: grid;
@@ -645,6 +655,11 @@
 @media (max-width: 480px) {
   .cashflow-page {
     gap: 1rem;
+  }
+
+  .cashflow-layer-label {
+    font-size: 0.75rem;
+    margin-bottom: 0.6rem;
   }
 
   .cashflow-title {
