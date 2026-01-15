@@ -8,6 +8,7 @@ import './PageCommon.css'
 import './ConfigPage.css'
 
 const DASHBOARD_SETTINGS_KEY = 'dashboardSettings'
+const CASHFLOW_PAGE_SETTINGS_KEY = 'cashflowPageSettings'
 
 const defaultDashboardSettings = {
   // Quando true, oculta todos os cabeçalhos do layout/Home
@@ -15,6 +16,13 @@ const defaultDashboardSettings = {
   showStatusPanel: true,
   showBusinessInsights: true,
   showMealSection: true
+}
+
+const defaultCashflowPageSettings = {
+  showStatusSection: true,
+  showSummarySection: true,
+  showDetailsSection: true,
+  showMovementsSection: true
 }
 
 export function ConfigPage() {
@@ -29,6 +37,7 @@ export function ConfigPage() {
     autoBackup: false
   })
   const [dashboardSettings, setDashboardSettings] = useState(defaultDashboardSettings)
+  const [cashflowPageSettings, setCashflowPageSettings] = useState(defaultCashflowPageSettings)
   const [activeTab, setActiveTab] = useState('geral')
 
   // Carregar configurações do dashboard do localStorage
@@ -44,6 +53,19 @@ export function ConfigPage() {
     }
   }, [])
 
+  // Carregar configurações do Fluxo de Caixa (UI) do localStorage
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(CASHFLOW_PAGE_SETTINGS_KEY)
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        setCashflowPageSettings({ ...defaultCashflowPageSettings, ...parsed })
+      }
+    } catch (error) {
+      console.error('Erro ao carregar configurações do fluxo de caixa:', error)
+    }
+  }, [])
+
   // Salvar configurações do dashboard no localStorage
   const saveDashboardSettings = (newSettings) => {
     try {
@@ -53,6 +75,17 @@ export function ConfigPage() {
       window.dispatchEvent(new CustomEvent('dashboardSettingsChanged', { detail: newSettings }))
     } catch (error) {
       console.error('Erro ao salvar configurações do dashboard:', error)
+    }
+  }
+
+  // Salvar configurações do Fluxo de Caixa (UI) no localStorage
+  const saveCashflowPageSettings = (newSettings) => {
+    try {
+      localStorage.setItem(CASHFLOW_PAGE_SETTINGS_KEY, JSON.stringify(newSettings))
+      setCashflowPageSettings(newSettings)
+      window.dispatchEvent(new CustomEvent('cashflowPageSettingsChanged', { detail: newSettings }))
+    } catch (error) {
+      console.error('Erro ao salvar configurações do fluxo de caixa:', error)
     }
   }
 
@@ -476,15 +509,108 @@ export function ConfigPage() {
           <section className="config-section">
             <h2 className="config-section-title">Tela Fluxo de Caixa</h2>
             <p className="config-section-description">
-              Configurações da tela de Fluxo de Caixa. Em breve você poderá ajustar regras de exibição, filtros padrão e preferências.
+              Configure quais seções devem ser exibidas na tela de Fluxo de Caixa.
             </p>
-            <div className="config-backup-banner" style={{ marginTop: '0.5rem' }}>
-              <div className="config-backup-icon">📈</div>
-              <div className="config-backup-content">
-                <h3 className="config-backup-title">Em desenvolvimento</h3>
-                <p className="config-backup-description">
-                  Esta seção foi criada para centralizar configurações do financeiro.
-                </p>
+
+            <div className="config-dashboard-settings">
+              <div className="config-dashboard-item">
+                <div className="config-dashboard-item-content">
+                  <div className="config-dashboard-item-header">
+                    <h3 className="config-dashboard-item-title">Status do Caixa</h3>
+                    <Tooltip content="Exibe o topo com status (aberto/fechado), saldo atual e ação de abrir/fechar caixa">
+                      <span className="tooltip-icon">ⓘ</span>
+                    </Tooltip>
+                  </div>
+                  <p className="config-dashboard-item-description">
+                    Mostra o bloco principal com saldo e status do caixa
+                  </p>
+                </div>
+                <ToggleSwitch
+                  checked={cashflowPageSettings.showStatusSection}
+                  onChange={() => {
+                    const newSettings = {
+                      ...cashflowPageSettings,
+                      showStatusSection: !cashflowPageSettings.showStatusSection
+                    }
+                    saveCashflowPageSettings(newSettings)
+                  }}
+                  label={cashflowPageSettings.showStatusSection ? 'Exibindo' : 'Oculto'}
+                />
+              </div>
+
+              <div className="config-dashboard-item">
+                <div className="config-dashboard-item-content">
+                  <div className="config-dashboard-item-header">
+                    <h3 className="config-dashboard-item-title">Resumo Financeiro</h3>
+                    <Tooltip content="Exibe o bloco com Entradas, Saídas, Resultado do período e Saldo final">
+                      <span className="tooltip-icon">ⓘ</span>
+                    </Tooltip>
+                  </div>
+                  <p className="config-dashboard-item-description">
+                    Mostra os 4 cards compactos do resumo
+                  </p>
+                </div>
+                <ToggleSwitch
+                  checked={cashflowPageSettings.showSummarySection}
+                  onChange={() => {
+                    const newSettings = {
+                      ...cashflowPageSettings,
+                      showSummarySection: !cashflowPageSettings.showSummarySection
+                    }
+                    saveCashflowPageSettings(newSettings)
+                  }}
+                  label={cashflowPageSettings.showSummarySection ? 'Exibindo' : 'Oculto'}
+                />
+              </div>
+
+              <div className="config-dashboard-item">
+                <div className="config-dashboard-item-content">
+                  <div className="config-dashboard-item-header">
+                    <h3 className="config-dashboard-item-title">Detalhes do Caixa</h3>
+                    <Tooltip content="Exibe o accordion com detalhes da sessão (abertura/fechamento, lucro médio por venda e orçamento)">
+                      <span className="tooltip-icon">ⓘ</span>
+                    </Tooltip>
+                  </div>
+                  <p className="config-dashboard-item-description">
+                    Mostra o bloco colapsável “Detalhes da Sessão de Caixa”
+                  </p>
+                </div>
+                <ToggleSwitch
+                  checked={cashflowPageSettings.showDetailsSection}
+                  onChange={() => {
+                    const newSettings = {
+                      ...cashflowPageSettings,
+                      showDetailsSection: !cashflowPageSettings.showDetailsSection
+                    }
+                    saveCashflowPageSettings(newSettings)
+                  }}
+                  label={cashflowPageSettings.showDetailsSection ? 'Exibindo' : 'Oculto'}
+                />
+              </div>
+
+              <div className="config-dashboard-item">
+                <div className="config-dashboard-item-content">
+                  <div className="config-dashboard-item-header">
+                    <h3 className="config-dashboard-item-title">Movimentações</h3>
+                    <Tooltip content="Exibe a tabela operacional de movimentações e os botões de filtros e adicionar despesa">
+                      <span className="tooltip-icon">ⓘ</span>
+                    </Tooltip>
+                  </div>
+                  <p className="config-dashboard-item-description">
+                    Mostra a lista/tabela de entradas e saídas
+                  </p>
+                </div>
+                <ToggleSwitch
+                  checked={cashflowPageSettings.showMovementsSection}
+                  onChange={() => {
+                    const newSettings = {
+                      ...cashflowPageSettings,
+                      showMovementsSection: !cashflowPageSettings.showMovementsSection
+                    }
+                    saveCashflowPageSettings(newSettings)
+                  }}
+                  label={cashflowPageSettings.showMovementsSection ? 'Exibindo' : 'Oculto'}
+                />
               </div>
             </div>
           </section>
