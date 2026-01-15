@@ -51,7 +51,23 @@
   opacity: 1;
   background: var(--bg-secondary);
   position: relative;
+  z-index: 2;
   top: 1px; /* “encaixa” no painel, como uma pasta */
+}
+
+.config-tab:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.18);
+}
+
+.config-tab.active::after {
+  content: '';
+  position: absolute;
+  left: -1px;
+  right: -1px;
+  bottom: -2px;
+  height: 3px;
+  background: var(--bg-secondary);
 }
 
 .config-tab-panel {
