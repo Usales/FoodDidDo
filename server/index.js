@@ -882,20 +882,31 @@ fastify.post('/api/restore', async (request, reply) => {
     // 6. Fluxo de Caixa
     if (data.cashflow && Array.isArray(data.cashflow)) {
       if (data.cashflow.length > 0) {
-        await prisma.cashflowEntry.createMany({ 
-          data: data.cashflow.map(cf => ({
-            id: cf.id,
-            type: cf.type,
-            amount: cf.amount,
-            cost: typeof cf.cost === 'number' ? cf.cost : null,
-            profit: typeof cf.profit === 'number' ? cf.profit : null,
-            description: cf.description,
-            date: cf.date ? new Date(cf.date) : new Date(),
-            category: cf.category || null,
-            createdAt: cf.createdAt ? new Date(cf.createdAt) : new Date(),
-            updatedAt: cf.updatedAt ? new Date(cf.updatedAt) : new Date()
-          }))
-        })
+        const rowsWithProfit = data.cashflow.map(cf => ({
+          id: cf.id,
+          type: cf.type,
+          amount: cf.amount,
+          cost: typeof cf.cost === 'number' ? cf.cost : null,
+          profit: typeof cf.profit === 'number' ? cf.profit : null,
+          description: cf.description,
+          date: cf.date ? new Date(cf.date) : new Date(),
+          category: cf.category || null,
+          createdAt: cf.createdAt ? new Date(cf.createdAt) : new Date(),
+          updatedAt: cf.updatedAt ? new Date(cf.updatedAt) : new Date()
+        }))
+
+        try {
+          await prisma.cashflowEntry.createMany({ data: rowsWithProfit })
+        } catch (error) {
+          // Compatibilidade: bancos antigos podem não ter colunas cost/profit ainda
+          if (error?.code === 'P2022') {
+            await prisma.cashflowEntry.createMany({
+              data: rowsWithProfit.map(({ cost, profit, ...rest }) => rest)
+            })
+          } else {
+            throw error
+          }
+        }
       }
     }
     
