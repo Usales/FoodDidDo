@@ -495,11 +495,21 @@ fastify.post('/api/cashflow', async (request, reply) => {
 
 fastify.put('/api/cashflow/:id', async (request, reply) => {
   const { id } = request.params
-  const entry = await prisma.cashflowEntry.update({
-    where: { id },
-    data: request.body
-  })
-  return entry
+  try {
+    const entry = await prisma.cashflowEntry.update({
+      where: { id },
+      data: request.body
+    })
+    return entry
+  } catch (error) {
+    // Compatibilidade: bancos antigos podem não ter colunas cost/profit ainda
+    if (error?.code === 'P2022') {
+      const { cost, profit, ...data } = request.body || {}
+      const entry = await prisma.cashflowEntry.update({ where: { id }, data })
+      return { ...entry, cost: null, profit: null }
+    }
+    throw error
+  }
 })
 
 fastify.delete('/api/cashflow/:id', async (request, reply) => {
