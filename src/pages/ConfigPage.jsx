@@ -438,6 +438,60 @@ export function ConfigPage() {
       )
     }
 
+    if (activeTab === 'tela-caixa') {
+      return (
+        <div
+          id="config-panel-tela-caixa"
+          role="tabpanel"
+          aria-labelledby="config-tab-tela-caixa"
+          className="config-tab-panel"
+        >
+          <section className="config-section">
+            <h2 className="config-section-title">Tela Caixa</h2>
+            <p className="config-section-description">
+              Configurações da tela de PDV (Caixa). Em breve você poderá personalizar comportamentos e preferências específicas.
+            </p>
+            <div className="config-backup-banner" style={{ marginTop: '0.5rem' }}>
+              <div className="config-backup-icon">🧾</div>
+              <div className="config-backup-content">
+                <h3 className="config-backup-title">Em desenvolvimento</h3>
+                <p className="config-backup-description">
+                  Esta seção foi criada para centralizar configurações do PDV.
+                </p>
+              </div>
+            </div>
+          </section>
+        </div>
+      )
+    }
+
+    if (activeTab === 'tela-fluxo-caixa') {
+      return (
+        <div
+          id="config-panel-tela-fluxo-caixa"
+          role="tabpanel"
+          aria-labelledby="config-tab-tela-fluxo-caixa"
+          className="config-tab-panel"
+        >
+          <section className="config-section">
+            <h2 className="config-section-title">Tela Fluxo de Caixa</h2>
+            <p className="config-section-description">
+              Configurações da tela de Fluxo de Caixa. Em breve você poderá ajustar regras de exibição, filtros padrão e preferências.
+            </p>
+            <div className="config-backup-banner" style={{ marginTop: '0.5rem' }}>
+              <div className="config-backup-icon">📈</div>
+              <div className="config-backup-content">
+                <h3 className="config-backup-title">Em desenvolvimento</h3>
+                <p className="config-backup-description">
+                  Esta seção foi criada para centralizar configurações do financeiro.
+                </p>
+              </div>
+            </div>
+          </section>
+        </div>
+      )
+    }
+
     return (
       <div
         id="config-panel-backup"
@@ -531,6 +585,28 @@ export function ConfigPage() {
             onClick={() => setActiveTab('tela-home')}
           >
             Tela Home
+          </button>
+          <button
+            id="config-tab-tela-caixa"
+            type="button"
+            role="tab"
+            className={`config-tab ${activeTab === 'tela-caixa' ? 'active' : ''}`}
+            aria-selected={activeTab === 'tela-caixa'}
+            aria-controls="config-panel-tela-caixa"
+            onClick={() => setActiveTab('tela-caixa')}
+          >
+            Tela Caixa
+          </button>
+          <button
+            id="config-tab-tela-fluxo-caixa"
+            type="button"
+            role="tab"
+            className={`config-tab ${activeTab === 'tela-fluxo-caixa' ? 'active' : ''}`}
+            aria-selected={activeTab === 'tela-fluxo-caixa'}
+            aria-controls="config-panel-tela-fluxo-caixa"
+            onClick={() => setActiveTab('tela-fluxo-caixa')}
+          >
+            Tela Fluxo de Caixa
           </button>
           <button
             id="config-tab-backup"
