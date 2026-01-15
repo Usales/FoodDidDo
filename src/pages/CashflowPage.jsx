@@ -7,6 +7,7 @@ import './PageCommon.css'
 import './CashflowPage.css'
 
 const CASHBOX_STORAGE_KEY = 'cashboxData'
+const CASHFLOW_PAGE_SETTINGS_KEY = 'cashflowPageSettings'
 const typeLabels = {
   entrada: 'Entrada',
   saída: 'Saída',
@@ -23,6 +24,13 @@ const defaultCashboxData = {
   totalExits: 0
 }
 
+const defaultCashflowPageSettings = {
+  showStatusSection: true,
+  showSummarySection: true,
+  showDetailsSection: true,
+  showMovementsSection: true
+}
+
 export function CashflowPage() {
   const cashflow = useAppStore((state) => state.cashflow)
   const budgets = useAppStore((state) => state.budgets)
@@ -34,6 +42,7 @@ export function CashflowPage() {
   const [editingId, setEditingId] = useState(null)
   const [expandedCardId, setExpandedCardId] = useState(null)
   const [cashboxData, setCashboxData] = useState(defaultCashboxData)
+  const [cashflowPageSettings, setCashflowPageSettings] = useState(defaultCashflowPageSettings)
   const [isOpenModalOpen, setIsOpenModalOpen] = useState(false)
   const [isCloseModalOpen, setIsCloseModalOpen] = useState(false)
   const [openingAmount, setOpeningAmount] = useState('')
@@ -65,6 +74,37 @@ export function CashflowPage() {
     } catch (error) {
       console.error('Erro ao carregar dados do caixa:', error)
     }
+  }, [])
+
+  // Carregar/atualizar preferências de exibição (UI) do Fluxo de Caixa
+  useEffect(() => {
+    const loadSettings = () => {
+      try {
+        const saved = localStorage.getItem(CASHFLOW_PAGE_SETTINGS_KEY)
+        if (saved) {
+          const parsed = JSON.parse(saved)
+          setCashflowPageSettings({ ...defaultCashflowPageSettings, ...parsed })
+        } else {
+          setCashflowPageSettings(defaultCashflowPageSettings)
+        }
+      } catch (error) {
+        console.error('Erro ao carregar configurações do fluxo de caixa:', error)
+        setCashflowPageSettings(defaultCashflowPageSettings)
+      }
+    }
+
+    loadSettings()
+
+    const handleSettingsChanged = (event) => {
+      if (event?.detail && typeof event.detail === 'object') {
+        setCashflowPageSettings({ ...defaultCashflowPageSettings, ...event.detail })
+        return
+      }
+      loadSettings()
+    }
+
+    window.addEventListener('cashflowPageSettingsChanged', handleSettingsChanged)
+    return () => window.removeEventListener('cashflowPageSettingsChanged', handleSettingsChanged)
   }, [])
 
   // Salvar dados do caixa no localStorage
