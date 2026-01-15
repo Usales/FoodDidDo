@@ -6,6 +6,65 @@
   gap: 3rem;
 }
 
+/* Abas estilo "pastas" */
+.config-tabs-area {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.config-tabs {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+  border-bottom: 1px solid var(--border-primary);
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 0;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+.config-tab {
+  appearance: none;
+  position: relative;
+  border: 1px solid var(--border-primary);
+  border-bottom: none;
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--text-primary);
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 0.7rem 1rem;
+  border-radius: 12px 12px 0 0;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
+  opacity: 0.85;
+}
+
+.config-tab:hover {
+  opacity: 1;
+  transform: translateY(-1px);
+}
+
+.config-tab.active {
+  opacity: 1;
+  background: var(--bg-secondary);
+  position: relative;
+  top: 1px; /* “encaixa” no painel, como uma pasta */
+}
+
+.config-tab-panel {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  border-top: none;
+  border-radius: 0 12px 12px 12px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
 /* Seção 1: Estado Atual */
 .config-section {
   display: flex;
@@ -288,6 +347,11 @@
 @media (max-width: 768px) {
   .config-page {
     gap: 2rem;
+  }
+
+  .config-tab-panel {
+    padding: 1.25rem;
+    gap: 1.5rem;
   }
 
   .config-state-grid {
