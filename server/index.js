@@ -449,10 +449,31 @@ fastify.delete('/api/fixed-costs/:id', async (request, reply) => {
 
 // Rotas de Fluxo de Caixa
 fastify.get('/api/cashflow', async (request, reply) => {
-  const entries = await prisma.cashflowEntry.findMany({
-    orderBy: { date: 'desc' }
-  })
-  return entries
+  try {
+    const entries = await prisma.cashflowEntry.findMany({
+      orderBy: { date: 'desc' }
+    })
+    return entries
+  } catch (error) {
+    // Compatibilidade: bancos antigos podem não ter colunas cost/profit ainda
+    if (error?.code === 'P2022') {
+      const entries = await prisma.cashflowEntry.findMany({
+        select: {
+          id: true,
+          type: true,
+          amount: true,
+          description: true,
+          date: true,
+          category: true,
+          createdAt: true,
+          updatedAt: true
+        },
+        orderBy: { date: 'desc' }
+      })
+      return entries.map((e) => ({ ...e, cost: null, profit: null }))
+    }
+    throw error
+  }
 })
 
 fastify.post('/api/cashflow', async (request, reply) => {
