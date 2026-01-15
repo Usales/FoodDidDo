@@ -209,16 +209,17 @@
 }
 
 .cashbox-cart-brief-qty-btn:hover {
+  background: rgba(220, 38, 38, 0.08);
   color: var(--text-primary);
 }
 
 .cashbox-cart-brief-qty-input {
-  width: 54px;
+  width: 44px;
   height: 26px;
-  border: 1px solid var(--border-primary);
-  border-radius: 8px;
-  background: var(--bg-secondary);
-  color: var(--text-muted);
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text-primary);
   text-align: center;
   font-weight: 600;
   font-size: 0.9rem;
@@ -227,9 +228,7 @@
 
 .cashbox-cart-brief-qty-input:focus {
   outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
-  color: var(--text-primary);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
 }
 
 .cashbox-cart-brief-name {
