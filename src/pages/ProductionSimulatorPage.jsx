@@ -131,6 +131,10 @@ export function ProductionSimulatorPage() {
 
   return (
     <div className="page simulator-page">
+      <div className="page-header">
+        <h1>Simulador</h1>
+      </div>
+
       <section className="page-stack">
         <div className="simulator-kpi-grid">
           <div className="simulator-kpi-card kpi-budget">

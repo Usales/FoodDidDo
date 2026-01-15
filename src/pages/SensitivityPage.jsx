@@ -28,6 +28,10 @@ export function SensitivityPage() {
 
   return (
     <div className="page">
+      <div className="page-header">
+        <h1>Sensibilidade</h1>
+      </div>
+
       <section className="page-stack">
         <div className="summary-grid">
           <div className="summary-card">

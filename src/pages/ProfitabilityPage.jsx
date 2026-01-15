@@ -108,11 +108,6 @@ export function ProfitabilityPage() {
     <div className="profitability-page">
       {/* Header Interno */}
       <header className="profitability-header">
-        <nav className="profitability-breadcrumb">
-          <span>Análises</span>
-          <span className="breadcrumb-separator">›</span>
-          <span className="breadcrumb-current">Lucratividade</span>
-        </nav>
         <h1 className="profitability-title">Lucratividade da Receita</h1>
       </header>
 

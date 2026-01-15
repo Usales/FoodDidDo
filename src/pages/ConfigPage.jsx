@@ -10,6 +10,8 @@ import './ConfigPage.css'
 const DASHBOARD_SETTINGS_KEY = 'dashboardSettings'
 
 const defaultDashboardSettings = {
+  // Quando true, oculta todos os cabeçalhos do layout/Home
+  showHeader: false,
   showStatusPanel: true,
   showBusinessInsights: true,
   showMealSection: true
@@ -47,6 +49,8 @@ export function ConfigPage() {
     try {
       localStorage.setItem(DASHBOARD_SETTINGS_KEY, JSON.stringify(newSettings))
       setDashboardSettings(newSettings)
+      // Atualizar UI em tempo real (mesma aba) sem reload
+      window.dispatchEvent(new CustomEvent('dashboardSettingsChanged', { detail: newSettings }))
     } catch (error) {
       console.error('Erro ao salvar configurações do dashboard:', error)
     }
@@ -308,6 +312,47 @@ export function ConfigPage() {
       )
     }
 
+    if (activeTab === 'cabecalho') {
+      return (
+        <div
+          id="config-panel-cabecalho"
+          role="tabpanel"
+          aria-labelledby="config-tab-cabecalho"
+          className="config-tab-panel"
+        >
+          <section className="config-section">
+            <h2 className="config-section-title">Cabeçalho</h2>
+            <p className="config-section-description">
+              Configure o cabeçalho exibido no topo da tela Home.
+            </p>
+            <div className="config-dashboard-settings">
+              <div className="config-dashboard-item">
+                <div className="config-dashboard-item-content">
+                  <div className="config-dashboard-item-header">
+                    <h3 className="config-dashboard-item-title">Ocultar cabeçalho</h3>
+                    <Tooltip content="Quando ativado, esconde o topo (topbar) e o cabeçalho da Home">
+                      <span className="tooltip-icon">ⓘ</span>
+                    </Tooltip>
+                  </div>
+                  <p className="config-dashboard-item-description">
+                    Ative para não exibir nenhuma parte do cabeçalho
+                  </p>
+                </div>
+                <ToggleSwitch
+                  checked={dashboardSettings.showHeader}
+                  onChange={() => {
+                    const newSettings = { ...dashboardSettings, showHeader: !dashboardSettings.showHeader }
+                    saveDashboardSettings(newSettings)
+                  }}
+                  label={dashboardSettings.showHeader ? 'Oculto' : 'Exibindo'}
+                />
+              </div>
+            </div>
+          </section>
+        </div>
+      )
+    }
+
     if (activeTab === 'tela-home') {
       return (
         <div
@@ -464,6 +509,17 @@ export function ConfigPage() {
             onClick={() => setActiveTab('geral')}
           >
             Geral
+          </button>
+          <button
+            id="config-tab-cabecalho"
+            type="button"
+            role="tab"
+            className={`config-tab ${activeTab === 'cabecalho' ? 'active' : ''}`}
+            aria-selected={activeTab === 'cabecalho'}
+            aria-controls="config-panel-cabecalho"
+            onClick={() => setActiveTab('cabecalho')}
+          >
+            Cabeçalho
           </button>
           <button
             id="config-tab-tela-home"

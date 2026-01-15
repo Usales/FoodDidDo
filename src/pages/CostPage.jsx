@@ -942,6 +942,10 @@ export function CostPage() {
 
   return (
     <div className="page cost-page">
+      <div className="page-header">
+        <h1>Custos</h1>
+      </div>
+
       <section className="page-stack">
         <div className="kpi-grid">
           <div className="kpi-card kpi-card-primary">

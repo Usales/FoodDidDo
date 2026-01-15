@@ -117,6 +117,10 @@ export function BudgetPage() {
 
   return (
     <div className="page">
+      <div className="page-header">
+        <h1>Orçamentos</h1>
+      </div>
+
       <section className="page-stack">
         <div className="summary-grid">
           <div className="summary-card">

@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types'
-import { NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import {
   AiOutlineHome,
   AiOutlineShoppingCart,
@@ -22,6 +22,8 @@ import { HiMoon, HiSun } from 'react-icons/hi'
 import { useState, useEffect, useRef } from 'react'
 import { useTheme } from '../../contexts/ThemeContext'
 import './MainLayout.css'
+
+const DASHBOARD_SETTINGS_KEY = 'dashboardSettings'
 
 const navigation = [
   {
@@ -62,11 +64,68 @@ export function MainLayout({ onLogout, user }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, transform: 'translate(-50%, -50%)' })
   const [isMobile, setIsMobile] = useState(false)
+  const [dashboardSettings, setDashboardSettings] = useState({ showHeader: false })
   const dropdownRef = useRef(null)
   const userChipRef = useRef(null)
   const mobileMenuRef = useRef(null)
+  const location = useLocation()
   const navigate = useNavigate()
   const { theme, toggleTheme, isDarkMode } = useTheme()
+
+  const getBreadcrumb = () => {
+    const rawPath = location?.pathname || ''
+    const aliasMap = {
+      '/financeiro': '/fluxo-caixa',
+      '/grocery': '/ingredientes',
+      '/geladeira': '/ingredientes'
+    }
+    const normalizedPath = aliasMap[rawPath] || rawPath
+
+    for (const group of navigation) {
+      for (const item of group.items) {
+        const isExact = item.path === normalizedPath
+        const isNested = item.path !== '/' && normalizedPath.startsWith(`${item.path}/`)
+        if (isExact || isNested) {
+          return { section: group.section, label: item.label }
+        }
+      }
+    }
+    return null
+  }
+
+  const breadcrumb = getBreadcrumb()
+
+  // Carregar e reagir às configurações da Home (Cabeçalho)
+  useEffect(() => {
+    const readSettings = () => {
+      try {
+        const saved = localStorage.getItem(DASHBOARD_SETTINGS_KEY)
+        if (!saved) {
+          setDashboardSettings({ showHeader: false })
+          return
+        }
+        const parsed = JSON.parse(saved)
+        setDashboardSettings({
+          showHeader: typeof parsed?.showHeader === 'boolean' ? parsed.showHeader : false
+        })
+      } catch {
+        setDashboardSettings({ showHeader: false })
+      }
+    }
+
+    const handleCustom = (event) => {
+      const next = event?.detail
+      if (next && typeof next === 'object' && typeof next.showHeader === 'boolean') {
+        setDashboardSettings({ showHeader: next.showHeader })
+      } else {
+        readSettings()
+      }
+    }
+
+    readSettings()
+    window.addEventListener('dashboardSettingsChanged', handleCustom)
+    return () => window.removeEventListener('dashboardSettingsChanged', handleCustom)
+  }, [])
 
   // Verificar se é mobile
   useEffect(() => {
@@ -162,150 +221,173 @@ export function MainLayout({ onLogout, user }) {
         </div>
       </aside>
       <div className="main-shell-content">
-        <header className="topbar">
+        {!dashboardSettings.showHeader && (
+          <header className="topbar">
+            <button
+              type="button"
+              className="mobile-menu-toggle"
+              aria-label={mobileMenuOpen ? 'Fechar menu' : 'Abrir menu'}
+              aria-expanded={mobileMenuOpen}
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              {mobileMenuOpen ? (
+                <FiX size={20} style={{ display: 'block' }} />
+              ) : (
+                <FiMenu size={20} style={{ display: 'block' }} />
+              )}
+            </button>
+            <div className="topbar-left">
+              <h1>
+                {(() => {
+                  const hour = new Date().getHours()
+                  const greeting = hour < 12 ? 'Bom dia' : hour < 18 ? 'Boa tarde' : 'Boa noite'
+                  const userName = user?.name?.split(' ')[0] || 'Sales'
+                  return (
+                    <>
+                      {greeting}<span className="user-name-mobile">, {userName}</span> 👋
+                    </>
+                  )
+                })()}
+              </h1>
+              <span className="topbar-subtitle">Organize suas receitas favoritas e gerencie sua geladeira.</span>
+            </div>
+            <div className="topbar-actions">
+              <div className="search-box-wrapper">
+                <FiSearch className="search-icon" />
+                <input
+                  type="text"
+                  className="global-search"
+                  placeholder="Buscar receitas ou ingredientes"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+              <div className="user-dropdown-wrapper" ref={dropdownRef}>
+                <button
+                  ref={userChipRef}
+                  type="button"
+                  className="user-chip"
+                  onClick={(e) => {
+                    // No mobile, centralizar o dropdown usando valores calculados
+                    if (isMobile) {
+                      const viewportWidth = window.innerWidth
+                      const viewportHeight = window.innerHeight
+                      setDropdownPosition({
+                        top: viewportHeight / 2,
+                        left: viewportWidth / 2,
+                        transform: 'translate(-50%, -50%)'
+                      })
+                    }
+                    setUserDropdownOpen(!userDropdownOpen)
+                  }}
+                >
+                  <div className="user-avatar">{(user?.name ?? 'G').charAt(0).toUpperCase()}</div>
+                  <span className="user-name">{user?.name ?? 'gabrielsales012345'}</span>
+                  <FiChevronDown className={`dropdown-chevron ${userDropdownOpen ? 'open' : ''}`} />
+                </button>
+                {userDropdownOpen && (
+                  <>
+                    {isMobile && (
+                      <div 
+                        className="user-dropdown-overlay" 
+                        onClick={() => setUserDropdownOpen(false)}
+                      />
+                    )}
+                    <div 
+                      className={`user-dropdown ${isMobile ? 'mobile' : 'desktop'}`}
+                      style={isMobile ? {
+                        top: `${dropdownPosition.top}px`,
+                        left: `${dropdownPosition.left}px`,
+                        transform: dropdownPosition.transform,
+                        right: 'auto',
+                        WebkitTransform: dropdownPosition.transform,
+                        msTransform: dropdownPosition.transform
+                      } : {}}
+                    >
+                      <div className="dropdown-header">
+                        <div className="dropdown-user-info">
+                          <div className="dropdown-user-avatar">
+                            {(user?.name ?? 'G').charAt(0).toUpperCase()}
+                          </div>
+                          <div className="dropdown-user-details">
+                            <span className="dropdown-user-name">{user?.name ?? 'Usuário'}</span>
+                            {user?.email && (
+                              <span className="dropdown-user-email">{user.email}</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="dropdown-divider"></div>
+                      <button 
+                        type="button" 
+                        className="dropdown-item"
+                        onClick={() => {
+                          toggleTheme()
+                          setUserDropdownOpen(false)
+                        }}
+                      >
+                        <span className="dropdown-item-icon">
+                          {isDarkMode ? <HiSun size={18} /> : <HiMoon size={18} />}
+                        </span>
+                        <span className="dropdown-item-text">
+                          {isDarkMode ? 'Modo Claro' : 'Modo Escuro'}
+                        </span>
+                      </button>
+                      <button 
+                        type="button" 
+                        className="dropdown-item"
+                        onClick={() => {
+                          navigate('/config')
+                          setUserDropdownOpen(false)
+                        }}
+                      >
+                        <span className="dropdown-item-icon">
+                          <AiOutlineSetting size={18} />
+                        </span>
+                        <span className="dropdown-item-text">Configurações</span>
+                      </button>
+                      <div className="dropdown-divider"></div>
+                      <button 
+                        type="button" 
+                        className="dropdown-item dropdown-item-danger" 
+                        onClick={() => {
+                          setUserDropdownOpen(false)
+                          onLogout()
+                        }}
+                      >
+                        <span className="dropdown-item-icon">
+                          <FiLogOut size={18} />
+                        </span>
+                        <span className="dropdown-item-text">Sair</span>
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          </header>
+        )}
+
+        {dashboardSettings.showHeader && isMobile && (
           <button
             type="button"
-            className="mobile-menu-toggle"
+            className="mobile-menu-toggle-floating"
             aria-label={mobileMenuOpen ? 'Fechar menu' : 'Abrir menu'}
             aria-expanded={mobileMenuOpen}
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
-            {mobileMenuOpen ? (
-              <FiX size={20} style={{ display: 'block' }} />
-            ) : (
-              <FiMenu size={20} style={{ display: 'block' }} />
-            )}
+            {mobileMenuOpen ? <FiX size={20} /> : <FiMenu size={20} />}
           </button>
-          <div className="topbar-left">
-            <h1>
-              {(() => {
-                const hour = new Date().getHours()
-                const greeting = hour < 12 ? 'Bom dia' : hour < 18 ? 'Boa tarde' : 'Boa noite'
-                const userName = user?.name?.split(' ')[0] || 'Sales'
-                return (
-                  <>
-                    {greeting}<span className="user-name-mobile">, {userName}</span> 👋
-                  </>
-                )
-              })()}
-            </h1>
-            <span className="topbar-subtitle">Organize suas receitas favoritas e gerencie sua geladeira.</span>
-          </div>
-          <div className="topbar-actions">
-            <div className="search-box-wrapper">
-              <FiSearch className="search-icon" />
-              <input
-                type="text"
-                className="global-search"
-                placeholder="Buscar receitas ou ingredientes"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-            <div className="user-dropdown-wrapper" ref={dropdownRef}>
-              <button
-                ref={userChipRef}
-                type="button"
-                className="user-chip"
-                onClick={(e) => {
-                  // No mobile, centralizar o dropdown usando valores calculados
-                  if (isMobile) {
-                    const viewportWidth = window.innerWidth
-                    const viewportHeight = window.innerHeight
-                    setDropdownPosition({
-                      top: viewportHeight / 2,
-                      left: viewportWidth / 2,
-                      transform: 'translate(-50%, -50%)'
-                    })
-                  }
-                  setUserDropdownOpen(!userDropdownOpen)
-                }}
-              >
-                <div className="user-avatar">{(user?.name ?? 'G').charAt(0).toUpperCase()}</div>
-                <span className="user-name">{user?.name ?? 'gabrielsales012345'}</span>
-                <FiChevronDown className={`dropdown-chevron ${userDropdownOpen ? 'open' : ''}`} />
-              </button>
-              {userDropdownOpen && (
-                <>
-                  {isMobile && (
-                    <div 
-                      className="user-dropdown-overlay" 
-                      onClick={() => setUserDropdownOpen(false)}
-                    />
-                  )}
-                  <div 
-                    className={`user-dropdown ${isMobile ? 'mobile' : 'desktop'}`}
-                    style={isMobile ? {
-                      top: `${dropdownPosition.top}px`,
-                      left: `${dropdownPosition.left}px`,
-                      transform: dropdownPosition.transform,
-                      right: 'auto',
-                      WebkitTransform: dropdownPosition.transform,
-                      msTransform: dropdownPosition.transform
-                    } : {}}
-                  >
-                    <div className="dropdown-header">
-                      <div className="dropdown-user-info">
-                        <div className="dropdown-user-avatar">
-                          {(user?.name ?? 'G').charAt(0).toUpperCase()}
-                        </div>
-                        <div className="dropdown-user-details">
-                          <span className="dropdown-user-name">{user?.name ?? 'Usuário'}</span>
-                          {user?.email && (
-                            <span className="dropdown-user-email">{user.email}</span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="dropdown-divider"></div>
-                    <button 
-                      type="button" 
-                      className="dropdown-item"
-                      onClick={() => {
-                        toggleTheme()
-                        setUserDropdownOpen(false)
-                      }}
-                    >
-                      <span className="dropdown-item-icon">
-                        {isDarkMode ? <HiSun size={18} /> : <HiMoon size={18} />}
-                      </span>
-                      <span className="dropdown-item-text">
-                        {isDarkMode ? 'Modo Claro' : 'Modo Escuro'}
-                      </span>
-                    </button>
-                    <button 
-                      type="button" 
-                      className="dropdown-item"
-                      onClick={() => {
-                        navigate('/config')
-                        setUserDropdownOpen(false)
-                      }}
-                    >
-                      <span className="dropdown-item-icon">
-                        <AiOutlineSetting size={18} />
-                      </span>
-                      <span className="dropdown-item-text">Configurações</span>
-                    </button>
-                    <div className="dropdown-divider"></div>
-                    <button 
-                      type="button" 
-                      className="dropdown-item dropdown-item-danger" 
-                      onClick={() => {
-                        setUserDropdownOpen(false)
-                        onLogout()
-                      }}
-                    >
-                      <span className="dropdown-item-icon">
-                        <FiLogOut size={18} />
-                      </span>
-                      <span className="dropdown-item-text">Sair</span>
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-        </header>
+        )}
+
+        {breadcrumb && (
+          <nav className="page-breadcrumb" aria-label="Localização">
+            <span>{breadcrumb.section}</span>
+            <span className="breadcrumb-separator">›</span>
+            <span className="breadcrumb-current">{breadcrumb.label}</span>
+          </nav>
+        )}
+
         <main className="main-shell-outlet">
           <Outlet />
         </main>

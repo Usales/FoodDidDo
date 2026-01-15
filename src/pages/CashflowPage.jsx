@@ -2,7 +2,7 @@ import { useMemo, useState, useEffect, useRef } from 'react'
 import { FormModal } from '../components/ui/FormModal'
 import { CurrencyInput } from '../components/ui/CurrencyInput'
 import { useAppStore } from '../stores/appStore'
-import { FiEdit3, FiSave, FiTrash2, FiLock, FiUnlock, FiFilter, FiTrendingUp, FiTrendingDown, FiDollarSign } from 'react-icons/fi'
+import { FiEdit3, FiTrash2, FiLock, FiUnlock, FiFilter, FiChevronDown, FiChevronUp } from 'react-icons/fi'
 import './PageCommon.css'
 import './CashflowPage.css'
 
@@ -37,6 +37,7 @@ export function CashflowPage() {
   const [isOpenModalOpen, setIsOpenModalOpen] = useState(false)
   const [isCloseModalOpen, setIsCloseModalOpen] = useState(false)
   const [openingAmount, setOpeningAmount] = useState('')
+  const [showSessionDetails, setShowSessionDetails] = useState(false)
   const [filters, setFilters] = useState({
     type: 'all',
     startDate: '',
@@ -340,25 +341,27 @@ export function CashflowPage() {
 
   return (
     <div className="page cashflow-page">
-      {/* Cabeçalho: Título e Controles do Caixa */}
+      {/* CAMADA 1 — Status do Caixa (fixa e enxuta) */}
       <section className="page-stack">
-        <div className="cashflow-header">
-          <div className="cashflow-header-title">
-            <h1>Fluxo de Caixa</h1>
-            <div className="cashflow-status-indicator">
-              <div className="cashflow-status-icon-small">
-                {cashboxData.isOpen ? (
-                  <FiUnlock size={20} style={{ color: 'var(--success)' }} />
-                ) : (
-                  <FiLock size={20} style={{ color: 'var(--text-muted)' }} />
-                )}
-              </div>
-              <span className={`cashflow-status-badge ${cashboxData.isOpen ? 'open' : 'closed'}`}>
-                {cashboxData.isOpen ? 'Caixa Aberto' : 'Caixa Fechado'}
-              </span>
-            </div>
+        <div className="cashflow-status-bar">
+          <div className="cashflow-status-left">
+            <h1 className="cashflow-title">Fluxo de Caixa</h1>
+            <span className={`cashflow-status-badge ${cashboxData.isOpen ? 'open' : 'closed'}`}>
+              {cashboxData.isOpen ? '🟢 Caixa aberto' : '🔒 Caixa fechado'}
+            </span>
           </div>
-          <div className="cashflow-header-actions">
+
+          <div className="cashflow-status-center" aria-label="Saldo atual do caixa">
+            <span className="cashflow-balance-label">Saldo atual</span>
+            <strong
+              className="cashflow-balance-hero"
+              style={{ color: currentBalance >= 0 ? 'var(--success)' : 'var(--error)' }}
+            >
+              {formatCurrency(currentBalance)}
+            </strong>
+          </div>
+
+          <div className="cashflow-status-right">
             {!cashboxData.isOpen ? (
               <button className="primary-btn" type="button" onClick={() => setIsOpenModalOpen(true)}>
                 <FiUnlock size={18} />
@@ -374,212 +377,96 @@ export function CashflowPage() {
         </div>
       </section>
 
-      {/* Saldo Atual e Abertura */}
+      {/* CAMADA 2 — Resumo Financeiro (unificado) */}
       <section className="page-stack">
-        <div className="cashflow-balance-grid">
-          <div className="cashflow-balance-card">
-            <span className="cashflow-balance-label">Saldo Atual do Caixa</span>
-            <strong className="cashflow-balance-value" style={{ color: currentBalance >= 0 ? 'var(--success)' : 'var(--error)' }}>
-              {formatCurrency(currentBalance)}
-            </strong>
-            {cashboxData.isOpen && (
-              <small className="cashflow-balance-note">
-                Abertura: {formatCurrency(cashboxData.openingAmount)} • {formatDateTime(cashboxData.openingDate)}
-              </small>
-            )}
+        <div className="cashflow-mini-cards">
+          <div className="cashflow-mini-card">
+            <span>Entradas</span>
+            <strong style={{ color: 'var(--success)' }}>{formatCurrency(summary.income)}</strong>
           </div>
-          <div className="cashflow-balance-card">
-            <span className="cashflow-balance-label">Valor de Abertura</span>
-            <strong className="cashflow-balance-value">
-              {formatCurrency(cashboxData.openingAmount)}
-            </strong>
-            {cashboxData.openingDate && (
-              <small className="cashflow-balance-note">
-                {formatDateTime(cashboxData.openingDate)}
-              </small>
-            )}
+          <div className="cashflow-mini-card">
+            <span>Saídas</span>
+            <strong style={{ color: 'var(--error)' }}>{formatCurrency(summary.expense)}</strong>
           </div>
-        </div>
-      </section>
-
-      {/* Resumo Financeiro */}
-      <section className="page-stack">
-        <h2 className="cashflow-section-title">Resumo Financeiro</h2>
-        <div className="summary-grid">
-          <div className="summary-card">
-            <span>Total de Entradas</span>
-            <strong style={{ color: 'var(--success)' }}>
-              {formatCurrency(summary.income)}
-            </strong>
-            <small>{summary.entriesCount} registro(s)</small>
-          </div>
-          <div className="summary-card">
-            <span>Total de Saídas</span>
-            <strong style={{ color: 'var(--error)' }}>
-              {formatCurrency(summary.expense)}
-            </strong>
-            <small>{summary.exitsCount} registro(s)</small>
-          </div>
-          <div className="summary-card">
-            <span>Resultado do Período</span>
+          <div className="cashflow-mini-card highlight">
+            <span>Resultado do período</span>
             <strong style={{ color: summary.balance >= 0 ? 'var(--success)' : 'var(--error)' }}>
               {summary.balance >= 0 ? '+' : ''}{formatCurrency(summary.balance)}
             </strong>
-            <small>{summary.balance >= 0 ? 'Lucro' : 'Prejuízo'}</small>
+          </div>
+          <div className="cashflow-mini-card">
+            <span>Saldo final</span>
+            <strong style={{ color: currentBalance >= 0 ? 'var(--success)' : 'var(--error)' }}>
+              {formatCurrency(currentBalance)}
+            </strong>
           </div>
         </div>
       </section>
 
-      {/* Relatório Consolidado */}
+      {/* CAMADA 3 — Detalhes do Caixa (colapsável) */}
       <section className="page-stack">
-        <div className="cashflow-report-card">
-          <h3>
-            <FiDollarSign size={20} />
-            Relatório Consolidado
-          </h3>
-          <div className="cashflow-report-grid">
-            <div className="cashflow-report-item">
-              <span>Total de Entradas:</span>
-              <strong style={{ color: 'var(--success)' }}>
-                {formatCurrency(summary.income)}
-              </strong>
-            </div>
-            <div className="cashflow-report-item">
-              <span>Total de Saídas:</span>
-              <strong style={{ color: 'var(--error)' }}>
-                {formatCurrency(summary.expense)}
-              </strong>
-            </div>
-            <div className="cashflow-report-item">
-              <span>Diferença:</span>
-              <strong style={{ color: summary.balance >= 0 ? 'var(--success)' : 'var(--error)' }}>
-                {summary.balance >= 0 ? '+' : ''}{formatCurrency(summary.balance)}
-              </strong>
-            </div>
-            <div className="cashflow-report-item">
-              <span>Lucro médio por venda:</span>
-              <strong style={{ color: salesSummary.avgProfit >= 0 ? 'var(--success)' : 'var(--error)' }}>
-                {formatCurrency(salesSummary.avgProfit)}
-              </strong>
-            </div>
-            {summary.profit > 0 && (
-              <div className="cashflow-report-item profit">
-                <span>
-                  <FiTrendingUp size={16} />
-                  Lucro:
-                </span>
-                <strong style={{ color: 'var(--success)' }}>
-                  {formatCurrency(summary.profit)}
-                </strong>
-              </div>
-            )}
-            {summary.loss > 0 && (
-              <div className="cashflow-report-item loss">
-                <span>
-                  <FiTrendingDown size={16} />
-                  Prejuízo:
-                </span>
-                <strong style={{ color: 'var(--error)' }}>
-                  {formatCurrency(summary.loss)}
-                </strong>
-              </div>
-            )}
-            <div className="cashflow-report-item total">
-              <span>Saldo Final do Caixa:</span>
-              <strong style={{ color: currentBalance >= 0 ? 'var(--success)' : 'var(--error)' }}>
-                {formatCurrency(currentBalance)}
-              </strong>
-            </div>
-          </div>
-        </div>
-      </section>
+        <button
+          type="button"
+          className="cashflow-accordion-toggle"
+          onClick={() => setShowSessionDetails((v) => !v)}
+          aria-expanded={showSessionDetails}
+        >
+          <span className="cashflow-accordion-title">📂 Detalhes da Sessão de Caixa</span>
+          {showSessionDetails ? <FiChevronUp size={18} /> : <FiChevronDown size={18} />}
+        </button>
 
-      {/* Informações de Abertura e Fechamento */}
-      <section className="page-stack">
-        <div className="cashflow-info-grid">
-          <div className="cashflow-info-card">
-            <h3>
-              <FiUnlock size={20} />
-              Abertura de Caixa
-            </h3>
-            <div className="cashflow-info-content">
-              <div className="cashflow-info-item">
-                <span>Valor Inicial:</span>
+        {showSessionDetails && (
+          <div className="cashflow-accordion-content">
+            <div className="cashflow-details-grid">
+              <div className="cashflow-detail">
+                <span>Valor de abertura</span>
                 <strong>{formatCurrency(cashboxData.openingAmount)}</strong>
               </div>
-              <div className="cashflow-info-item">
-                <span>Data/Hora:</span>
+              <div className="cashflow-detail">
+                <span>Data/Hora de abertura</span>
                 <strong>{formatDateTime(cashboxData.openingDate)}</strong>
               </div>
-            </div>
-          </div>
-
-          {!cashboxData.isOpen && cashboxData.closingDate && (
-            <div className="cashflow-info-card">
-              <h3>
-                <FiLock size={20} />
-                Fechamento de Caixa
-              </h3>
-              <div className="cashflow-info-content">
-                <div className="cashflow-info-item">
-                  <span>Saldo Final:</span>
-                  <strong style={{ color: cashboxData.closingBalance >= 0 ? 'var(--success)' : 'var(--error)' }}>
-                    {formatCurrency(cashboxData.closingBalance)}
-                  </strong>
-                </div>
-                <div className="cashflow-info-item">
-                  <span>Total de Entradas:</span>
-                  <strong>{formatCurrency(cashboxData.totalEntries)}</strong>
-                </div>
-                <div className="cashflow-info-item">
-                  <span>Total de Saídas:</span>
-                  <strong>{formatCurrency(cashboxData.totalExits)}</strong>
-                </div>
-                <div className="cashflow-info-item">
-                  <span>Data/Hora:</span>
+              {!cashboxData.isOpen && (
+                <div className="cashflow-detail">
+                  <span>Data/Hora de fechamento</span>
                   <strong>{formatDateTime(cashboxData.closingDate)}</strong>
                 </div>
+              )}
+              <div className="cashflow-detail">
+                <span>Lucro médio por venda</span>
+                <strong style={{ color: salesSummary.avgProfit >= 0 ? 'var(--success)' : 'var(--error)' }}>
+                  {formatCurrency(salesSummary.avgProfit)}
+                </strong>
               </div>
             </div>
-          )}
-        </div>
+
+            {currentBudget && (
+              <div className="cashflow-details-budget">
+                <div className="cashflow-detail">
+                  <span>Orçamento</span>
+                  <strong>{currentBudget.period}</strong>
+                </div>
+                <div className="cashflow-detail">
+                  <span>Valor orçado</span>
+                  <strong>{formatCurrency(currentBudget.amount)}</strong>
+                </div>
+                <div className="cashflow-detail">
+                  <span>Gasto</span>
+                  <strong style={{ color: 'var(--error)' }}>{formatCurrency(currentBudget.spent || 0)}</strong>
+                </div>
+                <div className="cashflow-detail">
+                  <span>Disponível</span>
+                  <strong style={{ color: 'var(--success)' }}>
+                    {formatCurrency((currentBudget.amount || 0) - (currentBudget.spent || 0))}
+                  </strong>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </section>
 
-      {/* Orçamento Definido */}
-      {currentBudget && (
-        <section className="page-stack">
-          <div className="cashflow-budget-card">
-            <h3>
-              <FiDollarSign size={20} />
-              Orçamento Definido
-            </h3>
-            <div className="cashflow-budget-content">
-              <div className="cashflow-budget-item">
-                <span>Período:</span>
-                <strong>{currentBudget.period}</strong>
-              </div>
-              <div className="cashflow-budget-item">
-                <span>Valor Orçado:</span>
-                <strong>{formatCurrency(currentBudget.amount)}</strong>
-              </div>
-              <div className="cashflow-budget-item">
-                <span>Gasto:</span>
-                <strong style={{ color: 'var(--error)' }}>
-                  {formatCurrency(currentBudget.spent || 0)}
-                </strong>
-              </div>
-              <div className="cashflow-budget-item">
-                <span>Disponível:</span>
-                <strong style={{ color: 'var(--success)' }}>
-                  {formatCurrency((currentBudget.amount || 0) - (currentBudget.spent || 0))}
-                </strong>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Filtros e Ações */}
+      {/* CAMADA 4 — Movimentações (foco operacional) */}
       <section className="page-stack">
         <div className="page-header">
           <h2 className="cashflow-section-title">Movimentações</h2>
@@ -592,10 +479,14 @@ export function CashflowPage() {
               <FiFilter size={18} />
               Filtros
             </button>
-            <button className="primary-btn" type="button" onClick={() => {
-              setFormState({ ...formState, type: 'saída' })
-              setIsModalOpen(true)
-            }}>
+            <button
+              className="primary-btn"
+              type="button"
+              onClick={() => {
+                setFormState({ ...formState, type: 'saída' })
+                setIsModalOpen(true)
+              }}
+            >
               Adicionar Despesa
             </button>
           </div>
@@ -640,30 +531,34 @@ export function CashflowPage() {
                     let startDate = ''
                     let endDate = today.toISOString().split('T')[0]
                     
-                    switch(e.target.value) {
+                    switch (e.target.value) {
                       case 'hoje':
                         startDate = endDate
                         break
-                      case 'semana':
+                      case 'semana': {
                         const weekAgo = new Date(today)
                         weekAgo.setDate(today.getDate() - 7)
                         startDate = weekAgo.toISOString().split('T')[0]
                         break
-                      case 'mes':
+                      }
+                      case 'mes': {
                         const monthAgo = new Date(today)
                         monthAgo.setMonth(today.getMonth() - 1)
                         startDate = monthAgo.toISOString().split('T')[0]
                         break
-                      case 'trimestre':
+                      }
+                      case 'trimestre': {
                         const quarterAgo = new Date(today)
                         quarterAgo.setMonth(today.getMonth() - 3)
                         startDate = quarterAgo.toISOString().split('T')[0]
                         break
-                      case 'ano':
+                      }
+                      case 'ano': {
                         const yearAgo = new Date(today)
                         yearAgo.setFullYear(today.getFullYear() - 1)
                         startDate = yearAgo.toISOString().split('T')[0]
                         break
+                      }
                     }
                     setFilters({ ...filters, startDate, endDate })
                   }
@@ -686,10 +581,7 @@ export function CashflowPage() {
             </button>
           </div>
         )}
-      </section>
 
-      {/* Lista de Movimentações */}
-      <section className="page-stack">
         <div className="cashflow-movements-table">
           <div className="cashflow-table-header">
             <div className="cashflow-table-col date">Data</div>
@@ -723,7 +615,7 @@ export function CashflowPage() {
                     </div>
                   </div>
                   <div className="cashflow-table-col value">
-                    <strong style={{ color: entry.type === 'entrada' ? 'var(--success)' : 'var(--error)' }}>
+                    <strong className={`cashflow-value ${entry.type === 'entrada' ? 'entry' : 'exit'}`}>
                       {entry.type === 'entrada' ? '+' : '-'} {formatCurrency(entry.amount)}
                     </strong>
                   </div>

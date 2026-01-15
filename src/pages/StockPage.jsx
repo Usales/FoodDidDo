@@ -323,6 +323,10 @@ export function StockPage() {
 
   return (
     <div className="page">
+      <div className="page-header">
+        <h1>Estoque</h1>
+      </div>
+
       {/* Barra superior */}
       <section className="page-stack">
         <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>

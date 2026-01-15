@@ -6,50 +6,59 @@
   gap: 2rem;
 }
 
-/* Cabeçalho */
-.cashflow-header {
-  background: var(--bg-card);
-  border: 1px solid var(--border-primary);
-  border-radius: 12px;
-  padding: 1.5rem 2rem;
-  display: flex;
+/* CAMADA 1 — Status do Caixa */
+.cashflow-status-bar {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: space-between;
-  gap: 2rem;
-  box-shadow: var(--shadow-lg);
-}
-
-.cashflow-header-title h1 {
-  margin: 0 0 0.5rem 0;
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--text-primary);
-}
-
-.cashflow-status-indicator {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.cashflow-status-icon-small {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 6px;
-  background: var(--bg-secondary);
-}
-
-.cashflow-header-actions {
-  display: flex;
   gap: 1rem;
 }
 
+.cashflow-status-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.cashflow-title {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+
+.cashflow-status-right {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.cashflow-status-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.cashflow-balance-label {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+}
+
+.cashflow-balance-hero {
+  font-size: 2.4rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+}
+
 /* Alinhamento de ícone + texto nos botões do cabeçalho */
-.cashflow-header-actions .primary-btn,
-.cashflow-header-actions .secondary-btn {
+.cashflow-status-right .primary-btn,
+.cashflow-status-right .secondary-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -57,8 +66,8 @@
   line-height: 1;
 }
 
-.cashflow-header-actions .primary-btn svg,
-.cashflow-header-actions .secondary-btn svg {
+.cashflow-status-right .primary-btn svg,
+.cashflow-status-right .secondary-btn svg {
   display: block;
   flex-shrink: 0;
 }
@@ -79,42 +88,107 @@
   flex-shrink: 0;
 }
 
-/* Saldo Atual e Abertura */
-.cashflow-balance-grid {
+/* CAMADA 2 — Cards compactos */
+.cashflow-mini-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(4, minmax(160px, 1fr));
+  gap: 0.85rem;
 }
 
-.cashflow-balance-card {
-  background: var(--bg-card);
+.cashflow-mini-card {
+  background: var(--bg-secondary);
   border: 1px solid var(--border-primary);
   border-radius: 12px;
-  padding: 1.5rem;
+  padding: 0.9rem 1rem;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  box-shadow: var(--shadow-md);
+  gap: 0.35rem;
+  min-height: 78px;
 }
 
-.cashflow-balance-label {
-  font-size: 0.9rem;
+.cashflow-mini-card span {
+  font-size: 0.8rem;
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-weight: 600;
 }
 
-.cashflow-balance-value {
-  font-size: 2rem;
-  font-weight: 700;
+.cashflow-mini-card strong {
+  font-size: 1.35rem;
+  font-weight: 800;
   color: var(--text-primary);
 }
 
-.cashflow-balance-note {
-  font-size: 0.85rem;
+.cashflow-mini-card.highlight {
+  background: var(--bg-card);
+  border-color: rgba(220, 38, 38, 0.35);
+  box-shadow: 0 10px 18px rgba(220, 38, 38, 0.12);
+}
+
+/* CAMADA 3 — Accordion */
+.cashflow-accordion-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-primary);
+  border-radius: 12px;
+  padding: 0.9rem 1rem;
+  cursor: pointer;
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.cashflow-accordion-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cashflow-accordion-content {
+  margin-top: 0.9rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.cashflow-details-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(180px, 1fr));
+  gap: 0.75rem;
+}
+
+.cashflow-details-budget {
+  margin-top: 0.85rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--border-primary);
+  display: grid;
+  grid-template-columns: repeat(4, minmax(180px, 1fr));
+  gap: 0.75rem;
+}
+
+.cashflow-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.cashflow-detail span {
+  font-size: 0.8rem;
   color: var(--text-muted);
-  margin-top: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+.cashflow-detail strong {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--text-primary);
 }
 
 /* Título de Seção */
@@ -157,7 +231,7 @@
   display: grid;
   grid-template-columns: 120px 100px 1fr 150px 80px;
   gap: 1rem;
-  padding: 1rem 1.5rem;
+  padding: 1.15rem 1.5rem;
   border-bottom: 1px solid var(--border-primary);
   align-items: center;
   transition: background 0.2s ease;
@@ -216,6 +290,19 @@
   border-radius: 4px;
   display: inline-block;
   width: fit-content;
+}
+
+.cashflow-value {
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.cashflow-value.entry {
+  color: var(--success);
+}
+
+.cashflow-value.exit {
+  color: var(--error);
 }
 
 .cashflow-action-btn {
@@ -310,168 +397,6 @@
 .cashflow-status-actions {
   display: flex;
   gap: 1rem;
-}
-
-/* Relatório Consolidado */
-.cashflow-report-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-primary);
-  border-radius: 12px;
-  padding: 1.5rem;
-  box-shadow: var(--shadow-md);
-}
-
-.cashflow-report-card h3 {
-  margin: 0 0 1.5rem 0;
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.cashflow-report-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-}
-
-.cashflow-report-item {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  padding: 1rem;
-  background: var(--bg-secondary);
-  border-radius: 8px;
-  border: 1px solid var(--border-primary);
-}
-
-.cashflow-report-item.profit {
-  border-left: 4px solid var(--success);
-}
-
-.cashflow-report-item.loss {
-  border-left: 4px solid var(--error);
-}
-
-.cashflow-report-item.total {
-  border-left: 4px solid var(--primary-color);
-  background: var(--bg-card);
-}
-
-.cashflow-report-item span {
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.cashflow-report-item strong {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--text-primary);
-}
-
-/* Informações de Abertura e Fechamento */
-.cashflow-info-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1.5rem;
-}
-
-.cashflow-info-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-primary);
-  border-radius: 12px;
-  padding: 1.5rem;
-  box-shadow: var(--shadow-md);
-}
-
-.cashflow-info-card h3 {
-  margin: 0 0 1rem 0;
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.cashflow-info-content {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.cashflow-info-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.5rem 0;
-  border-bottom: 1px solid var(--border-primary);
-}
-
-.cashflow-info-item:last-child {
-  border-bottom: none;
-}
-
-.cashflow-info-item span {
-  font-size: 0.9rem;
-  color: var(--text-muted);
-}
-
-.cashflow-info-item strong {
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-/* Orçamento */
-.cashflow-budget-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-primary);
-  border-radius: 12px;
-  padding: 1.5rem;
-  box-shadow: var(--shadow-md);
-}
-
-.cashflow-budget-card h3 {
-  margin: 0 0 1rem 0;
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.cashflow-budget-content {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-}
-
-.cashflow-budget-item {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.cashflow-budget-item span {
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.cashflow-budget-item strong {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: var(--text-primary);
 }
 
 /* Filtros */
@@ -574,8 +499,13 @@
     padding: 0.875rem 1rem;
   }
 
-  .cashflow-balance-grid {
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  .cashflow-mini-cards {
+    grid-template-columns: repeat(2, minmax(160px, 1fr));
+  }
+
+  .cashflow-details-grid,
+  .cashflow-details-budget {
+    grid-template-columns: repeat(2, minmax(180px, 1fr));
   }
 }
 
@@ -584,36 +514,21 @@
     gap: 1.5rem;
   }
 
-  .cashflow-header {
-    flex-direction: column;
+  .cashflow-status-bar {
+    grid-template-columns: 1fr;
     align-items: flex-start;
-    gap: 1rem;
-    padding: 1rem 1.5rem;
   }
 
-  .cashflow-header-title h1 {
+  .cashflow-title {
     font-size: 1.5rem;
   }
 
-  .cashflow-header-actions {
-    width: 100%;
+  .cashflow-status-center {
+    align-items: flex-start;
   }
 
-  .cashflow-header-actions button {
-    flex: 1;
-  }
-
-  .cashflow-balance-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-
-  .cashflow-balance-card {
-    padding: 1rem;
-  }
-
-  .cashflow-balance-value {
-    font-size: 1.75rem;
+  .cashflow-balance-hero {
+    font-size: 2rem;
   }
 
   .cashflow-section-title {
@@ -704,39 +619,14 @@
     display: none;
   }
 
-  .cashflow-info-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-
-  .cashflow-info-card {
-    padding: 1rem;
-  }
-
-  .cashflow-budget-content {
+  .cashflow-mini-cards {
     grid-template-columns: 1fr;
     gap: 0.75rem;
   }
 
-  .cashflow-budget-card {
-    padding: 1rem;
-  }
-
-  .cashflow-report-grid {
+  .cashflow-details-grid,
+  .cashflow-details-budget {
     grid-template-columns: 1fr;
-    gap: 0.75rem;
-  }
-
-  .cashflow-report-card {
-    padding: 1rem;
-  }
-
-  .cashflow-report-item {
-    padding: 0.875rem;
-  }
-
-  .cashflow-report-item strong {
-    font-size: 1.25rem;
   }
 
   .cashflow-filters {
@@ -750,14 +640,6 @@
     min-width: 100%;
   }
 
-  .summary-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-
-  .summary-card {
-    padding: 1rem;
-  }
 }
 
 @media (max-width: 480px) {
@@ -765,47 +647,12 @@
     gap: 1rem;
   }
 
-  .cashflow-header {
-    padding: 0.875rem 1rem;
-    border-radius: 8px;
-  }
-
-  .cashflow-header-title h1 {
+  .cashflow-title {
     font-size: 1.25rem;
-    margin-bottom: 0.375rem;
   }
 
-  .cashflow-status-indicator {
-    gap: 0.5rem;
-  }
-
-  .cashflow-status-icon-small {
-    width: 28px;
-    height: 28px;
-  }
-
-  .cashflow-header-actions {
-    flex-direction: column;
-  }
-
-  .cashflow-header-actions button {
-    width: 100%;
-  }
-
-  .cashflow-balance-card {
-    padding: 0.875rem;
-  }
-
-  .cashflow-balance-label {
-    font-size: 0.8rem;
-  }
-
-  .cashflow-balance-value {
-    font-size: 1.5rem;
-  }
-
-  .cashflow-balance-note {
-    font-size: 0.75rem;
+  .cashflow-balance-hero {
+    font-size: 1.75rem;
   }
 
   .cashflow-section-title {
@@ -844,23 +691,6 @@
     font-size: 0.8rem;
   }
 
-  .cashflow-info-card,
-  .cashflow-budget-card,
-  .cashflow-report-card {
-    padding: 0.875rem;
-    border-radius: 8px;
-  }
-
-  .cashflow-info-card h3,
-  .cashflow-budget-card h3,
-  .cashflow-report-card h3 {
-    font-size: 1rem;
-  }
-
-  .cashflow-report-item strong {
-    font-size: 1.1rem;
-  }
-
   .cashflow-filters {
     padding: 0.875rem;
     border-radius: 8px;
@@ -876,19 +706,7 @@
     font-size: 0.875rem;
   }
 
-  .summary-card {
+  .cashflow-mini-card {
     padding: 0.875rem;
-  }
-
-  .summary-card span {
-    font-size: 0.8rem;
-  }
-
-  .summary-card strong {
-    font-size: 1.25rem;
-  }
-
-  .summary-card small {
-    font-size: 0.75rem;
   }
 }
