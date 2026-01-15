@@ -1557,27 +1557,6 @@ export function DashboardPage() {
 
   return (
     <div className="dashboard-page page">
-      {/* Cabeçalho (Home) */}
-      {!dashboardSettings.showHeader && (
-        <section className="dashboard-home-header">
-          <div className="dashboard-home-header-main">
-            <div className="dashboard-home-header-left">
-              <h1 className="dashboard-home-title">
-                {getGreeting()}, {getUserName()}!
-              </h1>
-              <p className="dashboard-home-subtitle">Visão geral da sua operação hoje.</p>
-            </div>
-            <div className="dashboard-home-header-right" aria-label="Data atual">
-              {new Date().toLocaleDateString('pt-BR', {
-                weekday: 'long',
-                day: '2-digit',
-                month: 'long'
-              })}
-            </div>
-          </div>
-        </section>
-      )}
-
       {/* Painel de Status Diário */}
       {dashboardSettings.showStatusPanel && (
       <section className="dashboard-status-panel">

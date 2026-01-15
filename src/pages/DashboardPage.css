@@ -2,45 +2,6 @@
   gap: 2rem;
 }
 
-/* Cabeçalho da Tela Home */
-.dashboard-home-header {
-  background: var(--bg-card);
-  border-radius: 18px;
-  box-shadow: var(--shadow-xl);
-  border: 1px solid var(--border-primary);
-  padding: 1.25rem 1.5rem;
-}
-
-.dashboard-home-header-main {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
-}
-
-.dashboard-home-title {
-  margin: 0;
-  font-size: 1.6rem;
-  font-weight: 800;
-  color: var(--text-primary);
-  letter-spacing: -0.02em;
-}
-
-.dashboard-home-subtitle {
-  margin: 0.35rem 0 0 0;
-  color: var(--text-muted);
-  font-size: 0.95rem;
-  line-height: 1.4;
-}
-
-.dashboard-home-header-right {
-  color: var(--text-muted);
-  font-size: 0.9rem;
-  font-weight: 600;
-  text-transform: capitalize;
-  white-space: nowrap;
-}
-
 /* Painel de Status Diário (substitui o hero) */
 .dashboard-status-panel {
   background: var(--bg-card);
