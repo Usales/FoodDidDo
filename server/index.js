@@ -652,6 +652,30 @@ fastify.delete('/api/warehouses/:warehouseId/items/:itemId', async (request, rep
 // Rota de backup/export
 fastify.get('/api/export', async (request, reply) => {
   try {
+    const fetchCashflowSafe = async () => {
+      try {
+        return await prisma.cashflowEntry.findMany()
+      } catch (error) {
+        // Compatibilidade: bancos antigos podem não ter colunas cost/profit ainda
+        if (error?.code === 'P2022') {
+          const entries = await prisma.cashflowEntry.findMany({
+            select: {
+              id: true,
+              type: true,
+              amount: true,
+              description: true,
+              date: true,
+              category: true,
+              createdAt: true,
+              updatedAt: true
+            }
+          })
+          return entries.map((e) => ({ ...e, cost: null, profit: null }))
+        }
+        throw error
+      }
+    }
+
     const [budgets, ingredients, recipes, fixedCosts, cashflow, stockMovements, warehouses, pricing] = await Promise.all([
       prisma.budget.findMany(),
       prisma.ingredient.findMany(),
@@ -663,7 +687,7 @@ fastify.get('/api/export', async (request, reply) => {
         }
       }),
       prisma.fixedCost.findMany(),
-      prisma.cashflowEntry.findMany(),
+      fetchCashflowSafe(),
       prisma.stockMovement.findMany(),
       prisma.warehouse.findMany({
         include: { items: true }
