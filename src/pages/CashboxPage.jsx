@@ -25,6 +25,8 @@ export function CashboxPage() {
   const [discount, setDiscount] = useState('')
   const [isProcessing, setIsProcessing] = useState(false)
 
+  const roundMoney = (value) => Math.round((Number(value) || 0) * 100) / 100
+
   // Filtrar produtos por busca
   const filteredProducts = useMemo(() => {
     if (!searchQuery.trim()) return recipes
@@ -57,8 +59,8 @@ export function CashboxPage() {
 
   const getDefaultPriceForRecipe = (recipe) => {
     const priced = pricing?.find((p) => p.recipeId === recipe.id)
-    if (priced && typeof priced.price === 'number') return priced.price
-    if (recipe.unitCost) return recipe.unitCost * 1.5
+    if (priced && typeof priced.price === 'number') return roundMoney(priced.price)
+    if (recipe.unitCost) return roundMoney(recipe.unitCost * 1.5)
     return 0
   }
 
@@ -74,7 +76,7 @@ export function CashboxPage() {
       ))
     } else {
       // Usar preço do Pricing se disponível, senão usar unitCost * 1.5 como padrão
-      const price = getDefaultPriceForRecipe(recipe)
+      const price = roundMoney(getDefaultPriceForRecipe(recipe))
       setCart([...cart, {
         id: recipe.id,
         name: recipe.name,
@@ -106,7 +108,7 @@ export function CashboxPage() {
   const handleUpdatePrice = (id, newPrice) => {
     setCart(cart.map(item =>
       item.id === id
-        ? { ...item, price: Number(newPrice) || 0 }
+        ? { ...item, price: roundMoney(newPrice) }
         : item
     ))
   }
