@@ -249,9 +249,11 @@
 }
 
 .cashbox-cart-items {
-  flex: 1;
+  flex: 0 1 auto;
+  /* evita ficar um "retângulo vazio" gigante quando há poucos itens */
+  max-height: clamp(140px, 32vh, 320px);
   overflow-y: auto;
-  margin: 1rem 0;
+  margin: 0.75rem 0 1rem;
   padding-right: 0.5rem;
   display: flex;
   flex-direction: column;
@@ -276,7 +278,7 @@
 }
 
 .cashbox-cart-item-header strong {
-  font-size: 0.95rem;
+  font-size: 1.1rem;
   font-weight: 600;
   color: var(--text-primary);
   flex: 1;
@@ -304,9 +306,9 @@
 }
 
 .cashbox-cart-item-details {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem 1rem;
 }
 
 .cashbox-cart-field {
@@ -316,30 +318,30 @@
 }
 
 .cashbox-cart-field label {
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   font-weight: 500;
-  color: var(--text-muted);
+  color: var(--text-secondary);
 }
 
 .cashbox-qty-controls {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.6rem;
   background: var(--bg-card);
   border: 1px solid var(--border-primary);
-  border-radius: 6px;
-  padding: 0.25rem;
+  border-radius: 10px;
+  padding: 0.35rem;
 }
 
 .cashbox-qty-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 40px;
+  height: 40px;
   background: transparent;
   border: none;
-  border-radius: 4px;
+  border-radius: 10px;
   color: var(--text-primary);
   cursor: pointer;
   transition: background 0.2s ease;
@@ -350,14 +352,14 @@
 }
 
 .cashbox-qty-input {
-  width: 60px;
+  width: 72px;
   text-align: center;
   border: none;
   background: transparent;
   color: var(--text-primary);
   font-weight: 600;
-  font-size: 0.95rem;
-  padding: 0.25rem;
+  font-size: 1.05rem;
+  padding: 0.25rem 0.35rem;
 }
 
 .cashbox-qty-input:focus {
@@ -368,18 +370,19 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-top: 0.75rem;
+  padding-top: 0.5rem;
   border-top: 1px solid var(--border-primary);
-  margin-top: 0.5rem;
+  margin-top: 0.25rem;
+  grid-column: 1 / -1;
 }
 
 .cashbox-cart-item-total span {
-  font-size: 0.9rem;
-  color: var(--text-muted);
+  font-size: 0.95rem;
+  color: var(--text-secondary);
 }
 
 .cashbox-cart-item-total strong {
-  font-size: 1.1rem;
+  font-size: 1.25rem;
   font-weight: 700;
   color: var(--text-primary);
 }
@@ -439,7 +442,7 @@
 
 .cashbox-total-row span {
   font-size: 0.95rem;
-  color: var(--text-muted);
+  color: var(--text-secondary);
 }
 
 .cashbox-total-row strong {
@@ -450,7 +453,7 @@
 
 .cashbox-total-row.total strong {
   font-size: 1.5rem;
-  color: var(--primary-color);
+  color: var(--success);
 }
 
 /* Formas de Pagamento */
@@ -485,6 +488,8 @@
   font-size: 0.875rem;
   cursor: pointer;
   transition: all 0.2s ease;
+  min-height: 56px; /* padroniza o grid */
+  width: 100%;
 }
 
 .cashbox-payment-option:hover {
@@ -525,15 +530,37 @@
   border: 1px solid var(--border-primary);
 }
 
+.cashbox-received-input .input-control {
+  margin: 0;
+}
+
+.cashbox-received-input .input-control span {
+  display: none;
+}
+
+.cashbox-received-input .input-control input {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.cashbox-received-input .input-control:focus-within input {
+  border-color: var(--success);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.18);
+}
+
 .cashbox-change span {
   font-size: 0.9rem;
-  color: var(--text-muted);
+  color: var(--text-secondary);
 }
 
 .cashbox-change strong {
   font-size: 1.1rem;
   font-weight: 700;
   color: var(--success);
+}
+
+.cashbox-change.warn strong {
+  color: var(--error);
 }
 
 /* Botão Finalizar */
