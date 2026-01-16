@@ -42,12 +42,19 @@ export function RecipesPage() {
       portugal: 'Portugal',
       japonesa: 'Japão',
       japao: 'Japão',
+      russa: 'Rússia',
+      russia: 'Rússia',
+      'rússia': 'Rússia',
+      'rússa': 'Rússia',
       'oriente médio': 'Oriente Médio',
       'oriente medio': 'Oriente Médio',
       frança: 'França',
       franca: 'França',
-      asiática: 'Ásia',
-      asiatica: 'Ásia',
+      // "Asiática/Ásia" -> "Japão" (padronização pedida na UI)
+      asia: 'Japão',
+      'ásia': 'Japão',
+      asiática: 'Japão',
+      asiatica: 'Japão',
       internacional: 'Internacional'
     }
 
