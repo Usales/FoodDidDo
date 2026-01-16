@@ -2,7 +2,6 @@ import { useMemo, useState, useEffect, useRef } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useAppStore } from '../stores/appStore'
 import { FormModal } from '../components/ui/FormModal'
-import { CurrencyInput } from '../components/ui/CurrencyInput'
 import { ToggleSwitch } from '../components/ui/ToggleSwitch'
 import { api } from '../lib/api'
 import { FiEdit2, FiTrash2, FiCheck, FiX } from 'react-icons/fi'
@@ -13,11 +12,13 @@ export function CostPage() {
   const location = useLocation()
   const navigate = useNavigate()
   const recipes = useAppStore((state) => state.recipes)
+  const pricing = useAppStore((state) => state.pricing)
   const ingredients = useAppStore((state) => state.ingredients)
   const warehouses = useAppStore((state) => state.warehouses)
   const addRecipe = useAppStore((state) => state.addRecipe)
   const updateRecipe = useAppStore((state) => state.updateRecipe)
   const deleteRecipe = useAppStore((state) => state.deleteRecipe)
+  const addPricing = useAppStore((state) => state.addPricing)
   const addWarehouse = useAppStore((state) => state.addWarehouse)
   const addWarehouseItem = useAppStore((state) => state.addWarehouseItem)
   const updateWarehouseItem = useAppStore((state) => state.updateWarehouseItem)
@@ -48,6 +49,7 @@ export function CostPage() {
   const [openEmojiPicker, setOpenEmojiPicker] = useState(null) // index do ingrediente com picker aberto
   const [ingredientNameSuggestions, setIngredientNameSuggestions] = useState({}) // Sugestões de nomes por índice
   const [focusEditingIngredientIndex, setFocusEditingIngredientIndex] = useState(null)
+  const [priceDraftByRecipeId, setPriceDraftByRecipeId] = useState({}) // edição inline do preço de venda (tabela)
   
   // Emojis comuns para picker
   const commonEmojis = [
@@ -86,6 +88,92 @@ export function CostPage() {
       averageProfitPerUnit
     }
   }, [recipes])
+
+  const roundMoney = (value) => Math.round((Number(value) || 0) * 100) / 100
+
+  const latestPriceByRecipeId = useMemo(() => {
+    const map = new Map()
+    for (const p of pricing || []) {
+      if (!p?.recipeId) continue
+      // pricing já vem ordenado por createdAt desc do backend, então o primeiro é o mais recente
+      if (!map.has(p.recipeId) && typeof p.price === 'number') {
+        map.set(p.recipeId, p.price)
+      }
+    }
+    return map
+  }, [pricing])
+
+  const getDefaultSellingPrice = (recipe) => {
+    const unitCost = Number(recipe?.unitCost) || 0
+    const margin = Number(recipe?.contributionMargin) || 0
+    // contributionMargin aqui é tratada como margem sobre o PREÇO (ex: 0.45 => 45%)
+    if (unitCost > 0 && margin > 0 && margin < 0.99) {
+      return roundMoney(unitCost / (1 - margin))
+    }
+    // fallback simples
+    return roundMoney(unitCost * 1.5)
+  }
+
+  const getEffectiveSellingPrice = (recipe) => {
+    const draft = priceDraftByRecipeId?.[recipe.id]
+    if (draft !== undefined && draft !== null && String(draft).trim() !== '') {
+      return roundMoney(draft)
+    }
+    const priced = latestPriceByRecipeId.get(recipe.id)
+    if (typeof priced === 'number') return roundMoney(priced)
+    return getDefaultSellingPrice(recipe)
+  }
+
+  const getMarginFromPrice = (unitCost, price) => {
+    const c = Number(unitCost) || 0
+    const p = Number(price) || 0
+    if (p <= 0) return 0
+    return Math.max(0, Math.min(0.999, (p - c) / p))
+  }
+
+  const handleSaveSellingPrice = async (recipe) => {
+    const draft = priceDraftByRecipeId?.[recipe.id]
+    if (draft === undefined || draft === null || String(draft).trim() === '') return
+    const newPrice = roundMoney(draft)
+    if (!Number.isFinite(newPrice) || newPrice <= 0) {
+      setPriceDraftByRecipeId((prev) => {
+        const next = { ...prev }
+        delete next[recipe.id]
+        return next
+      })
+      return
+    }
+
+    const current = latestPriceByRecipeId.get(recipe.id)
+    if (typeof current === 'number' && Math.abs(current - newPrice) < 0.005) {
+      setPriceDraftByRecipeId((prev) => {
+        const next = { ...prev }
+        delete next[recipe.id]
+        return next
+      })
+      return
+    }
+
+    const margin = getMarginFromPrice(recipe.unitCost, newPrice)
+
+    try {
+      await addPricing({
+        id: crypto.randomUUID(),
+        recipeId: recipe.id,
+        recipeName: recipe.name,
+        price: newPrice,
+        margin
+      })
+      setPriceDraftByRecipeId((prev) => {
+        const next = { ...prev }
+        delete next[recipe.id]
+        return next
+      })
+    } catch (error) {
+      console.error('Erro ao salvar preço:', error)
+      alert(`Erro ao salvar preço. ${error.message || 'Tente novamente.'}`)
+    }
+  }
 
   // Funções para salvar e carregar rascunho
   const saveDraft = () => {
@@ -1127,11 +1215,10 @@ export function CostPage() {
               </thead>
               <tbody>
                 {recipes.map((recipe) => {
-                  const marginPercent = (recipe.contributionMargin * 100).toFixed(1)
-                  // Calcular lucro: custo unitário × margem
-                  const profit = recipe.unitCost * recipe.contributionMargin
-                  // Calcular preço de venda: lucro + custo unitário (ou custo / (1 - margem))
-                  const sellingPrice = recipe.unitCost + profit
+                  const sellingPrice = getEffectiveSellingPrice(recipe)
+                  const margin = getMarginFromPrice(recipe.unitCost, sellingPrice)
+                  const marginPercent = (margin * 100).toFixed(1)
+                  const profit = Math.max(0, sellingPrice - (Number(recipe.unitCost) || 0))
                   return (
                     <tr key={recipe.id}>
                       <td style={{ textAlign: 'center', verticalAlign: 'middle', padding: '1rem 0.5rem' }}>
@@ -1158,13 +1245,34 @@ export function CostPage() {
                       <td>
                         <span
                           className="margin-badge"
-                          style={{ color: getMarginColor(recipe.contributionMargin) }}
+                          style={{ color: getMarginColor(margin) }}
                         >
                           {marginPercent}%
                         </span>
                       </td>
                       <td className="recipe-profit">{profit.toFixed(2)}</td>
-                      <td className="recipe-price">R$ {sellingPrice.toFixed(2)}</td>
+                      <td className="recipe-price">
+                        <div className="recipe-price-edit">
+                          <span className="recipe-price-prefix">R$</span>
+                          <input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            className="recipe-price-input"
+                            value={
+                              priceDraftByRecipeId?.[recipe.id] !== undefined
+                                ? priceDraftByRecipeId[recipe.id]
+                                : sellingPrice.toFixed(2)
+                            }
+                            onChange={(e) => {
+                              const v = e.target.value
+                              setPriceDraftByRecipeId((prev) => ({ ...prev, [recipe.id]: v }))
+                            }}
+                            onBlur={() => handleSaveSellingPrice(recipe)}
+                            title="Digite o preço de venda. A margem (%) será recalculada automaticamente."
+                          />
+                        </div>
+                      </td>
                       <td>
                         <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                           <button

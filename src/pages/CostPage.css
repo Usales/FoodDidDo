@@ -131,6 +131,35 @@
   color: var(--primary-color);
 }
 
+.recipe-price-edit {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.recipe-price-prefix {
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+.recipe-price-input {
+  width: 92px;
+  min-width: 92px;
+  padding: 0.35rem 0.5rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-primary);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-weight: 700;
+  text-align: right;
+}
+
+.recipe-price-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
 .margin-badge {
   display: inline-flex;
   align-items: center;
