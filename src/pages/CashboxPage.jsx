@@ -272,53 +272,53 @@ export function CashboxPage() {
                 <div key={item.id} className="cashbox-cart-brief-item">
                   <div className="cashbox-cart-brief-row">
                     <span className="cashbox-cart-brief-name">{item.name}</span>
-                    <div className="cashbox-cart-brief-qty">
+                    <div className="cashbox-cart-brief-right">
+                      <div className="cashbox-cart-brief-qty">
+                        <button
+                          type="button"
+                          className="cashbox-cart-brief-qty-btn"
+                          onClick={() => handleUpdateQuantity(item.id, -1)}
+                          aria-label="Diminuir quantidade"
+                        >
+                          <FiMinus size={12} />
+                        </button>
+                        <input
+                          type="number"
+                          className="cashbox-cart-brief-qty-input"
+                          value={item.quantity}
+                          onChange={(e) => handleUpdateQuantityManual(item.id, e.target.value)}
+                          min="1"
+                          aria-label="Quantidade"
+                        />
+                        <button
+                          type="button"
+                          className="cashbox-cart-brief-qty-btn"
+                          onClick={() => handleUpdateQuantity(item.id, 1)}
+                          aria-label="Aumentar quantidade"
+                        >
+                          <FiPlus size={12} />
+                        </button>
+                      </div>
+
+                      <div className="cashbox-cart-brief-price">
+                        <CurrencyInput
+                          label=""
+                          value={roundMoney(item.price).toFixed(2)}
+                          onChange={(value) => handleUpdatePrice(item.id, value)}
+                          placeholder="0,00"
+                        />
+                      </div>
+
                       <button
                         type="button"
-                        className="cashbox-cart-brief-qty-btn"
-                        onClick={() => handleUpdateQuantity(item.id, -1)}
-                        aria-label="Diminuir quantidade"
+                        className="cashbox-cart-brief-remove-btn"
+                        onClick={() => handleRemoveItem(item.id)}
+                        aria-label="Remover item"
+                        title="Remover"
                       >
-                        <FiMinus size={12} />
-                      </button>
-                      <input
-                        type="number"
-                        className="cashbox-cart-brief-qty-input"
-                        value={item.quantity}
-                        onChange={(e) => handleUpdateQuantityManual(item.id, e.target.value)}
-                        min="1"
-                        aria-label="Quantidade"
-                      />
-                      <button
-                        type="button"
-                        className="cashbox-cart-brief-qty-btn"
-                        onClick={() => handleUpdateQuantity(item.id, 1)}
-                        aria-label="Aumentar quantidade"
-                      >
-                        <FiPlus size={12} />
+                        <FiTrash2 size={16} />
                       </button>
                     </div>
-                  </div>
-
-                  <div className="cashbox-cart-brief-controls">
-                    <div className="cashbox-cart-brief-price">
-                      <CurrencyInput
-                        label=""
-                        value={roundMoney(item.price).toFixed(2)}
-                        onChange={(value) => handleUpdatePrice(item.id, value)}
-                        placeholder="0,00"
-                      />
-                    </div>
-
-                    <button
-                      type="button"
-                      className="cashbox-cart-brief-remove-btn"
-                      onClick={() => handleRemoveItem(item.id)}
-                      aria-label="Remover item"
-                      title="Remover"
-                    >
-                      <FiTrash2 size={16} />
-                    </button>
                   </div>
                 </div>
               ))}
