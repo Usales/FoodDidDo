@@ -163,6 +163,19 @@
   border-color: var(--primary-color);
 }
 
+/* Botão "📦 Estoque" no footer do modal (mesmo tamanho do primary-btn) */
+.cost-stock-btn {
+  height: 42px;
+  min-width: 106px;
+  padding: 0 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  line-height: 1;
+  font-size: 0.9rem; /* mantém padrão do edit-btn */
+}
+
 .delete-btn {
   background: transparent;
   border: 1px solid var(--border-primary);

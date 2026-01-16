@@ -38,6 +38,11 @@ export function CostPage() {
   })
   const [editingIngredients, setEditingIngredients] = useState([]) // Ingredientes em edição (lado esquerdo)
   const [confirmedIngredients, setConfirmedIngredients] = useState([]) // Ingredientes confirmados (lado direito)
+
+  const editingRecipe = useMemo(() => {
+    if (!editingId) return null
+    return recipes.find((recipe) => recipe.id === editingId) || null
+  }, [editingId, recipes])
   const [editingConfirmedIndex, setEditingConfirmedIndex] = useState(null) // Índice do ingrediente confirmado sendo editado
   const [editingConfirmedData, setEditingConfirmedData] = useState(null) // Dados temporários do ingrediente sendo editado
   const [openEmojiPicker, setOpenEmojiPicker] = useState(null) // index do ingrediente com picker aberto
@@ -1039,15 +1044,6 @@ export function CostPage() {
                           >
                             Editar
                           </button>
-                          <button
-                            type="button"
-                            className="edit-btn"
-                            onClick={() => addRecipeIngredientsToStock(recipe)}
-                            title="Adicionar ingredientes ao estoque"
-                            style={{ fontSize: '0.85rem', padding: '0.4rem 0.75rem' }}
-                          >
-                            📦 Estoque
-                          </button>
                         </div>
                       </td>
                     </tr>
@@ -1113,9 +1109,21 @@ export function CostPage() {
                 Cancelar
               </button>
             </div>
-            <button className="primary-btn" type="button" onClick={() => handleSubmit()}>
-              {editingId ? 'Atualizar' : 'Salvar'}
-            </button>
+            <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+              {editingId && (
+                <button
+                  type="button"
+                  className="edit-btn cost-stock-btn"
+                  onClick={() => addRecipeIngredientsToStock(editingRecipe)}
+                  title="Adicionar ingredientes ao estoque"
+                >
+                  📦 Estoque
+                </button>
+              )}
+              <button className="primary-btn" type="button" onClick={() => handleSubmit()}>
+                {editingId ? 'Atualizar' : 'Salvar'}
+              </button>
+            </div>
           </>
         }
       >
