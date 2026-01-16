@@ -253,12 +253,12 @@ export function StockPage() {
     setItemForm({
       emoji: item.emoji || '📦',
       name: item.name,
-      quantity: item.quantity.toString(),
-      unit: item.unit,
-      minIdeal: item.minIdeal.toString(),
-      unitCost: item.unitCost.toString(),
-      category: item.category || '',
-      notes: item.notes || ''
+      quantity: String(item.quantity ?? 0),
+      unit: item.unit || 'g',
+      minIdeal: String(item.minIdeal ?? 0),
+      unitCost: String(item.unitCost ?? 0),
+      category: item.category ?? '',
+      notes: item.notes ?? ''
     })
     setIsItemModalOpen(true)
   }

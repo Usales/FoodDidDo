@@ -47,6 +47,7 @@ export function CostPage() {
   const [editingConfirmedData, setEditingConfirmedData] = useState(null) // Dados temporários do ingrediente sendo editado
   const [openEmojiPicker, setOpenEmojiPicker] = useState(null) // index do ingrediente com picker aberto
   const [ingredientNameSuggestions, setIngredientNameSuggestions] = useState({}) // Sugestões de nomes por índice
+  const [focusEditingIngredientIndex, setFocusEditingIngredientIndex] = useState(null)
   
   // Emojis comuns para picker
   const commonEmojis = [
@@ -277,6 +278,7 @@ export function CostPage() {
     setEditingConfirmedIndex(null)
     setEditingConfirmedData(null)
     setOpenEmojiPicker(null)
+    setFocusEditingIngredientIndex(null)
     
     // Se veio do simulador, voltar para lá ao cancelar
     if (location.state?.editRecipeId) {
@@ -473,8 +475,20 @@ export function CostPage() {
 
   const handleEditConfirmedIngredient = (index) => {
     const ingredient = confirmedIngredients[index]
-    setEditingConfirmedIndex(index)
-    setEditingConfirmedData({ ...ingredient })
+    if (!ingredient) return
+
+    // Remove da coluna da direita...
+    setConfirmedIngredients((prev) => prev.filter((_, i) => i !== index))
+    // ...e envia de volta para a coluna da esquerda para edição completa
+    setEditingIngredients((prev) => {
+      const next = [...prev, { ...ingredient }]
+      setFocusEditingIngredientIndex(next.length - 1)
+      return next
+    })
+
+    // Garantir que não fique preso no modo "editar inline"
+    setEditingConfirmedIndex(null)
+    setEditingConfirmedData(null)
   }
 
   const handleSaveConfirmedIngredient = (index) => {
@@ -1320,7 +1334,11 @@ export function CostPage() {
                           onChange={(e) =>
                             handleUpdateIngredient(index, 'name', e.target.value)
                           }
+                          autoFocus={focusEditingIngredientIndex === index}
                           onFocus={(e) => {
+                            if (focusEditingIngredientIndex === index) {
+                              setFocusEditingIngredientIndex(null)
+                            }
                             // Mostrar sugestões ao focar
                             const searchValue = (item.name || '').toLowerCase().trim()
                             const suggestions = []

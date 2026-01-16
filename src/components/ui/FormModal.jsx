@@ -1,8 +1,33 @@
+import { useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import PropTypes from 'prop-types'
 import './FormModal.css'
 
 export function FormModal({ isOpen, title, description, onClose, children, footer, isExpanded = false }) {
+  // Impede scroll da página atrás quando o modal estiver aberto
+  useEffect(() => {
+    if (!isOpen) return undefined
+
+    const body = document.body
+    const root = document.documentElement
+
+    const prevOverflow = body.style.overflow
+    const prevPaddingRight = body.style.paddingRight
+
+    // Compensa a largura da scrollbar para evitar "pular" layout
+    const scrollbarWidth = window.innerWidth - root.clientWidth
+
+    body.style.overflow = 'hidden'
+    if (scrollbarWidth > 0) {
+      body.style.paddingRight = `${scrollbarWidth}px`
+    }
+
+    return () => {
+      body.style.overflow = prevOverflow
+      body.style.paddingRight = prevPaddingRight
+    }
+  }, [isOpen])
+
   if (!isOpen) return null
 
   const modalContent = (

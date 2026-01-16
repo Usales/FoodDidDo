@@ -9,6 +9,7 @@ export function BudgetPage() {
   const budgets = useAppStore((state) => state.budgets)
   const recipes = useAppStore((state) => state.recipes)
   const fixedCosts = useAppStore((state) => state.fixedCosts)
+  const warehouses = useAppStore((state) => state.warehouses)
   const addBudget = useAppStore((state) => state.addBudget)
   const loadData = useAppStore((state) => state.loadData)
 
@@ -60,6 +61,57 @@ export function BudgetPage() {
     const latest = sortedBudgets[0] || budgets[0]
     const total = latest?.amount || 0
 
+    // Map de consumo por ingrediente (nome -> total consumido nas receitas)
+    const consumedByName = recipes.reduce((acc, recipe) => {
+      const ingredients = recipe?.ingredients
+      if (!Array.isArray(ingredients)) return acc
+
+      for (const ing of ingredients) {
+        const name = String(ing?.name || '').trim().toLowerCase()
+        if (!name) continue
+        const qty = Number(ing?.quantity) || 0
+        acc[name] = (acc[name] || 0) + qty
+      }
+      return acc
+    }, {})
+
+    // Soma do custo de compra do estoque (saldo real * custo unitário), consolidando duplicados por nome
+    const stockPurchaseCost = (warehouses || []).reduce((acc, warehouse) => {
+      const items = Array.isArray(warehouse?.items) ? warehouse.items : []
+      const itemsMap = new Map()
+
+      for (const item of items) {
+        const nameKey = String(item?.name || '').trim().toLowerCase()
+        if (!nameKey) continue
+
+        const qty = Number(item?.quantity) || 0
+        const unitCost = Number(item?.unitCost) || 0
+
+        const existing = itemsMap.get(nameKey)
+        if (existing) {
+          itemsMap.set(nameKey, {
+            totalQty: existing.totalQty + qty,
+            totalCost: existing.totalCost + qty * unitCost
+          })
+        } else {
+          itemsMap.set(nameKey, {
+            totalQty: qty,
+            totalCost: qty * unitCost
+          })
+        }
+      }
+
+      let warehouseSum = 0
+      for (const [nameKey, data] of itemsMap.entries()) {
+        const consumed = consumedByName[nameKey] || 0
+        const realStock = Math.max(0, (data.totalQty || 0) - consumed)
+        const avgUnitCost = data.totalQty > 0 ? data.totalCost / data.totalQty : 0
+        warehouseSum += realStock * avgUnitCost
+      }
+
+      return acc + warehouseSum
+    }, 0)
+
     // Calcular gastos baseado no custo total das receitas com includeInBudget = true
     const spentFromRecipes = recipes
       .filter((recipe) => recipe.includeInBudget !== false)
@@ -70,8 +122,8 @@ export function BudgetPage() {
       .filter((cost) => (cost.allocationMethod || 'mensal') === 'mensal')
       .reduce((acc, cost) => acc + (cost.value || 0), 0)
 
-    // Gasto do período mais recente: usa o maior entre banco e cálculo (receitas + fixos mensais)
-    const computedSpent = spentFromRecipes + spentFromFixedCostsMonthly
+    // Gasto do período mais recente: usa o maior entre banco e cálculo (receitas + fixos mensais + estoque)
+    const computedSpent = spentFromRecipes + spentFromFixedCostsMonthly + stockPurchaseCost
     const spent = Math.max(latest?.spent || 0, computedSpent)
 
     const balance = total - spent
@@ -87,9 +139,10 @@ export function BudgetPage() {
       spent,
       balance,
       latest,
-      progress
+      progress,
+      stockPurchaseCost
     }
-  }, [budgets, recipes, fixedCosts, sortedBudgets])
+  }, [budgets, recipes, fixedCosts, warehouses, sortedBudgets])
 
   const handleCreateBudget = async () => {
     const numericAmount = Number(amount)
@@ -179,6 +232,56 @@ export function BudgetPage() {
                 {sortedBudgets.map((budget) => {
                   // Calcular gastos baseado no custo total das receitas com includeInBudget = true
                   const isLatest = budget.id === (sortedBudgets[0]?.id || budgets[0]?.id)
+
+                  const consumedByName = recipes.reduce((acc, recipe) => {
+                    const ingredients = recipe?.ingredients
+                    if (!Array.isArray(ingredients)) return acc
+
+                    for (const ing of ingredients) {
+                      const name = String(ing?.name || '').trim().toLowerCase()
+                      if (!name) continue
+                      const qty = Number(ing?.quantity) || 0
+                      acc[name] = (acc[name] || 0) + qty
+                    }
+                    return acc
+                  }, {})
+
+                  const stockPurchaseCost = (warehouses || []).reduce((acc, warehouse) => {
+                    const items = Array.isArray(warehouse?.items) ? warehouse.items : []
+                    const itemsMap = new Map()
+
+                    for (const item of items) {
+                      const nameKey = String(item?.name || '').trim().toLowerCase()
+                      if (!nameKey) continue
+
+                      const qty = Number(item?.quantity) || 0
+                      const unitCost = Number(item?.unitCost) || 0
+
+                      const existing = itemsMap.get(nameKey)
+                      if (existing) {
+                        itemsMap.set(nameKey, {
+                          totalQty: existing.totalQty + qty,
+                          totalCost: existing.totalCost + qty * unitCost
+                        })
+                      } else {
+                        itemsMap.set(nameKey, {
+                          totalQty: qty,
+                          totalCost: qty * unitCost
+                        })
+                      }
+                    }
+
+                    let warehouseSum = 0
+                    for (const [nameKey, data] of itemsMap.entries()) {
+                      const consumed = consumedByName[nameKey] || 0
+                      const realStock = Math.max(0, (data.totalQty || 0) - consumed)
+                      const avgUnitCost = data.totalQty > 0 ? data.totalCost / data.totalQty : 0
+                      warehouseSum += realStock * avgUnitCost
+                    }
+
+                    return acc + warehouseSum
+                  }, 0)
+
                   const spentFromRecipes = recipes
                     .filter((recipe) => recipe.includeInBudget !== false)
                     .reduce((acc, recipe) => acc + (recipe.totalCost || 0), 0)
@@ -188,7 +291,7 @@ export function BudgetPage() {
                     .reduce((acc, cost) => acc + (cost.value || 0), 0)
 
                   // Para o orçamento mais recente: maior entre banco e (receitas + fixos mensais)
-                  const computedSpent = spentFromRecipes + spentFromFixedCostsMonthly
+                  const computedSpent = spentFromRecipes + spentFromFixedCostsMonthly + stockPurchaseCost
                   const actualSpent = isLatest ? Math.max(budget.spent || 0, computedSpent) : budget.spent
                   const remaining = budget.amount - actualSpent
                   const percentage = budget.amount > 0 ? Math.min(100, Math.round((actualSpent / budget.amount) * 100)) : 0
