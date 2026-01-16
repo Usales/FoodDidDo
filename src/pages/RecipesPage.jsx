@@ -16,7 +16,16 @@ export function RecipesPage() {
   const [error, setError] = useState(null)
   const [activeRecipe, setActiveRecipe] = useState(null)
   const [currentPage, setCurrentPage] = useState(1)
+  const [filters, setFilters] = useState({
+    search: '',
+    area: 'all',
+    category: 'all',
+    source: 'all',
+    flavor: 'all',
+    hasVideo: false
+  })
   const prevIngredientsRef = useRef(selectedIngredients.join(','))
+  const prevFiltersRef = useRef(JSON.stringify(filters))
 
   useEffect(() => {
     let isMounted = true
@@ -47,20 +56,117 @@ export function RecipesPage() {
     }
   }, [])
 
+  const inferFlavor = (recipe) => {
+    const cat = String(recipe?.category || '').toLowerCase()
+    const title = String(recipe?.title || '').toLowerCase()
+    const haystack = `${cat} ${title}`
+
+    if (/(drink|cocktail|bebida|juice|suco|smoothie)/.test(haystack)) return 'bebida'
+    if (/(dessert|sobremesa|sweet|doce|cake|bolo|cookie|biscoito|chocolate|pudim|torta)/.test(haystack)) return 'doce'
+    return 'salgado'
+  }
+
+  const filterOptions = useMemo(() => {
+    const areas = new Set()
+    const categories = new Set()
+    const sources = new Set()
+
+    for (const recipe of recipes) {
+      const area = String(recipe?.area || '').trim()
+      const category = String(recipe?.category || '').trim()
+      const source = String(recipe?.source || '').trim()
+      if (area) areas.add(area)
+      if (category) categories.add(category)
+      if (source) sources.add(source)
+    }
+
+    const sortPt = (a, b) => a.localeCompare(b, 'pt-BR', { sensitivity: 'base' })
+
+    return {
+      areas: Array.from(areas).sort(sortPt),
+      categories: Array.from(categories).sort(sortPt),
+      sources: Array.from(sources).sort(sortPt)
+    }
+  }, [recipes])
+
   const filteredRecipes = useMemo(() => {
-    if (!selectedIngredients.length) return recipes
-    return recipes.filter((recipe) => {
-      const recipeTitle = (recipe.title || '').toLowerCase()
-      const recipeIngredients = (recipe.ingredientsList || '').toLowerCase()
-      return selectedIngredients.some((ingredient) => {
-        const searchIngredient = ingredient.toLowerCase().trim()
-        const inTitle = recipeTitle.includes(searchIngredient)
-        const inDescription = recipeIngredients.includes(searchIngredient)
-        // O ingrediente deve estar TANTO no título QUANTO na descrição
-        return inTitle && inDescription
+    let base = recipes
+
+    if (selectedIngredients.length) {
+      base = base.filter((recipe) => {
+        const recipeTitle = (recipe.title || '').toLowerCase()
+        const recipeIngredients = (recipe.ingredientsList || '').toLowerCase()
+        return selectedIngredients.some((ingredient) => {
+          const searchIngredient = ingredient.toLowerCase().trim()
+          const inTitle = recipeTitle.includes(searchIngredient)
+          const inDescription = recipeIngredients.includes(searchIngredient)
+          // O ingrediente deve estar TANTO no título QUANTO na descrição
+          return inTitle && inDescription
+        })
       })
+    }
+
+    const search = String(filters.search || '').trim().toLowerCase()
+    if (search) {
+      base = base.filter((recipe) => {
+        const haystack = `${recipe.title || ''} ${recipe.ingredientsList || ''} ${recipe.category || ''} ${recipe.area || ''}`.toLowerCase()
+        return haystack.includes(search)
+      })
+    }
+
+    if (filters.area !== 'all') {
+      base = base.filter((recipe) => String(recipe.area || '') === filters.area)
+    }
+
+    if (filters.category !== 'all') {
+      base = base.filter((recipe) => String(recipe.category || '') === filters.category)
+    }
+
+    if (filters.source !== 'all') {
+      base = base.filter((recipe) => String(recipe.source || '') === filters.source)
+    }
+
+    if (filters.flavor !== 'all') {
+      base = base.filter((recipe) => inferFlavor(recipe) === filters.flavor)
+    }
+
+    if (filters.hasVideo) {
+      base = base.filter((recipe) => Boolean(recipe.video))
+    }
+
+    return base
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // inferFlavor é estável por definição (não depende de state), mas é função local
+  }, [recipes, selectedIngredients, filters])
+
+  // Resetar paginação quando filtros mudarem (ingredientes ou filtros locais)
+  useEffect(() => {
+    const currentIngredients = selectedIngredients.join(',')
+    const currentFilters = JSON.stringify(filters)
+
+    if (prevIngredientsRef.current !== currentIngredients || prevFiltersRef.current !== currentFilters) {
+      prevIngredientsRef.current = currentIngredients
+      prevFiltersRef.current = currentFilters
+      setCurrentPage(1)
+    }
+  }, [selectedIngredients, filters])
+
+  const updateFilter = (key) => (event) => {
+    const value = event?.target?.type === 'checkbox' ? event.target.checked : event.target.value
+    setFilters((prev) => ({ ...prev, [key]: value }))
+  }
+
+  const clearFilters = () => {
+    setFilters({
+      search: '',
+      area: 'all',
+      category: 'all',
+      source: 'all',
+      flavor: 'all',
+      hasVideo: false
     })
-  }, [recipes, selectedIngredients])
+  }
 
   // Calcular paginação
   const paginationData = useMemo(() => {
@@ -78,16 +184,6 @@ export function RecipesPage() {
   }, [filteredRecipes, currentPage])
 
   const { totalPages, startIndex, endIndex, paginatedRecipes } = paginationData
-
-  // Resetar para página 1 quando os filtros mudarem (apenas quando ingredientes mudarem)
-  useEffect(() => {
-    const currentIngredients = selectedIngredients.join(',')
-    // Só resetar se realmente mudou os ingredientes selecionados
-    if (prevIngredientsRef.current !== currentIngredients) {
-      prevIngredientsRef.current = currentIngredients
-      setCurrentPage(1)
-    }
-  }, [selectedIngredients])
 
   const handleOpenRecipe = (recipe) => {
     setActiveRecipe(recipe)
@@ -118,6 +214,77 @@ export function RecipesPage() {
               ? `Exibindo receitas que combinam com: ${selectedIngredients.join(', ')}`
               : 'Explore pratos preparados com ingredientes acessíveis e fáceis de encontrar.'}
           </p>
+
+          <div className="recipes-filters" role="region" aria-label="Filtros de receitas">
+            <div className="recipes-filters-row">
+              <label className="recipes-filter">
+                <span>Buscar</span>
+                <input
+                  type="text"
+                  value={filters.search}
+                  onChange={updateFilter('search')}
+                  placeholder="Ex.: bolo, cenoura, chocolate..."
+                />
+              </label>
+
+              <label className="recipes-filter">
+                <span>País / Região</span>
+                <select value={filters.area} onChange={updateFilter('area')}>
+                  <option value="all">Todos</option>
+                  {filterOptions.areas.map((area) => (
+                    <option key={area} value={area}>
+                      {area}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="recipes-filter">
+                <span>Sabor</span>
+                <select value={filters.flavor} onChange={updateFilter('flavor')}>
+                  <option value="all">Todos</option>
+                  <option value="doce">Doce</option>
+                  <option value="salgado">Salgado</option>
+                  <option value="bebida">Bebida</option>
+                </select>
+              </label>
+            </div>
+
+            <div className="recipes-filters-row">
+              <label className="recipes-filter">
+                <span>Categoria</span>
+                <select value={filters.category} onChange={updateFilter('category')}>
+                  <option value="all">Todas</option>
+                  {filterOptions.categories.map((category) => (
+                    <option key={category} value={category}>
+                      {category}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="recipes-filter">
+                <span>Fonte</span>
+                <select value={filters.source} onChange={updateFilter('source')}>
+                  <option value="all">Todas</option>
+                  {filterOptions.sources.map((source) => (
+                    <option key={source} value={source}>
+                      {source}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="recipes-filter recipes-filter-check">
+                <input type="checkbox" checked={filters.hasVideo} onChange={updateFilter('hasVideo')} />
+                <span>Somente com vídeo</span>
+              </label>
+
+              <button type="button" className="recipes-clear-filters" onClick={clearFilters}>
+                Limpar filtros
+              </button>
+            </div>
+          </div>
         </div>
       </header>
 

@@ -13,6 +13,93 @@
   color: var(--text-muted);
 }
 
+.recipes-filters {
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--border-primary);
+  border-radius: 16px;
+  background: var(--bg-card);
+  box-shadow: var(--shadow-lg);
+}
+
+.recipes-filters-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem;
+}
+
+.recipes-filters-row + .recipes-filters-row {
+  margin-top: 0.75rem;
+}
+
+.recipes-filter {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 180px;
+  flex: 1 1 220px;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.recipes-filter > span {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.recipes-filter input[type='text'],
+.recipes-filter select {
+  border: 1px solid var(--border-primary);
+  border-radius: 12px;
+  padding: 0.65rem 0.8rem;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  background: var(--bg-secondary);
+  transition: border 0.2s ease, box-shadow 0.2s ease;
+}
+
+.recipes-filter input[type='text']:focus,
+.recipes-filter select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+.recipes-filter-check {
+  flex: 0 0 auto;
+  min-width: unset;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.65rem 0.8rem;
+  border: 1px solid var(--border-primary);
+  border-radius: 12px;
+  background: var(--bg-secondary);
+}
+
+.recipes-filter-check input {
+  width: 16px;
+  height: 16px;
+}
+
+.recipes-clear-filters {
+  flex: 0 0 auto;
+  padding: 0.7rem 1rem;
+  border-radius: 12px;
+  border: 1px solid var(--border-primary);
+  background: transparent;
+  color: var(--text-primary);
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.recipes-clear-filters:hover {
+  background: var(--bg-secondary);
+  border-color: var(--primary-color);
+}
+
 .recipes-loading,
 .recipes-error {
   text-align: center;
@@ -183,6 +270,24 @@
 }
 
 @media (max-width: 768px) {
+  .recipes-filters {
+    padding: 0.85rem;
+  }
+
+  .recipes-filter {
+    min-width: 100%;
+    flex: 1 1 100%;
+  }
+
+  .recipes-filter-check {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .recipes-clear-filters {
+    width: 100%;
+  }
+
   .recipes-pagination {
     flex-direction: column;
     gap: 1rem;
