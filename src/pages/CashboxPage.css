@@ -237,6 +237,8 @@
   justify-content: center;
   width: 40px;
   height: 40px;
+  padding: 0;
+  line-height: 0;
   background: transparent;
   border: 1px solid var(--border-primary);
   border-radius: 9px;
@@ -247,8 +249,9 @@
 }
 
 .cashbox-cart-brief-remove-btn svg {
-  width: 14px;
-  height: 14px;
+  display: block;
+  width: 16px;
+  height: 16px;
 }
 
 .cashbox-cart-brief-remove-btn:hover {
