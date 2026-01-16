@@ -1,8 +1,8 @@
-# 🍽️ FoodDidDo - Aplicativo de Receitas e Gestão de Refeições
+# 🍽️ FoodDidDo - Aplicativo de Receitas, Gestão e PDV
 
 ## 📋 Sobre o Projeto
 
-O **FoodDidDo** é uma aplicação web moderna desenvolvida em React voltada para **gestão de alimentação e operação**, combinando organização de refeições/receitas com recursos de gestão (custos, precificação, estoque e rotinas financeiras).
+O **FoodDidDo** é uma aplicação moderna desenvolvida em React voltada para **gestão de alimentação e operação**, combinando organização de refeições/receitas com recursos de gestão (custos, precificação, estoque, orçamento/financeiro) e uma base para **PDV (caixa)**.
 
 Atualmente o projeto está sendo conduzido por uma **empresa unipessoal**, com **apenas 1 funcionário** responsável pelo desenvolvimento e manutenção.
 
@@ -19,7 +19,7 @@ Atualmente o projeto está sendo conduzido por uma **empresa unipessoal**, com *
 - **Editar Refeições**: Modificar refeições existentes facilmente
 - **Deletar Refeições**: Remover refeições com confirmação
 - **Status de Refeições**: Marcar como "fazer", "fazendo" ou "feito"
-- **Armazenamento Local**: Dados salvos no localStorage do navegador
+- **Armazenamento**: Projeto evoluiu para suportar **backend local + banco SQLite (Prisma)**, além de configurações locais (ex.: moeda/idioma).
 
 ### 🥘 Busca Inteligente de Receitas
 - **Busca Precisa**: Sistema inteligente que evita falsos positivos (ex: milho não encontra tomilho)
@@ -31,6 +31,19 @@ Atualmente o projeto está sendo conduzido por uma **empresa unipessoal**, com *
 - **Seleção Visual**: Interface intuitiva com mais de 100 ingredientes disponíveis
 - **Feedback Visual**: Indicação clara dos ingredientes selecionados
 - **Categorização**: Ingredientes organizados por categorias (carnes, vegetais, laticínios, etc.)
+
+### 📦 Estoque e Armazéns
+- **Estoque**: Cadastro e edição de itens de estoque (quantidade, custo unitário, mínimo ideal, categoria e observações)
+- **Armazéns**: Organização de itens por armazém
+
+### 💰 Custos, Precificação e Orçamento
+- **Custos de receitas**: Cálculo automático (custo total, custo de uso, custo unitário, sugestão de preço)
+- **Custos fixos**: Rateio (mensal / por hora / por lote)
+- **Orçamento**: Gastos do mês consolidados (receitas + custos fixos mensais + custo de compra do estoque real)
+
+### 🧾 Backup e Restauração
+- **Exportação**: Backup JSON com todos os dados
+- **Restauração**: Importa backup e recria as entidades no banco
 
 ### 📖 Visualização Detalhada de Receitas
 - **Modal Completo**: Visualização detalhada com todos os ingredientes e instruções
@@ -46,11 +59,19 @@ Atualmente o projeto está sendo conduzido por uma **empresa unipessoal**, com *
 ## 🛠️ Tecnologias Utilizadas
 
 ### Frontend
-- **React 18** - Biblioteca principal para interface
+- **React 19** - Biblioteca principal para interface
 - **Vite** - Build tool e servidor de desenvolvimento
 - **CSS3** - Estilização com variáveis CSS e gradientes
 - **JavaScript ES6+** - Lógica da aplicação
-- **Context API** - Gerenciamento de estado global
+- **Zustand** - Gerenciamento de estado global
+- **React Router** - Rotas e navegação
+
+### Backend e Banco (modo local/offline)
+- **Node.js + Fastify** - API local
+- **SQLite + Prisma** - Banco local
+
+### Desktop
+- **Tauri** - Aplicação desktop (offline)
 
 ### APIs Integradas
 - **Spoonacular** - API principal com receitas internacionais
@@ -67,7 +88,7 @@ Atualmente o projeto está sendo conduzido por uma **empresa unipessoal**, com *
 ## 🚀 Como Executar o Projeto
 
 ### Pré-requisitos
-- Node.js (versão 16 ou superior)
+- Node.js (versão 18 ou superior)
 - npm ou yarn
 
 ### Instalação
@@ -81,12 +102,21 @@ cd FoodDidDo
 # Instale as dependências
 npm install
 
-# Execute o servidor de desenvolvimento
-npm run dev
+# (Opcional) Gerar Prisma Client e aplicar migrações (necessário para backend/banco)
+npm run db:generate
+npm run db:migrate
+
+# Rodar frontend + backend (recomendado)
+npm run dev:all
 ```
 
 ### Acesso
 Abra seu navegador e acesse: `http://localhost:5173`
+
+Backend local: `http://127.0.0.1:3001`
+
+### Desktop (Tauri)
+Consulte `README-DESKTOP.md`.
 
 ## 📱 Como Usar
 
@@ -134,6 +164,9 @@ FoodDidDo/
 ├── public/
 │   ├── images_/          # Imagens e logos
 │   └── vite.svg
+├── server/               # Backend Fastify (API local)
+├── prisma/               # Prisma + SQLite + migrações
+├── src-tauri/            # App desktop (Tauri)
 ├── src/
 │   ├── components/
 │   │   ├── AuthProvider.jsx    # Context de autenticação
@@ -144,6 +177,7 @@ FoodDidDo/
 │   │   └── AuthScreen.css      # Estilos da tela de boas-vindas
 │   ├── lib/
 │   │   └── supabase.js         # Configuração do Supabase
+│   │   └── api.js              # Client para API local (quando usado)
 │   ├── App.jsx                 # Componente principal
 │   ├── App.css                 # Estilos globais
 │   ├── main.jsx                # Ponto de entrada
@@ -152,6 +186,26 @@ FoodDidDo/
 ├── vite.config.js              # Configuração do Vite
 └── README.md                   # Este arquivo
 ```
+
+## 🔌 API local (Fastify)
+
+Quando rodando com backend, a API fica em `http://127.0.0.1:3001`.
+
+### Endpoints principais
+- `GET /api/ingredients`
+- `POST /api/ingredients`
+- `GET /api/recipes`
+- `POST /api/recipes`
+- `GET /api/budgets`
+- `GET /api/fixed-costs`
+- `GET /api/cashflow`
+- `GET /api/warehouses`
+- `GET /api/export` (backup)
+- `POST /api/restore` (restauração)
+
+## 🧾 Configurações de app (moeda/idioma)
+
+O app possui configurações persistidas (ex.: **moeda** e **idioma**), usadas inclusive no `CurrencyInput` para formatar valores corretamente (ex.: `pt-BR` usa vírgula como separador decimal).
 
 ## 🌟 Características Técnicas
 
@@ -219,12 +273,46 @@ O FoodDidDo representa a evolução de um projeto que hoje segue em direção a 
 - **Interface Simplificada**: Remoção do sistema de modos de busca para maior clareza
 - **Otimização de Performance**: Remoção de APIs desnecessárias e código simplificado
 - **Suporte Específico**: Verificações especiais para ingredientes como tomate, milho, ovos, etc.
+- **Moeda pt-BR**: `CurrencyInput` com vírgula e formatação de Real (R$) quando configurado
+- **Modal**: Scroll do fundo bloqueado quando o modal está aberto e scrollbars estilizadas
+- **Orçamento**: Gastos consideram custos fixos mensais e custo de compra do estoque real
+- **Custos/Ingredientes**: Edição de ingredientes melhorada (mover da direita para a esquerda e cancelar retorna)
 
 ### 🔧 Sistema Robusto
 - **Funcionamento Offline**: Dados salvos localmente
 - **Validação Completa**: Verificação de dados em tempo real
 - **Feedback Visual**: Alertas e confirmações claras
 - **Navegação Intuitiva**: Interface fácil de usar
+
+## 🧾 Roadmap do PDV (para funcionamento completo no caixa)
+
+### Operação de caixa (MVP)
+- [ ] **Abertura/fechamento de caixa** (suprimento, sangria, conferência)
+- [ ] **Vendas persistidas** (pedido/itens) e vínculo com **fluxo de caixa**
+- [ ] **Baixa de estoque automática** ao finalizar venda (por receita/insumo)
+- [ ] **Descontos** por item e por venda com regras
+- [ ] **Cancelamento/estorno** com justificativa e permissões
+
+### Pagamentos
+- [ ] Integração com **PIX / cartão** (Mercado Pago / PagSeguro / Asaas)
+- [ ] Webhooks e **status do pagamento** (pendente/processando/pago/estornado)
+- [ ] Conciliação (pagamento ↔ venda ↔ fluxo de caixa ↔ CMV)
+
+### Fiscal (Brasil)
+- [ ] Emissão de **NFC-e/NFe** (Focus NFe / TecnoSpeed / Bling)
+- [ ] Armazenar **XML/PDF**, chave de acesso, cancelamento
+- [ ] Parametrização fiscal (CFOP/NCM/tributação) por produto
+
+### Hardware / UX de PDV
+- [ ] Leitor de **código de barras** (atalhos + foco inteligente)
+- [ ] **Impressão térmica** de comprovante/cupom
+- [ ] Atalhos (finalizar, cancelar, buscar produto)
+- [ ] Modo “touch”
+
+### Segurança e auditoria
+- [ ] Perfis e permissões (operador/gerente/admin)
+- [ ] Auditoria (quem alterou preço, cancelou venda, etc.)
+- [ ] Backup automático e histórico de restauração
 
 ## 🤝 Contribuições
 

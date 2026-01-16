@@ -365,8 +365,11 @@ export function CostPage() {
       })
     })
     
+    // Remover metadados internos de edição antes de salvar nos confirmados
+    const { __fromConfirmed, __confirmedIndex, __originalConfirmed, ...cleanUpdatedIngredient } = updatedIngredient
+
     // Mover da lista de edição para a lista de confirmados
-    setConfirmedIngredients((prev) => [...prev, updatedIngredient])
+    setConfirmedIngredients((prev) => [...prev, cleanUpdatedIngredient])
     setEditingIngredients((prev) => prev.filter((_, i) => i !== index))
     setOpenEmojiPicker(null)
     setIsModalExpanded(true)
@@ -473,16 +476,59 @@ export function CostPage() {
     setEditingIngredients((prev) => prev.filter((_, i) => i !== index))
   }
 
+  const handleCancelEditingIngredient = (index) => {
+    const ingredient = editingIngredients[index]
+    if (!ingredient) return
+
+    // Se este item veio da coluna de confirmados, ao cancelar ele deve voltar pra direita
+    if (ingredient.__fromConfirmed) {
+      const originalIndex =
+        typeof ingredient.__confirmedIndex === 'number' && Number.isFinite(ingredient.__confirmedIndex)
+          ? ingredient.__confirmedIndex
+          : null
+
+      const originalIngredient = ingredient.__originalConfirmed || ingredient
+      const { __fromConfirmed, __confirmedIndex, __originalConfirmed, ...cleanOriginal } = originalIngredient || {}
+
+      setConfirmedIngredients((prev) => {
+        const next = [...prev]
+        if (originalIndex !== null) {
+          const safeIndex = Math.max(0, Math.min(originalIndex, next.length))
+          next.splice(safeIndex, 0, cleanOriginal)
+          return next
+        }
+        return [...prev, cleanOriginal]
+      })
+    }
+
+    setEditingIngredients((prev) => prev.filter((_, i) => i !== index))
+    setOpenEmojiPicker(null)
+  }
+
   const handleEditConfirmedIngredient = (index) => {
     const ingredient = confirmedIngredients[index]
     if (!ingredient) return
+
+    const originalIngredient = { ...ingredient }
+    // Ao mover para edição, desfaz o consumo para o usuário editar em cima do pacote "cheio"
+    const prevRemaining = Number(originalIngredient.packageQty) || 0
+    const prevUsed = Number(originalIngredient.quantity) || 0
+    const restoredPackageQty = (prevRemaining + prevUsed).toString()
 
     // Remove da coluna da direita...
     setConfirmedIngredients((prev) => prev.filter((_, i) => i !== index))
     // ...e envia de volta para a coluna da esquerda para edição completa
     setEditingIngredients((prev) => {
-      const next = [...prev, { ...ingredient }]
-      setFocusEditingIngredientIndex(next.length - 1)
+      const next = [
+        ...prev,
+        {
+          ...originalIngredient,
+          packageQty: restoredPackageQty,
+          __fromConfirmed: true,
+          __confirmedIndex: index,
+          __originalConfirmed: originalIngredient
+        }
+      ]
       return next
     })
 
@@ -588,6 +634,76 @@ export function CostPage() {
       suggestedProfit: Number(suggestedProfit.toFixed(2))
     }
   }, [confirmedIngredients, formState.yield, formState.yieldQuantity, formState.contributionMargin])
+
+  // ===== Saldo global de ingrediente (considera consumo em outras receitas) =====
+  const normalizeIngredientKey = (name) => String(name || '').toLowerCase().trim()
+
+  const ingredientOriginalQtyByName = useMemo(() => {
+    const map = new Map()
+    for (const ing of ingredients || []) {
+      const key = normalizeIngredientKey(ing?.name)
+      if (!key) continue
+      const qty = Number(ing?.packageQty) || 0
+      map.set(key, qty)
+    }
+    return map
+  }, [ingredients])
+
+  // Soma o consumo por ingrediente em TODAS as receitas, exceto a receita em edição (se houver)
+  const consumedInOtherRecipesByName = useMemo(() => {
+    const map = new Map()
+    for (const recipe of recipes || []) {
+      if (editingId && recipe?.id === editingId) continue
+      const recipeIngredients = recipe?.ingredients || []
+      for (const ing of recipeIngredients) {
+        const key = normalizeIngredientKey(ing?.name)
+        if (!key) continue
+        const qty = Number(ing?.quantity) || 0
+        if (qty <= 0) continue
+        map.set(key, (map.get(key) || 0) + qty)
+      }
+    }
+    return map
+  }, [recipes, editingId])
+
+  // Consumo já confirmado no rascunho atual (esta receita no modal)
+  const consumedInDraftByName = useMemo(() => {
+    const map = new Map()
+    for (const ing of confirmedIngredients || []) {
+      const key = normalizeIngredientKey(ing?.name)
+      if (!key) continue
+      const qty = Number(ing?.quantity) || 0
+      if (qty <= 0) continue
+      map.set(key, (map.get(key) || 0) + qty)
+    }
+    return map
+  }, [confirmedIngredients])
+
+  const getOriginalPackageQty = (name, fallbackPackageQty) => {
+    const key = normalizeIngredientKey(name)
+    if (!key) return 0
+    const fromCatalog = ingredientOriginalQtyByName.get(key)
+    const fallback = Number(fallbackPackageQty) || 0
+    return Number(fromCatalog ?? fallback) || 0
+  }
+
+  // Saldo global disponível (considera consumo em outras receitas; não considera o rascunho atual)
+  const getGlobalSaldoQty = (name, fallbackPackageQty) => {
+    const key = normalizeIngredientKey(name)
+    if (!key) return 0
+    const original = getOriginalPackageQty(name, fallbackPackageQty)
+    const consumedOther = consumedInOtherRecipesByName.get(key) || 0
+    return Math.max(0, original - consumedOther)
+  }
+
+  // Disponível para esta receita = saldo global - consumo já confirmado no rascunho atual
+  const getDisponivelQty = (name, fallbackPackageQty) => {
+    const key = normalizeIngredientKey(name)
+    if (!key) return 0
+    const saldoGlobal = getGlobalSaldoQty(name, fallbackPackageQty)
+    const consumedDraft = consumedInDraftByName.get(key) || 0
+    return Math.max(0, saldoGlobal - consumedDraft)
+  }
 
   // Função para garantir que existe um warehouse padrão "Estoque"
   const ensureDefaultWarehouse = async () => {
@@ -1192,7 +1308,7 @@ export function CostPage() {
                 {formErrors.yield && <span className="error-message">{formErrors.yield}</span>}
               </label>
               <label className="input-control" style={{ flex: '1', minWidth: '200px' }}>
-                <span>Gramatura (g)</span>
+                <span>Gramatura total (g)</span>
                 <input
                   type="number"
                   value={formState.yieldWeight}
@@ -1213,7 +1329,8 @@ export function CostPage() {
                 color: 'var(--text-secondary)',
                 fontStyle: 'italic'
               }}>
-                Cada porção terá: <strong style={{ color: 'var(--primary-color)' }}>{weightPerPortion} g</strong>
+                Cada porção, unidade, fatia ou pedaço terá:{' '}
+                <strong style={{ color: 'var(--primary-color)' }}>{weightPerPortion} g</strong>
               </div>
             )}
             <label className="input-control">
@@ -1327,232 +1444,241 @@ export function CostPage() {
                       </div>
                       
                       {/* Linha 1: Nome do ingrediente (ocupa 2 colunas) - Combobox */}
-                      <div style={{ position: 'relative', gridColumn: 'span 2' }}>
-                        <input
-                          type="text"
-                          value={item.name || ''}
-                          onChange={(e) =>
-                            handleUpdateIngredient(index, 'name', e.target.value)
-                          }
-                          autoFocus={focusEditingIngredientIndex === index}
-                          onFocus={(e) => {
-                            if (focusEditingIngredientIndex === index) {
-                              setFocusEditingIngredientIndex(null)
-                            }
-                            // Mostrar sugestões ao focar
-                            const searchValue = (item.name || '').toLowerCase().trim()
-                            const suggestions = []
-                            confirmedIngredients.forEach((ing) => {
-                              if (ing.name && ing.name.toLowerCase().includes(searchValue)) {
-                                suggestions.push(ing.name)
+                      <div className="ingredient-field ingredient-field--name">
+                        <span className="ingredient-field-label">Ingrediente</span>
+                        <div className="ingredient-field-control">
+                          <input
+                            type="text"
+                            value={item.name || ''}
+                            onChange={(e) => handleUpdateIngredient(index, 'name', e.target.value)}
+                            autoFocus={focusEditingIngredientIndex === index}
+                            onFocus={() => {
+                              if (focusEditingIngredientIndex === index) {
+                                setFocusEditingIngredientIndex(null)
                               }
-                            })
-                            ingredients.forEach((ing) => {
-                              if (ing.name && ing.name.toLowerCase().includes(searchValue)) {
-                                if (!suggestions.includes(ing.name)) {
+                              // Mostrar sugestões ao focar
+                              const searchValue = (item.name || '').toLowerCase().trim()
+                              const suggestions = []
+                              confirmedIngredients.forEach((ing) => {
+                                if (ing.name && ing.name.toLowerCase().includes(searchValue)) {
                                   suggestions.push(ing.name)
                                 }
-                              }
-                            })
-                            setIngredientNameSuggestions((prev) => ({ ...prev, [index]: suggestions }))
-                          }}
-                          onBlur={(e) => {
-                            // Esconder sugestões após um pequeno delay para permitir clique
-                            setTimeout(() => {
-                              setIngredientNameSuggestions((prev) => {
-                                const updated = { ...prev }
-                                delete updated[index]
-                                return updated
                               })
-                            }, 200)
-                          }}
-                          placeholder="Nome do ingrediente"
-                          className="ingredient-name"
-                          list={`ingredient-suggestions-${index}`}
-                        />
-                        {ingredientNameSuggestions[index] && ingredientNameSuggestions[index].length > 0 && (
-                          <div
-                            style={{
-                              position: 'absolute',
-                              top: '100%',
-                              left: 0,
-                              right: 0,
-                              background: 'var(--bg-card)',
-                              border: '1px solid var(--border-primary)',
-                              borderRadius: '8px',
-                              marginTop: '0.25rem',
-                              maxHeight: '200px',
-                              overflowY: 'auto',
-                              zIndex: 1000,
-                              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)'
-                            }}
-                          >
-                            {ingredientNameSuggestions[index].map((suggestion, sugIndex) => (
-                              <div
-                                key={sugIndex}
-                                onClick={() => {
-                                  // Forçar atualização completa do ingrediente ao selecionar da lista
-                                  const consumedIngredient = confirmedIngredients.find(
-                                    (ing) => ing.name && ing.name.toLowerCase() === suggestion.toLowerCase()
-                                  )
-                                  
-                                  // Atualizar nome primeiro
-                                  handleUpdateIngredient(index, 'name', suggestion)
-                                  
-                                  if (consumedIngredient) {
-                                    // Se já foi consumido, manter packageQty original (congelado)
-                                    const foundIngredient = ingredients.find(
-                                      (ing) => ing.name.toLowerCase() === suggestion.toLowerCase()
-                                    )
-                                    
-                                    // Manter sempre o packageQty original
-                                    const originalPackageQty = foundIngredient?.packageQty || Number(consumedIngredient.packageQty) || 0
-                                    
-                                    // Aguardar um momento para garantir que o estado foi atualizado
-                                    setTimeout(() => {
-                                      handleUpdateIngredient(index, 'packageQty', originalPackageQty.toString())
-                                    }, 10)
+                              ingredients.forEach((ing) => {
+                                if (ing.name && ing.name.toLowerCase().includes(searchValue)) {
+                                  if (!suggestions.includes(ing.name)) {
+                                    suggestions.push(ing.name)
                                   }
-                                  
-                                  setIngredientNameSuggestions((prev) => {
-                                    const updated = { ...prev }
-                                    delete updated[index]
-                                    return updated
-                                  })
-                                }}
-                                style={{
-                                  padding: '0.75rem 1rem',
-                                  cursor: 'pointer',
-                                  borderBottom: '1px solid var(--border-primary)',
-                                  transition: 'background 0.2s'
-                                }}
-                                onMouseEnter={(e) => {
-                                  e.target.style.background = 'var(--bg-secondary)'
-                                }}
-                                onMouseLeave={(e) => {
-                                  e.target.style.background = 'transparent'
-                                }}
-                              >
-                                {suggestion}
-                                {confirmedIngredients.some((ing) => ing.name === suggestion) && (
-                                  <span style={{ 
-                                    marginLeft: '0.5rem', 
-                                    fontSize: '0.75rem', 
-                                    color: 'var(--text-muted)',
-                                    fontStyle: 'italic'
-                                  }}>
-                                    (já consumido)
-                                  </span>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        )}
+                                }
+                              })
+                              setIngredientNameSuggestions((prev) => ({ ...prev, [index]: suggestions }))
+                            }}
+                            onBlur={() => {
+                              // Esconder sugestões após um pequeno delay para permitir clique
+                              setTimeout(() => {
+                                setIngredientNameSuggestions((prev) => {
+                                  const updated = { ...prev }
+                                  delete updated[index]
+                                  return updated
+                                })
+                              }, 200)
+                            }}
+                            placeholder="Nome do ingrediente"
+                            className="ingredient-name"
+                            list={`ingredient-suggestions-${index}`}
+                          />
+                          {ingredientNameSuggestions[index] && ingredientNameSuggestions[index].length > 0 && (
+                            <div
+                              style={{
+                                position: 'absolute',
+                                top: '100%',
+                                left: 0,
+                                right: 0,
+                                background: 'var(--bg-card)',
+                                border: '1px solid var(--border-primary)',
+                                borderRadius: '8px',
+                                marginTop: '0.25rem',
+                                maxHeight: '200px',
+                                overflowY: 'auto',
+                                zIndex: 1000,
+                                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)'
+                              }}
+                            >
+                              {ingredientNameSuggestions[index].map((suggestion, sugIndex) => (
+                                <div
+                                  key={sugIndex}
+                                  onClick={() => {
+                                    // Forçar atualização completa do ingrediente ao selecionar da lista
+                                    const consumedIngredient = confirmedIngredients.find(
+                                      (ing) => ing.name && ing.name.toLowerCase() === suggestion.toLowerCase()
+                                    )
+
+                                    // Atualizar nome primeiro
+                                    handleUpdateIngredient(index, 'name', suggestion)
+
+                                    if (consumedIngredient) {
+                                      // Se já foi consumido, manter packageQty original (congelado)
+                                      const foundIngredient = ingredients.find(
+                                        (ing) => ing.name.toLowerCase() === suggestion.toLowerCase()
+                                      )
+
+                                      // Manter sempre o packageQty original
+                                      const originalPackageQty =
+                                        foundIngredient?.packageQty || Number(consumedIngredient.packageQty) || 0
+
+                                      // Aguardar um momento para garantir que o estado foi atualizado
+                                      setTimeout(() => {
+                                        handleUpdateIngredient(index, 'packageQty', originalPackageQty.toString())
+                                      }, 10)
+                                    }
+
+                                    setIngredientNameSuggestions((prev) => {
+                                      const updated = { ...prev }
+                                      delete updated[index]
+                                      return updated
+                                    })
+                                  }}
+                                  style={{
+                                    padding: '0.75rem 1rem',
+                                    cursor: 'pointer',
+                                    borderBottom: '1px solid var(--border-primary)',
+                                    transition: 'background 0.2s'
+                                  }}
+                                  onMouseEnter={(e) => {
+                                    e.target.style.background = 'var(--bg-secondary)'
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    e.target.style.background = 'transparent'
+                                  }}
+                                >
+                                  {suggestion}
+                                  {confirmedIngredients.some((ing) => ing.name === suggestion) && (
+                                    <span
+                                      style={{
+                                        marginLeft: '0.5rem',
+                                        fontSize: '0.75rem',
+                                        color: 'var(--text-muted)',
+                                        fontStyle: 'italic'
+                                      }}
+                                    >
+                                      (já consumido)
+                                    </span>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
                       </div>
                       
                       {/* Linha 2: Qtd. original do pacote | Valor total */}
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                        <input
-                          type="number"
-                          value={item.packageQty || ''}
-                          readOnly
-                          placeholder="Qtd. original do pacote"
-                          min="0"
-                          step="0.01"
-                          className="ingredient-package-qty"
-                          style={{ 
-                            cursor: 'not-allowed',
-                            background: 'var(--bg-secondary)',
-                            opacity: 0.8
-                          }}
-                          title="Quantidade original do pacote (não editável)"
-                        />
+                      <div className="ingredient-fields-column">
+                        <div className="ingredient-field">
+                          <span className="ingredient-field-label">Pacote</span>
+                          <div className="ingredient-field-control">
+                            <input
+                              type="number"
+                              value={item.name ? getGlobalSaldoQty(item.name, item.packageQty) : ''}
+                              readOnly
+                              placeholder="Saldo global"
+                              min="0"
+                              step="0.01"
+                              className="ingredient-package-qty"
+                              style={{
+                                cursor: 'not-allowed',
+                                background: 'var(--bg-secondary)',
+                                opacity: 0.8
+                              }}
+                              title="Saldo global do ingrediente (considera consumo em outras receitas)"
+                            />
+                          </div>
+                        </div>
                         
-                        {/* Campo para mostrar quantidade disponível (se ingrediente já foi consumido) */}
+                        {/* Campo para mostrar quantidade disponível usando o saldo global */}
                         {(() => {
-                          const consumedIngredient = confirmedIngredients.find(
-                            (ing) => ing.name && item.name && ing.name.toLowerCase() === item.name.toLowerCase().trim()
-                          )
-                          
-                          if (consumedIngredient && item.name) {
-                            // Calcular quantidade disponível
-                            const foundIngredient = ingredients.find(
-                              (ing) => ing.name.toLowerCase() === item.name.toLowerCase().trim()
-                            )
-                            
-                            const totalConsumed = confirmedIngredients
-                              .filter((ing) => ing.name && ing.name.toLowerCase() === item.name.toLowerCase().trim())
-                              .reduce((sum, ing) => sum + (Number(ing.quantity) || 0), 0)
-                            
-                            const originalPackageQty = foundIngredient?.packageQty || Number(item.packageQty) || 0
-                            const availableQty = Math.max(0, originalPackageQty - totalConsumed)
-                            
+                          if (item.name) {
+                            const availableQty = getDisponivelQty(item.name, item.packageQty)
                             return (
-                              <input
-                                type="number"
-                                value={availableQty}
-                                readOnly
-                                placeholder="Disponível"
-                                className="ingredient-available"
-                                style={{
-                                  cursor: 'not-allowed',
-                                  background: 'var(--bg-secondary)',
-                                  opacity: 0.8,
-                                  color: availableQty > 0 ? 'var(--text-primary)' : 'var(--error)',
-                                  fontSize: '0.85rem',
-                                  padding: '0.5rem 0.75rem'
-                                }}
-                                title="Quantidade disponível para uso (original - consumido)"
-                              />
+                              <div className="ingredient-field">
+                                <span className="ingredient-field-label">Disponível</span>
+                                <div className="ingredient-field-control">
+                                  <input
+                                    type="number"
+                                    value={availableQty}
+                                    readOnly
+                                    placeholder="Disponível"
+                                    className="ingredient-available"
+                                    style={{
+                                      cursor: 'not-allowed',
+                                      background: 'var(--bg-secondary)',
+                                      opacity: 0.8,
+                                      color: availableQty > 0 ? 'var(--text-primary)' : 'var(--error)',
+                                      fontSize: '0.85rem',
+                                      padding: '0.5rem 0.75rem'
+                                    }}
+                                    title="Disponível para esta receita (saldo global - consumo já confirmado aqui)"
+                                  />
+                                </div>
+                              </div>
                             )
                           }
                           return null
                         })()}
                         
                         {/* Mg/Ml usados - alinhado abaixo de Qtd. original do pacote */}
-                        <input
-                          type="number"
-                          value={item.quantity || ''}
-                          onChange={(e) => {
-                            const value = e.target.value
-                            handleUpdateIngredient(index, 'quantity', value)
-                          }}
-                          onBlur={(e) => {
-                            // Garantir que o valor seja válido ao sair do campo
-                            const value = e.target.value
-                            if (value && (isNaN(Number(value)) || Number(value) < 0)) {
-                              handleUpdateIngredient(index, 'quantity', '')
-                            }
-                            // NÃO recalcular valor total - deve manter o valor original do pacote
-                          }}
-                          placeholder="Mg/Ml usados"
-                          min="0"
-                          step="0.01"
-                          className="ingredient-quantity"
-                        />
+                        <div className="ingredient-field">
+                          <span className="ingredient-field-label">Usado</span>
+                          <div className="ingredient-field-control">
+                            <input
+                              type="number"
+                              value={item.quantity || ''}
+                              onChange={(e) => {
+                                const value = e.target.value
+                                handleUpdateIngredient(index, 'quantity', value)
+                              }}
+                              onBlur={(e) => {
+                                // Garantir que o valor seja válido ao sair do campo
+                                const value = e.target.value
+                                if (value && (isNaN(Number(value)) || Number(value) < 0)) {
+                                  handleUpdateIngredient(index, 'quantity', '')
+                                }
+                                // NÃO recalcular valor total - deve manter o valor original do pacote
+                              }}
+                              placeholder="Mg/Ml usados"
+                              min="0"
+                              step="0.01"
+                              className="ingredient-quantity"
+                            />
+                          </div>
+                        </div>
                       </div>
                       
-                      <input
-                        type="number"
-                        value={item.totalValue || ''}
-                        readOnly
-                        placeholder="Valor total (R$)"
-                        min="0"
-                        step="0.01"
-                        className="ingredient-value"
-                        style={{ 
-                          cursor: 'not-allowed',
-                          background: 'var(--bg-secondary)',
-                          opacity: 0.8
-                        }}
-                        title="Valor total do pacote (não editável)"
-                      />
+                      <div className="ingredient-field ingredient-field--value">
+                        <span className="ingredient-field-label">Valor</span>
+                        <div className="ingredient-field-control">
+                          <input
+                            type="number"
+                            value={item.totalValue || ''}
+                            readOnly
+                            placeholder="Valor total (R$)"
+                            min="0"
+                            step="0.01"
+                            className="ingredient-value"
+                            style={{
+                              cursor: 'not-allowed',
+                              background: 'var(--bg-secondary)',
+                              opacity: 0.8
+                            }}
+                            title="Valor total do pacote (não editável)"
+                          />
+                        </div>
+                      </div>
                       
                       <div className="ingredient-action-buttons">
                         <button
                           type="button"
                           className="cancel-ingredient-btn"
-                          onClick={() => handleRemoveIngredient(index)}
+                          onClick={() => handleCancelEditingIngredient(index)}
                           title="Cancelar adição"
                         >
                           ✕

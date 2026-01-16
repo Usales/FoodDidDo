@@ -350,6 +350,58 @@
   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
 }
 
+.ingredient-field {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 0;
+}
+
+.ingredient-field-label {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  min-width: 92px;
+  line-height: 1.15;
+  white-space: nowrap;
+}
+
+.ingredient-field-control {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+}
+
+.ingredient-fields-column {
+  grid-column: 2;
+  grid-row: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.ingredient-field--name {
+  grid-column: 2 / 4;
+  grid-row: 1;
+}
+
+.ingredient-field--value {
+  grid-column: 3;
+  grid-row: 2;
+}
+
+/* Ajuste fino: deslocar o campo "Valor" um pouco para a esquerda (somente desktop) */
+@media (min-width: 769px) {
+  .ingredient-field--value {
+    margin-left: 20px;
+    gap: 0.25rem; /* deixa o label "Valor" mais colado no input */
+  }
+
+  .ingredient-field--value .ingredient-field-label {
+    min-width: 60px; /* reduz a "coluna" do label só para o Valor */
+  }
+}
+
 .dark-theme .ingredient-item {
   background: var(--bg-card);
   border: 1px solid var(--border-primary);
@@ -529,6 +581,7 @@
 
 .ingredient-item input {
   box-sizing: border-box;
+  appearance: none;
   -webkit-appearance: none;
   -moz-appearance: textfield;
 }
@@ -568,8 +621,8 @@
 }
 
 .ingredient-value {
-  width: 140px;
-  min-width: 140px;
+  width: 110px;
+  min-width: 110px;
   flex-shrink: 0;
   border: 1px solid rgba(148, 163, 184, 0.4) !important;
   border-radius: 8px;
@@ -1044,6 +1097,17 @@
   .ingredient-quantity {
     width: 100% !important;
     min-width: 100% !important;
+  }
+
+  .ingredient-field {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.25rem;
+  }
+
+  .ingredient-field-label {
+    min-width: 0;
+    white-space: normal;
   }
 
   .remove-ingredient-btn {
