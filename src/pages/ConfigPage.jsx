@@ -4,6 +4,7 @@ import { useAppStore } from '../stores/appStore'
 import { Tooltip } from '../components/ui/Tooltip'
 import { ToggleSwitch } from '../components/ui/ToggleSwitch'
 import ThemeToggle from '../components/ThemeToggle'
+import { getAppSettings, setAppSettings } from '../utils/appSettings'
 import './PageCommon.css'
 import './ConfigPage.css'
 
@@ -30,15 +31,15 @@ export function ConfigPage() {
   const exportData = useAppStore((state) => state.exportData)
   const restoreData = useAppStore((state) => state.restoreData)
   const fileInputRef = useRef(null)
-  const [settings, setSettings] = useState({
-    currency: 'BRL',
-    language: 'pt-BR',
-    backupEmail: '',
-    autoBackup: false
-  })
+  const [settings, setSettings] = useState(() => getAppSettings())
   const [dashboardSettings, setDashboardSettings] = useState(defaultDashboardSettings)
   const [cashflowPageSettings, setCashflowPageSettings] = useState(defaultCashflowPageSettings)
   const [activeTab, setActiveTab] = useState('geral')
+
+  // Carregar preferências gerais (moeda/idioma/backup) do localStorage
+  useEffect(() => {
+    setSettings(getAppSettings())
+  }, [])
 
   // Carregar configurações do dashboard do localStorage
   useEffect(() => {
@@ -93,7 +94,9 @@ export function ConfigPage() {
     if (field === 'theme') {
       setTheme(event.target.value)
     } else {
-      setSettings((prev) => ({ ...prev, [field]: event.target.value }))
+      const next = { ...settings, [field]: event.target.value }
+      setSettings(next)
+      setAppSettings(next)
     }
   }
 
@@ -211,11 +214,15 @@ export function ConfigPage() {
   }
 
   const handleAutoBackupToggle = () => {
-    setSettings((prev) => ({ ...prev, autoBackup: !prev.autoBackup }))
+    const next = { ...settings, autoBackup: !settings.autoBackup }
+    setSettings(next)
+    setAppSettings(next)
   }
 
   const handleActivateAutoBackup = () => {
-    setSettings((prev) => ({ ...prev, autoBackup: true }))
+    const next = { ...settings, autoBackup: true }
+    setSettings(next)
+    setAppSettings(next)
     alert('Backup automático ativado! Você receberá backups semanais no e-mail cadastrado.')
   }
 
