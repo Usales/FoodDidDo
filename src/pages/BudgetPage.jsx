@@ -8,6 +8,7 @@ import './PageCommon.css'
 export function BudgetPage() {
   const budgets = useAppStore((state) => state.budgets)
   const recipes = useAppStore((state) => state.recipes)
+  const fixedCosts = useAppStore((state) => state.fixedCosts)
   const addBudget = useAppStore((state) => state.addBudget)
   const loadData = useAppStore((state) => state.loadData)
 
@@ -56,28 +57,29 @@ export function BudgetPage() {
   }, [budgets])
 
   const summary = useMemo(() => {
-    const total = budgets.reduce((acc, budget) => acc + budget.amount, 0)
-    
+    const latest = sortedBudgets[0] || budgets[0]
+    const total = latest?.amount || 0
+
     // Calcular gastos baseado no custo total das receitas com includeInBudget = true
     const spentFromRecipes = recipes
       .filter((recipe) => recipe.includeInBudget !== false)
       .reduce((acc, recipe) => acc + (recipe.totalCost || 0), 0)
-    
-    // Usar o maior valor entre o spent do banco e o calculado das receitas
-    const spent = Math.max(
-      budgets.reduce((acc, budget) => acc + budget.spent, 0),
-      spentFromRecipes
-    )
-    
+
+    // Custos fixos mensais (afetam o orçamento do mês)
+    const spentFromFixedCostsMonthly = fixedCosts
+      .filter((cost) => (cost.allocationMethod || 'mensal') === 'mensal')
+      .reduce((acc, cost) => acc + (cost.value || 0), 0)
+
+    // Gasto do período mais recente: usa o maior entre banco e cálculo (receitas + fixos mensais)
+    const computedSpent = spentFromRecipes + spentFromFixedCostsMonthly
+    const spent = Math.max(latest?.spent || 0, computedSpent)
+
     const balance = total - spent
-    const latest = sortedBudgets[0] || budgets[0]
-    
-    // Calcular progresso do orçamento mais recente
+
+    // Calcular progresso do orçamento mais recente (baseado no spent final)
     let progress = 0
     if (latest && latest.amount > 0) {
-      // Para o orçamento mais recente, usar o spent calculado das receitas
-      const latestSpent = spentFromRecipes
-      progress = Math.min(100, Math.round((latestSpent / latest.amount) * 100))
+      progress = Math.min(100, Math.round((spent / latest.amount) * 100))
     }
     
     return {
@@ -87,7 +89,7 @@ export function BudgetPage() {
       latest,
       progress
     }
-  }, [budgets, recipes, sortedBudgets])
+  }, [budgets, recipes, fixedCosts, sortedBudgets])
 
   const handleCreateBudget = async () => {
     const numericAmount = Number(amount)
@@ -176,14 +178,18 @@ export function BudgetPage() {
               <tbody>
                 {sortedBudgets.map((budget) => {
                   // Calcular gastos baseado no custo total das receitas com includeInBudget = true
-                  // Para o orçamento mais recente, usar o cálculo das receitas
                   const isLatest = budget.id === (sortedBudgets[0]?.id || budgets[0]?.id)
                   const spentFromRecipes = recipes
                     .filter((recipe) => recipe.includeInBudget !== false)
                     .reduce((acc, recipe) => acc + (recipe.totalCost || 0), 0)
-                  
-                  // Usar spent calculado das receitas se for o mais recente, senão usar o do banco
-                  const actualSpent = isLatest ? spentFromRecipes : budget.spent
+
+                  const spentFromFixedCostsMonthly = fixedCosts
+                    .filter((cost) => (cost.allocationMethod || 'mensal') === 'mensal')
+                    .reduce((acc, cost) => acc + (cost.value || 0), 0)
+
+                  // Para o orçamento mais recente: maior entre banco e (receitas + fixos mensais)
+                  const computedSpent = spentFromRecipes + spentFromFixedCostsMonthly
+                  const actualSpent = isLatest ? Math.max(budget.spent || 0, computedSpent) : budget.spent
                   const remaining = budget.amount - actualSpent
                   const percentage = budget.amount > 0 ? Math.min(100, Math.round((actualSpent / budget.amount) * 100)) : 0
                   
