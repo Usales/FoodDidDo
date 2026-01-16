@@ -819,6 +819,26 @@
   border-left: 1px solid var(--border-primary);
   max-height: calc(100vh - 12rem);
   overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-primary) var(--bg-secondary);
+}
+
+.modal-ingredients-column::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modal-ingredients-column::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+  border-radius: 6px;
+}
+
+.modal-ingredients-column::-webkit-scrollbar-thumb {
+  background: var(--border-primary);
+  border-radius: 6px;
+}
+
+.modal-ingredients-column::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
 }
 
 .ingredients-list-view h3 {

@@ -108,6 +108,29 @@
   gap: 1.2rem;
 }
 
+.form-modal {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-primary) var(--bg-secondary);
+}
+
+.form-modal::-webkit-scrollbar {
+  width: 8px;
+}
+
+.form-modal::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+  border-radius: 6px;
+}
+
+.form-modal::-webkit-scrollbar-thumb {
+  background: var(--border-primary);
+  border-radius: 6px;
+}
+
+.form-modal::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
 .form-modal-footer {
   display: flex;
   justify-content: space-between;
