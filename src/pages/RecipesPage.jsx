@@ -27,6 +27,34 @@ export function RecipesPage() {
   const prevIngredientsRef = useRef(selectedIngredients.join(','))
   const prevFiltersRef = useRef(JSON.stringify(filters))
 
+  const normalizeArea = (area) => {
+    const raw = String(area || '').trim()
+    if (!raw) return ''
+
+    const key = raw.toLowerCase()
+    const map = {
+      brasileira: 'Brasil',
+      brasil: 'Brasil',
+      italiana: 'Itália',
+      itália: 'Itália',
+      espanhola: 'Espanha',
+      espanha: 'Espanha',
+      portuguesa: 'Portugal',
+      portugal: 'Portugal',
+      japonesa: 'Japão',
+      japao: 'Japão',
+      'oriente médio': 'Oriente Médio',
+      'oriente medio': 'Oriente Médio',
+      frança: 'França',
+      franca: 'França',
+      asiática: 'Ásia',
+      asiatica: 'Ásia',
+      internacional: 'Internacional'
+    }
+
+    return map[key] || raw
+  }
+
   useEffect(() => {
     let isMounted = true
     const loadRecipes = async () => {
@@ -72,7 +100,7 @@ export function RecipesPage() {
     const sources = new Set()
 
     for (const recipe of recipes) {
-      const area = String(recipe?.area || '').trim()
+      const area = normalizeArea(recipe?.area)
       const category = String(recipe?.category || '').trim()
       const source = String(recipe?.source || '').trim()
       if (area) areas.add(area)
@@ -115,7 +143,7 @@ export function RecipesPage() {
     }
 
     if (filters.area !== 'all') {
-      base = base.filter((recipe) => String(recipe.area || '') === filters.area)
+      base = base.filter((recipe) => normalizeArea(recipe.area) === filters.area)
     }
 
     if (filters.category !== 'all') {
@@ -322,7 +350,7 @@ export function RecipesPage() {
                   <h3>{recipe.title}</h3>
                   <div className="recipe-meta">
                     <span>📂 {recipe.category}</span>
-                    <span>🌍 {recipe.area}</span>
+                    <span>🌍 {normalizeArea(recipe.area)}</span>
                   </div>
                   <p>{recipe.ingredientsList}</p>
                 </div>
