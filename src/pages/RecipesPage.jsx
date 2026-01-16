@@ -20,7 +20,6 @@ export function RecipesPage() {
     search: '',
     area: 'all',
     category: 'all',
-    source: 'all',
     flavor: 'all',
     hasVideo: false
   })
@@ -97,23 +96,19 @@ export function RecipesPage() {
   const filterOptions = useMemo(() => {
     const areas = new Set()
     const categories = new Set()
-    const sources = new Set()
 
     for (const recipe of recipes) {
       const area = normalizeArea(recipe?.area)
       const category = String(recipe?.category || '').trim()
-      const source = String(recipe?.source || '').trim()
       if (area) areas.add(area)
       if (category) categories.add(category)
-      if (source) sources.add(source)
     }
 
     const sortPt = (a, b) => a.localeCompare(b, 'pt-BR', { sensitivity: 'base' })
 
     return {
       areas: Array.from(areas).sort(sortPt),
-      categories: Array.from(categories).sort(sortPt),
-      sources: Array.from(sources).sort(sortPt)
+      categories: Array.from(categories).sort(sortPt)
     }
   }, [recipes])
 
@@ -148,10 +143,6 @@ export function RecipesPage() {
 
     if (filters.category !== 'all') {
       base = base.filter((recipe) => String(recipe.category || '') === filters.category)
-    }
-
-    if (filters.source !== 'all') {
-      base = base.filter((recipe) => String(recipe.source || '') === filters.source)
     }
 
     if (filters.flavor !== 'all') {
@@ -190,7 +181,6 @@ export function RecipesPage() {
       search: '',
       area: 'all',
       category: 'all',
-      source: 'all',
       flavor: 'all',
       hasVideo: false
     })
@@ -286,18 +276,6 @@ export function RecipesPage() {
                   {filterOptions.categories.map((category) => (
                     <option key={category} value={category}>
                       {category}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <label className="recipes-filter">
-                <span>Fonte</span>
-                <select value={filters.source} onChange={updateFilter('source')}>
-                  <option value="all">Todas</option>
-                  {filterOptions.sources.map((source) => (
-                    <option key={source} value={source}>
-                      {source}
                     </option>
                   ))}
                 </select>
