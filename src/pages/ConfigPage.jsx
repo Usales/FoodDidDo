@@ -431,17 +431,17 @@ export function ConfigPage() {
                   </p>
                 </div>
                 <ToggleSwitch
-                  checked={sidebarSettings.showVisaoGeral}
+                  checked={sidebarSettings.showVisaoGeral ?? true}
                   onChange={() => {
-                    const newSettings = { ...sidebarSettings, showVisaoGeral: !sidebarSettings.showVisaoGeral }
+                    const newSettings = { ...sidebarSettings, showVisaoGeral: !(sidebarSettings.showVisaoGeral ?? true) }
                     saveSidebarSettings(newSettings)
                   }}
-                  label={sidebarSettings.showVisaoGeral ? 'Exibindo' : 'Oculto'}
+                  label={(sidebarSettings.showVisaoGeral ?? true) ? 'Exibindo' : 'Oculto'}
                 />
               </div>
 
               {/* Itens da Visão Geral */}
-              {sidebarSettings.showVisaoGeral && (
+              {(sidebarSettings.showVisaoGeral ?? true) && (
                 <>
                   <div className="config-dashboard-item" style={{ marginLeft: '2rem', paddingLeft: '1rem', borderLeft: '2px solid var(--border-color)' }}>
                     <div className="config-dashboard-item-content">
@@ -452,14 +452,14 @@ export function ConfigPage() {
                         Link para página inicial do dashboard
                       </p>
                     </div>
-                    <ToggleSwitch
-                      checked={sidebarSettings.showDashboard}
-                      onChange={() => {
-                        const newSettings = { ...sidebarSettings, showDashboard: !sidebarSettings.showDashboard }
-                        saveSidebarSettings(newSettings)
-                      }}
-                      label={sidebarSettings.showDashboard ? 'Exibindo' : 'Oculto'}
-                    />
+                <ToggleSwitch
+                  checked={sidebarSettings.showDashboard ?? true}
+                  onChange={() => {
+                    const newSettings = { ...sidebarSettings, showDashboard: !(sidebarSettings.showDashboard ?? true) }
+                    saveSidebarSettings(newSettings)
+                  }}
+                  label={(sidebarSettings.showDashboard ?? true) ? 'Exibindo' : 'Oculto'}
+                />
                   </div>
 
                   <div className="config-dashboard-item" style={{ marginLeft: '2rem', paddingLeft: '1rem', borderLeft: '2px solid var(--border-color)' }}>
@@ -471,14 +471,14 @@ export function ConfigPage() {
                         Link para tela de PDV/Caixa
                       </p>
                     </div>
-                    <ToggleSwitch
-                      checked={sidebarSettings.showCaixa}
-                      onChange={() => {
-                        const newSettings = { ...sidebarSettings, showCaixa: !sidebarSettings.showCaixa }
-                        saveSidebarSettings(newSettings)
-                      }}
-                      label={sidebarSettings.showCaixa ? 'Exibindo' : 'Oculto'}
-                    />
+                <ToggleSwitch
+                  checked={sidebarSettings.showCaixa ?? true}
+                  onChange={() => {
+                    const newSettings = { ...sidebarSettings, showCaixa: !(sidebarSettings.showCaixa ?? true) }
+                    saveSidebarSettings(newSettings)
+                  }}
+                  label={(sidebarSettings.showCaixa ?? true) ? 'Exibindo' : 'Oculto'}
+                />
                   </div>
 
                   <div className="config-dashboard-item" style={{ marginLeft: '2rem', paddingLeft: '1rem', borderLeft: '2px solid var(--border-color)' }}>
@@ -490,14 +490,14 @@ export function ConfigPage() {
                         Link para gestão de fluxo de caixa
                       </p>
                     </div>
-                    <ToggleSwitch
-                      checked={sidebarSettings.showFluxoCaixa}
-                      onChange={() => {
-                        const newSettings = { ...sidebarSettings, showFluxoCaixa: !sidebarSettings.showFluxoCaixa }
-                        saveSidebarSettings(newSettings)
-                      }}
-                      label={sidebarSettings.showFluxoCaixa ? 'Exibindo' : 'Oculto'}
-                    />
+                <ToggleSwitch
+                  checked={sidebarSettings.showFluxoCaixa ?? true}
+                  onChange={() => {
+                    const newSettings = { ...sidebarSettings, showFluxoCaixa: !(sidebarSettings.showFluxoCaixa ?? true) }
+                    saveSidebarSettings(newSettings)
+                  }}
+                  label={(sidebarSettings.showFluxoCaixa ?? true) ? 'Exibindo' : 'Oculto'}
+                />
                   </div>
 
                   <div className="config-dashboard-item" style={{ marginLeft: '2rem', paddingLeft: '1rem', borderLeft: '2px solid var(--border-color)' }}>
@@ -509,14 +509,14 @@ export function ConfigPage() {
                         Link para gestão de orçamentos
                       </p>
                     </div>
-                    <ToggleSwitch
-                      checked={sidebarSettings.showOrcamento}
-                      onChange={() => {
-                        const newSettings = { ...sidebarSettings, showOrcamento: !sidebarSettings.showOrcamento }
-                        saveSidebarSettings(newSettings)
-                      }}
-                      label={sidebarSettings.showOrcamento ? 'Exibindo' : 'Oculto'}
-                    />
+                <ToggleSwitch
+                  checked={sidebarSettings.showOrcamento ?? true}
+                  onChange={() => {
+                    const newSettings = { ...sidebarSettings, showOrcamento: !(sidebarSettings.showOrcamento ?? true) }
+                    saveSidebarSettings(newSettings)
+                  }}
+                  label={(sidebarSettings.showOrcamento ?? true) ? 'Exibindo' : 'Oculto'}
+                />
                   </div>
 
                   <div className="config-dashboard-item" style={{ marginLeft: '2rem', paddingLeft: '1rem', borderLeft: '2px solid var(--border-color)' }}>
@@ -528,14 +528,14 @@ export function ConfigPage() {
                         Link para gestão de ingredientes
                       </p>
                     </div>
-                    <ToggleSwitch
-                      checked={sidebarSettings.showIngredientes}
-                      onChange={() => {
-                        const newSettings = { ...sidebarSettings, showIngredientes: !sidebarSettings.showIngredientes }
-                        saveSidebarSettings(newSettings)
-                      }}
-                      label={sidebarSettings.showIngredientes ? 'Exibindo' : 'Oculto'}
-                    />
+                <ToggleSwitch
+                  checked={sidebarSettings.showIngredientes ?? true}
+                  onChange={() => {
+                    const newSettings = { ...sidebarSettings, showIngredientes: !(sidebarSettings.showIngredientes ?? true) }
+                    saveSidebarSettings(newSettings)
+                  }}
+                  label={(sidebarSettings.showIngredientes ?? true) ? 'Exibindo' : 'Oculto'}
+                />
                   </div>
 
                   <div className="config-dashboard-item" style={{ marginLeft: '2rem', paddingLeft: '1rem', borderLeft: '2px solid var(--border-color)' }}>
@@ -547,14 +547,14 @@ export function ConfigPage() {
                         Link para gestão de receitas
                       </p>
                     </div>
-                    <ToggleSwitch
-                      checked={sidebarSettings.showReceitas}
-                      onChange={() => {
-                        const newSettings = { ...sidebarSettings, showReceitas: !sidebarSettings.showReceitas }
-                        saveSidebarSettings(newSettings)
-                      }}
-                      label={sidebarSettings.showReceitas ? 'Exibindo' : 'Oculto'}
-                    />
+                <ToggleSwitch
+                  checked={sidebarSettings.showReceitas ?? true}
+                  onChange={() => {
+                    const newSettings = { ...sidebarSettings, showReceitas: !(sidebarSettings.showReceitas ?? true) }
+                    saveSidebarSettings(newSettings)
+                  }}
+                  label={(sidebarSettings.showReceitas ?? true) ? 'Exibindo' : 'Oculto'}
+                />
                   </div>
                 </>
               )}
@@ -573,17 +573,17 @@ export function ConfigPage() {
                   </p>
                 </div>
                 <ToggleSwitch
-                  checked={sidebarSettings.showAnalises}
+                  checked={sidebarSettings.showAnalises ?? true}
                   onChange={() => {
-                    const newSettings = { ...sidebarSettings, showAnalises: !sidebarSettings.showAnalises }
+                    const newSettings = { ...sidebarSettings, showAnalises: !(sidebarSettings.showAnalises ?? true) }
                     saveSidebarSettings(newSettings)
                   }}
-                  label={sidebarSettings.showAnalises ? 'Exibindo' : 'Oculto'}
+                  label={(sidebarSettings.showAnalises ?? true) ? 'Exibindo' : 'Oculto'}
                 />
               </div>
 
               {/* Itens das Análises */}
-              {sidebarSettings.showAnalises && (
+              {(sidebarSettings.showAnalises ?? true) && (
                 <>
                   <div className="config-dashboard-item" style={{ marginLeft: '2rem', paddingLeft: '1rem', borderLeft: '2px solid var(--border-color)' }}>
                     <div className="config-dashboard-item-content">
@@ -594,14 +594,14 @@ export function ConfigPage() {
                         Link para análise de custos
                       </p>
                     </div>
-                    <ToggleSwitch
-                      checked={sidebarSettings.showCustos}
-                      onChange={() => {
-                        const newSettings = { ...sidebarSettings, showCustos: !sidebarSettings.showCustos }
-                        saveSidebarSettings(newSettings)
-                      }}
-                      label={sidebarSettings.showCustos ? 'Exibindo' : 'Oculto'}
-                    />
+                <ToggleSwitch
+                  checked={sidebarSettings.showCustos ?? true}
+                  onChange={() => {
+                    const newSettings = { ...sidebarSettings, showCustos: !(sidebarSettings.showCustos ?? true) }
+                    saveSidebarSettings(newSettings)
+                  }}
+                  label={(sidebarSettings.showCustos ?? true) ? 'Exibindo' : 'Oculto'}
+                />
                   </div>
 
                   <div className="config-dashboard-item" style={{ marginLeft: '2rem', paddingLeft: '1rem', borderLeft: '2px solid var(--border-color)' }}>
@@ -613,14 +613,14 @@ export function ConfigPage() {
                         Link para simulador de receitas
                       </p>
                     </div>
-                    <ToggleSwitch
-                      checked={sidebarSettings.showSimulador}
-                      onChange={() => {
-                        const newSettings = { ...sidebarSettings, showSimulador: !sidebarSettings.showSimulador }
-                        saveSidebarSettings(newSettings)
-                      }}
-                      label={sidebarSettings.showSimulador ? 'Exibindo' : 'Oculto'}
-                    />
+                <ToggleSwitch
+                  checked={sidebarSettings.showSimulador ?? true}
+                  onChange={() => {
+                    const newSettings = { ...sidebarSettings, showSimulador: !(sidebarSettings.showSimulador ?? true) }
+                    saveSidebarSettings(newSettings)
+                  }}
+                  label={(sidebarSettings.showSimulador ?? true) ? 'Exibindo' : 'Oculto'}
+                />
                   </div>
 
                   <div className="config-dashboard-item" style={{ marginLeft: '2rem', paddingLeft: '1rem', borderLeft: '2px solid var(--border-color)' }}>
@@ -632,14 +632,14 @@ export function ConfigPage() {
                         Link para análise de lucratividade
                       </p>
                     </div>
-                    <ToggleSwitch
-                      checked={sidebarSettings.showLucratividade}
-                      onChange={() => {
-                        const newSettings = { ...sidebarSettings, showLucratividade: !sidebarSettings.showLucratividade }
-                        saveSidebarSettings(newSettings)
-                      }}
-                      label={sidebarSettings.showLucratividade ? 'Exibindo' : 'Oculto'}
-                    />
+                <ToggleSwitch
+                  checked={sidebarSettings.showLucratividade ?? true}
+                  onChange={() => {
+                    const newSettings = { ...sidebarSettings, showLucratividade: !(sidebarSettings.showLucratividade ?? true) }
+                    saveSidebarSettings(newSettings)
+                  }}
+                  label={(sidebarSettings.showLucratividade ?? true) ? 'Exibindo' : 'Oculto'}
+                />
                   </div>
 
                   <div className="config-dashboard-item" style={{ marginLeft: '2rem', paddingLeft: '1rem', borderLeft: '2px solid var(--border-color)' }}>
@@ -651,14 +651,14 @@ export function ConfigPage() {
                         Link para gestão de custos fixos
                       </p>
                     </div>
-                    <ToggleSwitch
-                      checked={sidebarSettings.showCustosFixos}
-                      onChange={() => {
-                        const newSettings = { ...sidebarSettings, showCustosFixos: !sidebarSettings.showCustosFixos }
-                        saveSidebarSettings(newSettings)
-                      }}
-                      label={sidebarSettings.showCustosFixos ? 'Exibindo' : 'Oculto'}
-                    />
+                <ToggleSwitch
+                  checked={sidebarSettings.showCustosFixos ?? true}
+                  onChange={() => {
+                    const newSettings = { ...sidebarSettings, showCustosFixos: !(sidebarSettings.showCustosFixos ?? true) }
+                    saveSidebarSettings(newSettings)
+                  }}
+                  label={(sidebarSettings.showCustosFixos ?? true) ? 'Exibindo' : 'Oculto'}
+                />
                   </div>
 
                   <div className="config-dashboard-item" style={{ marginLeft: '2rem', paddingLeft: '1rem', borderLeft: '2px solid var(--border-color)' }}>
@@ -670,14 +670,14 @@ export function ConfigPage() {
                         Link para gestão de precificação
                       </p>
                     </div>
-                    <ToggleSwitch
-                      checked={sidebarSettings.showPricing}
-                      onChange={() => {
-                        const newSettings = { ...sidebarSettings, showPricing: !sidebarSettings.showPricing }
-                        saveSidebarSettings(newSettings)
-                      }}
-                      label={sidebarSettings.showPricing ? 'Exibindo' : 'Oculto'}
-                    />
+                <ToggleSwitch
+                  checked={sidebarSettings.showPricing ?? true}
+                  onChange={() => {
+                    const newSettings = { ...sidebarSettings, showPricing: !(sidebarSettings.showPricing ?? true) }
+                    saveSidebarSettings(newSettings)
+                  }}
+                  label={(sidebarSettings.showPricing ?? true) ? 'Exibindo' : 'Oculto'}
+                />
                   </div>
 
                   <div className="config-dashboard-item" style={{ marginLeft: '2rem', paddingLeft: '1rem', borderLeft: '2px solid var(--border-color)' }}>
@@ -689,14 +689,14 @@ export function ConfigPage() {
                         Link para análise de sensibilidade
                       </p>
                     </div>
-                    <ToggleSwitch
-                      checked={sidebarSettings.showSimulacao}
-                      onChange={() => {
-                        const newSettings = { ...sidebarSettings, showSimulacao: !sidebarSettings.showSimulacao }
-                        saveSidebarSettings(newSettings)
-                      }}
-                      label={sidebarSettings.showSimulacao ? 'Exibindo' : 'Oculto'}
-                    />
+                <ToggleSwitch
+                  checked={sidebarSettings.showSimulacao ?? true}
+                  onChange={() => {
+                    const newSettings = { ...sidebarSettings, showSimulacao: !(sidebarSettings.showSimulacao ?? true) }
+                    saveSidebarSettings(newSettings)
+                  }}
+                  label={(sidebarSettings.showSimulacao ?? true) ? 'Exibindo' : 'Oculto'}
+                />
                   </div>
                 </>
               )}
@@ -715,17 +715,17 @@ export function ConfigPage() {
                   </p>
                 </div>
                 <ToggleSwitch
-                  checked={sidebarSettings.showOperacao}
+                  checked={sidebarSettings.showOperacao ?? true}
                   onChange={() => {
-                    const newSettings = { ...sidebarSettings, showOperacao: !sidebarSettings.showOperacao }
+                    const newSettings = { ...sidebarSettings, showOperacao: !(sidebarSettings.showOperacao ?? true) }
                     saveSidebarSettings(newSettings)
                   }}
-                  label={sidebarSettings.showOperacao ? 'Exibindo' : 'Oculto'}
+                  label={(sidebarSettings.showOperacao ?? true) ? 'Exibindo' : 'Oculto'}
                 />
               </div>
 
               {/* Itens da Operação (exceto Configurações) */}
-              {sidebarSettings.showOperacao && (
+              {(sidebarSettings.showOperacao ?? true) && (
                 <>
                   <div className="config-dashboard-item" style={{ marginLeft: '2rem', paddingLeft: '1rem', borderLeft: '2px solid var(--border-color)' }}>
                     <div className="config-dashboard-item-content">
@@ -736,14 +736,14 @@ export function ConfigPage() {
                         Link para gestão de estoque
                       </p>
                     </div>
-                    <ToggleSwitch
-                      checked={sidebarSettings.showEstoque}
-                      onChange={() => {
-                        const newSettings = { ...sidebarSettings, showEstoque: !sidebarSettings.showEstoque }
-                        saveSidebarSettings(newSettings)
-                      }}
-                      label={sidebarSettings.showEstoque ? 'Exibindo' : 'Oculto'}
-                    />
+                <ToggleSwitch
+                  checked={sidebarSettings.showEstoque ?? true}
+                  onChange={() => {
+                    const newSettings = { ...sidebarSettings, showEstoque: !(sidebarSettings.showEstoque ?? true) }
+                    saveSidebarSettings(newSettings)
+                  }}
+                  label={(sidebarSettings.showEstoque ?? true) ? 'Exibindo' : 'Oculto'}
+                />
                   </div>
 
                   <div className="config-dashboard-item" style={{ marginLeft: '2rem', paddingLeft: '1rem', borderLeft: '2px solid var(--border-color)' }}>
@@ -755,14 +755,14 @@ export function ConfigPage() {
                         Link para relatórios do sistema
                       </p>
                     </div>
-                    <ToggleSwitch
-                      checked={sidebarSettings.showRelatorios}
-                      onChange={() => {
-                        const newSettings = { ...sidebarSettings, showRelatorios: !sidebarSettings.showRelatorios }
-                        saveSidebarSettings(newSettings)
-                      }}
-                      label={sidebarSettings.showRelatorios ? 'Exibindo' : 'Oculto'}
-                    />
+                <ToggleSwitch
+                  checked={sidebarSettings.showRelatorios ?? true}
+                  onChange={() => {
+                    const newSettings = { ...sidebarSettings, showRelatorios: !(sidebarSettings.showRelatorios ?? true) }
+                    saveSidebarSettings(newSettings)
+                  }}
+                  label={(sidebarSettings.showRelatorios ?? true) ? 'Exibindo' : 'Oculto'}
+                />
                   </div>
                 </>
               )}
