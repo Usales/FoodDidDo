@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState, useRef, Fragment } from 'react'
 import { useAppStore } from '../stores/appStore'
 import { useAuth } from '../components/AuthProvider'
-import { FiEdit3, FiTrash2, FiPlus, FiClock, FiDollarSign, FiThermometer } from 'react-icons/fi'
+import { FiEdit3, FiTrash2, FiPlus, FiClock, FiDollarSign, FiThermometer, FiList } from 'react-icons/fi'
+import { FaYoutube } from 'react-icons/fa'
+import { BiBookOpen } from 'react-icons/bi'
 import './PageCommon.css'
 import './DashboardPage.css'
 
@@ -55,7 +57,8 @@ const initialForm = {
   time: '',
   timeUnit: 'Min',
   cost: '',
-  status: 'fazer'
+  status: 'fazer',
+  clientName: ''
 }
 
 // Mapeamento de ingredientes para emojis
@@ -1205,8 +1208,36 @@ export function DashboardPage() {
   const [editingId, setEditingId] = useState(null)
   const [showFabMenu, setShowFabMenu] = useState(false)
   const [isOrderInPreparation, setIsOrderInPreparation] = useState(false)
+  const [selectedRecipeId, setSelectedRecipeId] = useState(null)
+  const [selectedRecipeData, setSelectedRecipeData] = useState(null)
+  const [quantity, setQuantity] = useState('1')
+  const [allRecipes, setAllRecipes] = useState([])
+  const [draggedMealId, setDraggedMealId] = useState(null)
+  const [dragOverSection, setDragOverSection] = useState(null)
+  const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 })
+  const [draggedMealData, setDraggedMealData] = useState(null)
+  const [showHistory, setShowHistory] = useState(false)
+  const dragGhostRef = useRef(null)
   const ingredientsTimerRef = useRef(null)
   const [dashboardSettings, setDashboardSettings] = useState(defaultDashboardSettings)
+
+  // Carregar receitas do JSON
+  useEffect(() => {
+    const loadRecipes = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.BASE_URL}local-recipes/recipes.json`)
+        if (response.ok) {
+          const data = await response.json()
+          setAllRecipes(Array.isArray(data) ? data : [])
+        }
+      } catch (error) {
+        console.warn('Não foi possível carregar receitas do JSON:', error)
+        // Em caso de erro, usar apenas receitas do appStore
+        setAllRecipes([])
+      }
+    }
+    loadRecipes()
+  }, [])
 
   // Carregar configurações do dashboard do localStorage
   useEffect(() => {
@@ -1353,7 +1384,8 @@ export function DashboardPage() {
       time: timeValue,
       timeUnit: timeUnit,
       cost: meal.cost || '',
-      status: meal.status
+      status: meal.status,
+      clientName: meal.clientName || ''
     })
     setShowForm(true)
   }
@@ -1379,9 +1411,18 @@ export function DashboardPage() {
     }
 
     if (editingId) {
+      const previousMeal = meals.find(m => m.id === editingId)
+      const wasInPreparation = previousMeal?.status === 'fazer'
+      const isNowReady = mealData.status === 'finalizado'
+      
       setMeals((prev) =>
         prev.map((meal) => (meal.id === editingId ? { ...meal, ...mealData } : meal))
       )
+      
+      // Tocar sino se mudou de "em preparo" para "pronto"
+      if (wasInPreparation && isNowReady) {
+        playBellSound()
+      }
     } else {
       setMeals((prev) => [
         {
@@ -1408,6 +1449,146 @@ export function DashboardPage() {
       status: 'fazer' // Status padrão para pedidos em preparo
     })
     setEditingId(null)
+    setSelectedRecipeId(null)
+    setSelectedRecipeData(null)
+    setQuantity('1')
+  }
+
+  const handleRecipeSelect = (recipeId) => {
+    const recipe = allRecipes.find(r => r.id === recipeId)
+    if (recipe) {
+      setSelectedRecipeId(recipeId)
+      setSelectedRecipeData(recipe)
+      // Preencher automaticamente título e ingredientes
+      setFormData((prev) => ({
+        ...prev,
+        title: recipe.title || prev.title,
+        ingredients: recipe.ingredientsList || prev.ingredients
+      }))
+    }
+  }
+
+  const [isDragging, setIsDragging] = useState(false)
+  const dragStartPosRef = useRef({ x: 0, y: 0 })
+
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      if (isDragging && draggedMealId) {
+        setDragPosition({ x: e.clientX, y: e.clientY })
+      }
+    }
+
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove)
+      return () => {
+        document.removeEventListener('mousemove', handleMouseMove)
+      }
+    }
+  }, [isDragging, draggedMealId])
+
+  const handleDragStart = (e, mealId) => {
+    const meal = meals.find(m => m.id === mealId)
+    setDraggedMealId(mealId)
+    setDraggedMealData(meal)
+    setIsDragging(true)
+    setDragPosition({ x: e.clientX, y: e.clientY })
+    
+    e.dataTransfer.effectAllowed = 'move'
+    e.dataTransfer.setData('text/plain', mealId)
+    
+    // Criar imagem transparente para o drag nativo
+    const dragImg = document.createElement('div')
+    dragImg.style.position = 'absolute'
+    dragImg.style.top = '-1000px'
+    document.body.appendChild(dragImg)
+    e.dataTransfer.setDragImage(dragImg, 0, 0)
+    setTimeout(() => document.body.removeChild(dragImg), 0)
+  }
+
+  const handleDrag = (e) => {
+    if (draggedMealId && isDragging) {
+      setDragPosition({ x: e.clientX, y: e.clientY })
+    }
+  }
+
+  const handleDragEnd = (e) => {
+    setIsDragging(false)
+    setDraggedMealId(null)
+    setDraggedMealData(null)
+    setDragPosition({ x: 0, y: 0 })
+  }
+
+  const handleDragOver = (e, sectionType) => {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = 'move'
+    setDragOverSection(sectionType)
+  }
+
+  const handleDragLeave = () => {
+    setDragOverSection(null)
+  }
+
+  // Função para tocar som de sino
+  const playBellSound = () => {
+    try {
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)()
+      
+      // Criar osciladores para simular um sino
+      const frequencies = [523.25, 659.25, 783.99] // Dó, Mi, Sol
+      const oscillators = frequencies.map((freq, index) => {
+        const oscillator = audioContext.createOscillator()
+        const gainNode = audioContext.createGain()
+        
+        oscillator.type = 'sine'
+        oscillator.frequency.setValueAtTime(freq, audioContext.currentTime)
+        
+        // Envelope para simular o som de sino
+        gainNode.gain.setValueAtTime(0, audioContext.currentTime)
+        gainNode.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + 0.01)
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.8 + index * 0.1)
+        
+        oscillator.connect(gainNode)
+        gainNode.connect(audioContext.destination)
+        
+        return { oscillator, gainNode }
+      })
+      
+      // Iniciar todos os osciladores
+      oscillators.forEach(({ oscillator }) => {
+        oscillator.start(audioContext.currentTime)
+        oscillator.stop(audioContext.currentTime + 1.2)
+      })
+    } catch (error) {
+      console.warn('Não foi possível tocar o som:', error)
+    }
+  }
+
+  const handleDrop = (e, targetStatus) => {
+    e.preventDefault()
+    setDragOverSection(null)
+    setIsDragging(false)
+    const mealId = e.dataTransfer.getData('text/plain') || draggedMealId
+    
+    if (mealId) {
+      const previousMeal = meals.find(m => m.id === mealId)
+      const wasInPreparation = previousMeal?.status === 'fazer'
+      const isNowReady = targetStatus === 'finalizado'
+      
+      setMeals((prev) =>
+        prev.map((meal) =>
+          meal.id === mealId ? { ...meal, status: targetStatus } : meal
+        )
+      )
+      
+      // Tocar sino se moveu de "em preparo" para "pronto"
+      if (wasInPreparation && isNowReady) {
+        playBellSound()
+      }
+    }
+    
+    setDraggedMealId(null)
+    setDraggedMealData(null)
+    setDragPosition({ x: 0, y: 0 })
   }
 
   const handleNewMeal = () => {
@@ -1592,7 +1773,63 @@ export function DashboardPage() {
   }, [showForm])
 
   return (
-    <div className="dashboard-page page">
+    <div 
+      className="dashboard-page page"
+      onDragOver={handleDrag}
+    >
+      {/* Ghost element para mostrar durante o drag */}
+      {isDragging && draggedMealData && dragPosition.x > 0 && dragPosition.y > 0 && (
+        <div
+          className="drag-ghost"
+          style={{
+            left: `${dragPosition.x - 230}px`,
+            top: `${dragPosition.y - 87}px`,
+            width: '460px',
+            pointerEvents: 'none'
+          }}
+        >
+          <article className="meal-card">
+            <div className="meal-card-content">
+              <header>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', flex: 1 }}>
+                  <h3>{draggedMealData.title}</h3>
+                  {draggedMealData.clientName && (
+                    <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 500 }}>
+                      {draggedMealData.clientName}
+                    </span>
+                  )}
+                </div>
+                <span className={`status-pill status-${draggedMealData.status}`}>{draggedMealData.status}</span>
+              </header>
+              <div className="meal-details">
+                <span className="meal-detail-item">
+                  <FiClock size={14} />
+                  {draggedMealData.time}
+                </span>
+                {draggedMealData.cost && (
+                  <span className="meal-detail-item">
+                    <FiDollarSign size={14} />
+                    R$ {parseFloat(draggedMealData.cost).toFixed(2)}
+                  </span>
+                )}
+              </div>
+              <div className="meal-ingredients">
+                <span className="meal-ingredients-label">Ingredientes:</span>
+                <div className="ingredients-chips">
+                  {draggedMealData.ingredients?.split(',').slice(0, 2).map((ing, index) => {
+                    const trimmedIng = ing.trim()
+                    return trimmedIng ? (
+                      <span key={index} className="ingredient-chip">
+                        {getIngredientEmoji(trimmedIng)}{capitalizeFirst(trimmedIng)}
+                      </span>
+                    ) : null
+                  })}
+                </div>
+              </div>
+            </div>
+          </article>
+        </div>
+      )}
       {/* Painel de Status Diário */}
       {dashboardSettings.showStatusPanel && (
       <section className="dashboard-status-panel">
@@ -2026,12 +2263,162 @@ export function DashboardPage() {
       )}
 
       {dashboardSettings.showOrdersInPreparation && (
-      <section className="page-stack meal-section">
+      <>
+      <section 
+        className={`page-stack meal-section ${dragOverSection === 'prontos' ? 'drag-over' : ''}`}
+        onDragOver={(e) => handleDragOver(e, 'prontos')}
+        onDragLeave={handleDragLeave}
+        onDrop={(e) => handleDrop(e, 'finalizado')}
+      >
+        <header className="meal-section-header">
+          <div>
+            <h2>Pedidos Prontos</h2>
+            <p className="meal-section-subtitle">
+              {meals.filter((meal) => meal.status === 'finalizado').length} pedido(s) pronto(s)
+            </p>
+          </div>
+          <button
+            type="button"
+            className="history-btn"
+            onClick={() => setShowHistory(!showHistory)}
+            title={showHistory ? 'Ocultar histórico' : 'Ver histórico'}
+          >
+            <FiList size={20} />
+            <span>Histórico</span>
+          </button>
+        </header>
+
+        {showHistory && (
+          <div className="orders-history">
+            <div className="history-header">
+              <h3>Histórico de Pedidos Prontos</h3>
+              <button
+                type="button"
+                className="history-close-btn"
+                onClick={() => setShowHistory(false)}
+                aria-label="Fechar histórico"
+              >
+                ×
+              </button>
+            </div>
+            <div className="history-list">
+              {meals.filter((meal) => meal.status === 'finalizado').length === 0 ? (
+                <p className="history-empty">Nenhum pedido no histórico</p>
+              ) : (
+                meals
+                  .filter((meal) => meal.status === 'finalizado')
+                  .map((meal) => (
+                    <div key={meal.id} className="history-item">
+                      <div className="history-item-header">
+                        <h4>{meal.title}</h4>
+                        {meal.clientName && (
+                          <span className="history-client">{meal.clientName}</span>
+                        )}
+                      </div>
+                      <div className="history-item-details">
+                        {meal.time && (
+                          <span className="history-detail">
+                            <FiClock size={14} /> {meal.time}
+                          </span>
+                        )}
+                        {meal.cost && (
+                          <span className="history-detail">
+                            <FiDollarSign size={14} /> R$ {parseFloat(meal.cost).toFixed(2)}
+                          </span>
+                        )}
+                      </div>
+                      {meal.ingredients && (
+                        <div className="history-ingredients">
+                          <span className="history-ingredients-label">Ingredientes:</span>
+                          <div className="ingredients-chips">
+                            {meal.ingredients.split(',').map((ing, index) => {
+                              const trimmedIng = ing.trim()
+                              return trimmedIng ? (
+                                <span key={index} className="ingredient-chip">
+                                  {getIngredientEmoji(trimmedIng)}{capitalizeFirst(trimmedIng)}
+                                </span>
+                              ) : null
+                            })}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))
+              )}
+            </div>
+          </div>
+        )}
+
+        <div className="meal-list">
+          {meals.filter((meal) => meal.status === 'finalizado').map((meal) => (
+            <div key={meal.id} style={{ width: '100%' }}>
+              <article
+                className={`meal-card ${draggedMealId === meal.id ? 'dragging' : ''}`}
+                draggable
+                onDragStart={(e) => handleDragStart(e, meal.id)}
+                onDragEnd={handleDragEnd}
+                onClick={(e) => {
+                  if (!isDragging) {
+                    e.stopPropagation()
+                    handleEdit(meal)
+                  }
+                }}
+              >
+                <div className="meal-card-content">
+                  <header>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', flex: 1 }}>
+                      <h3>{meal.title}</h3>
+                      {meal.clientName && (
+                        <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 500 }}>
+                          {meal.clientName}
+                        </span>
+                      )}
+                    </div>
+                    <span className={`status-pill status-${meal.status}`}>{meal.status}</span>
+                  </header>
+                  <div className="meal-details">
+                    <span className="meal-detail-item">
+                      <FiClock size={14} />
+                      {meal.time}
+                    </span>
+                    {meal.cost && (
+                      <span className="meal-detail-item">
+                        <FiDollarSign size={14} />
+                        R$ {parseFloat(meal.cost).toFixed(2)}
+                      </span>
+                    )}
+                  </div>
+                  <div className="meal-ingredients">
+                    <span className="meal-ingredients-label">Ingredientes:</span>
+                    <div className="ingredients-chips">
+                      {meal.ingredients?.split(',').map((ing, index) => {
+                        const trimmedIng = ing.trim()
+                        return trimmedIng ? (
+                          <span key={index} className="ingredient-chip">
+                            {getIngredientEmoji(trimmedIng)}{capitalizeFirst(trimmedIng)}
+                          </span>
+                        ) : null
+                      })}
+                    </div>
+                  </div>
+                </div>
+              </article>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section 
+        className={`page-stack meal-section ${dragOverSection === 'preparo' ? 'drag-over' : ''}`}
+        onDragOver={(e) => handleDragOver(e, 'preparo')}
+        onDragLeave={handleDragLeave}
+        onDrop={(e) => handleDrop(e, 'fazer')}
+      >
         <header className="meal-section-header">
           <div>
             <h2>Pedidos em Preparo</h2>
             <p className="meal-section-subtitle">
-              {stats.completed} de {stats.total} concluídos • {stats.percent}% de progresso
+              {meals.filter((meal) => meal.status === 'fazer').length} pedido(s) em preparo
             </p>
           </div>
         </header>
@@ -2040,22 +2427,84 @@ export function DashboardPage() {
           <div className={`meal-form meal-form-desktop ${editingId ? 'meal-form-edit' : ''}`}>
             <div className="meal-form-header">
               <h3>{editingId ? 'Editar pedido' : 'Novo pedido em preparo'}</h3>
-              <button
-                type="button"
-                className="meal-form-close"
-                onClick={() => {
-                  setShowForm(false)
-                  setEditingId(null)
-                  setFormData(initialForm)
-                  setShowFabMenu(false)
-                  setIsOrderInPreparation(false)
-                }}
-                aria-label="Fechar formulário"
-              >
-                ×
-              </button>
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                {selectedRecipeData?.video && (
+                  <a
+                    href={selectedRecipeData.video}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="recipe-action-btn youtube-btn"
+                    title="Ver vídeo no YouTube"
+                  >
+                    <FaYoutube size={20} />
+                  </a>
+                )}
+                {selectedRecipeData?.instructions && (
+                  <button
+                    type="button"
+                    className="recipe-action-btn recipe-btn"
+                    title="Ver receita escrita"
+                    onClick={() => {
+                      alert(`Receita:\n\n${selectedRecipeData.instructions}`)
+                    }}
+                  >
+                    <BiBookOpen size={20} />
+                  </button>
+                )}
+                <button
+                  type="button"
+                  className="meal-form-close"
+                  onClick={() => {
+                    setShowForm(false)
+                    setEditingId(null)
+                    setFormData(initialForm)
+                    setShowFabMenu(false)
+                    setIsOrderInPreparation(false)
+                    setSelectedRecipeId(null)
+                    setSelectedRecipeData(null)
+                    setQuantity('1')
+                  }}
+                  aria-label="Fechar formulário"
+                >
+                  ×
+                </button>
+              </div>
             </div>
             <div className="meal-form-row">
+              <label style={{ gridColumn: '1 / -1' }}>
+                <span>Selecione uma receita/prato</span>
+                <select
+                  value={selectedRecipeId || ''}
+                  onChange={(event) => handleRecipeSelect(event.target.value)}
+                  style={{ width: '100%', padding: '0.65rem 0.9rem', borderRadius: '0.75rem', border: '1px solid var(--border-primary)', background: 'var(--input-bg, var(--bg-card))', color: 'var(--input-text, var(--text-primary))' }}
+                >
+                  <option value="">-- Selecione uma receita --</option>
+                  {allRecipes.map((recipe) => (
+                    <option key={recipe.id} value={recipe.id}>
+                      {recipe.title}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                <span>Cliente/Mesa</span>
+                <input
+                  type="text"
+                  value={formData.clientName || ''}
+                  onChange={(event) => setFormData((prev) => ({ ...prev, clientName: event.target.value }))}
+                  placeholder="Ex.: João Silva ou Mesa 5"
+                />
+              </label>
+              <label>
+                <span>Quantidade a ser servida</span>
+                <input
+                  type="number"
+                  min="1"
+                  value={quantity}
+                  onChange={(event) => setQuantity(event.target.value)}
+                  placeholder="Ex.: 1"
+                />
+              </label>
               <label>
                 <span>Título</span>
                 <input
@@ -2064,47 +2513,6 @@ export function DashboardPage() {
                   onChange={(event) => setFormData((prev) => ({ ...prev, title: event.target.value }))}
                   placeholder="Ex.: Avocado toast"
                 />
-              </label>
-              <label>
-                <span>Calorias</span>
-                <div className="calories-input-group">
-                  <div className="input-with-select">
-                    <input
-                      type="text"
-                      value={formData.calories}
-                      onChange={(event) => setFormData((prev) => ({ ...prev, calories: event.target.value }))}
-                      placeholder="Ex.: 250"
-                    />
-                    <select
-                      value={formData.caloriesUnit}
-                      className="unit-select unit-select-fixed"
-                      disabled
-                    >
-                      <option value="Cal">Cal</option>
-                    </select>
-                  </div>
-                  <div className="input-with-select">
-                    <input
-                      type="text"
-                      value={formData.caloriesMeasureValue}
-                      onChange={(event) => setFormData((prev) => ({ ...prev, caloriesMeasureValue: event.target.value }))}
-                      placeholder="Ex.: 100"
-                    />
-                    <select
-                      value={formData.caloriesMeasure}
-                      onChange={(event) => setFormData((prev) => ({ ...prev, caloriesMeasure: event.target.value }))}
-                      className="unit-select"
-                    >
-                      <option value="">-</option>
-                      <option value="KG">KG</option>
-                      <option value="g">g</option>
-                      <option value="Ml">Ml</option>
-                      <option value="L">L</option>
-                      <option value="mg">mg</option>
-                      <option value="ml">ml</option>
-                    </select>
-                  </div>
-                </div>
               </label>
             </div>
             <div className="meal-form-row">
@@ -2202,18 +2610,30 @@ export function DashboardPage() {
         )}
 
         <div className="meal-list">
-          {meals.filter((meal) => meal.status === 'fazer' || meal.status === 'finalizado').map((meal) => (
+          {meals.filter((meal) => meal.status === 'fazer').map((meal) => (
             <div key={meal.id} style={{ width: '100%' }}>
               <article
-                className="meal-card"
+                className={`meal-card ${draggedMealId === meal.id ? 'dragging' : ''}`}
+                draggable
+                onDragStart={(e) => handleDragStart(e, meal.id)}
+                onDragEnd={handleDragEnd}
                 onClick={(e) => {
-                  e.stopPropagation()
-                  handleEdit(meal)
+                  if (!isDragging) {
+                    e.stopPropagation()
+                    handleEdit(meal)
+                  }
                 }}
               >
                 <div className="meal-card-content">
                   <header>
-                    <h3>{meal.title}</h3>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', flex: 1 }}>
+                      <h3>{meal.title}</h3>
+                      {meal.clientName && (
+                        <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 500 }}>
+                          {meal.clientName}
+                        </span>
+                      )}
+                    </div>
                     <span className={`status-pill status-${meal.status}`}>{meal.status}</span>
                   </header>
                   <div className="meal-details">
@@ -2227,10 +2647,6 @@ export function DashboardPage() {
                         R$ {parseFloat(meal.cost).toFixed(2)}
                       </span>
                     )}
-                    <span className="meal-detail-item">
-                      <FiThermometer size={14} />
-                      {formatCalories(meal.calories)}
-                    </span>
                   </div>
                   <div className="meal-ingredients">
                     <span className="meal-ingredients-label">Ingredientes:</span>
@@ -2413,6 +2829,7 @@ export function DashboardPage() {
           ))}
         </div>
       </section>
+      </>
       )}
 
       {/* Floating Action Button */}
