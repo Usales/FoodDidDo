@@ -69,7 +69,21 @@ export function MainLayout({ onLogout, user }) {
   const [sidebarSettings, setSidebarSettings] = useState({
     showVisaoGeral: true,
     showAnalises: true,
-    showOperacao: true
+    showOperacao: true,
+    showDashboard: true,
+    showCaixa: true,
+    showFluxoCaixa: true,
+    showOrcamento: true,
+    showIngredientes: true,
+    showReceitas: true,
+    showCustos: true,
+    showSimulador: true,
+    showLucratividade: true,
+    showCustosFixos: true,
+    showPricing: true,
+    showSimulacao: true,
+    showEstoque: true,
+    showRelatorios: true
   })
   const dropdownRef = useRef(null)
   const userChipRef = useRef(null)
@@ -150,13 +164,41 @@ export function MainLayout({ onLogout, user }) {
         setSidebarSettings({
           showVisaoGeral: typeof parsed?.showVisaoGeral === 'boolean' ? parsed.showVisaoGeral : true,
           showAnalises: typeof parsed?.showAnalises === 'boolean' ? parsed.showAnalises : true,
-          showOperacao: typeof parsed?.showOperacao === 'boolean' ? parsed.showOperacao : true
+          showOperacao: typeof parsed?.showOperacao === 'boolean' ? parsed.showOperacao : true,
+          showDashboard: typeof parsed?.showDashboard === 'boolean' ? parsed.showDashboard : true,
+          showCaixa: typeof parsed?.showCaixa === 'boolean' ? parsed.showCaixa : true,
+          showFluxoCaixa: typeof parsed?.showFluxoCaixa === 'boolean' ? parsed.showFluxoCaixa : true,
+          showOrcamento: typeof parsed?.showOrcamento === 'boolean' ? parsed.showOrcamento : true,
+          showIngredientes: typeof parsed?.showIngredientes === 'boolean' ? parsed.showIngredientes : true,
+          showReceitas: typeof parsed?.showReceitas === 'boolean' ? parsed.showReceitas : true,
+          showCustos: typeof parsed?.showCustos === 'boolean' ? parsed.showCustos : true,
+          showSimulador: typeof parsed?.showSimulador === 'boolean' ? parsed.showSimulador : true,
+          showLucratividade: typeof parsed?.showLucratividade === 'boolean' ? parsed.showLucratividade : true,
+          showCustosFixos: typeof parsed?.showCustosFixos === 'boolean' ? parsed.showCustosFixos : true,
+          showPricing: typeof parsed?.showPricing === 'boolean' ? parsed.showPricing : true,
+          showSimulacao: typeof parsed?.showSimulacao === 'boolean' ? parsed.showSimulacao : true,
+          showEstoque: typeof parsed?.showEstoque === 'boolean' ? parsed.showEstoque : true,
+          showRelatorios: typeof parsed?.showRelatorios === 'boolean' ? parsed.showRelatorios : true
         })
       } catch {
         setSidebarSettings({
           showVisaoGeral: true,
           showAnalises: true,
-          showOperacao: true
+          showOperacao: true,
+          showDashboard: true,
+          showCaixa: true,
+          showFluxoCaixa: true,
+          showOrcamento: true,
+          showIngredientes: true,
+          showReceitas: true,
+          showCustos: true,
+          showSimulador: true,
+          showLucratividade: true,
+          showCustosFixos: true,
+          showPricing: true,
+          showSimulacao: true,
+          showEstoque: true,
+          showRelatorios: true
         })
       }
     }
@@ -167,7 +209,21 @@ export function MainLayout({ onLogout, user }) {
         setSidebarSettings({
           showVisaoGeral: typeof next.showVisaoGeral === 'boolean' ? next.showVisaoGeral : true,
           showAnalises: typeof next.showAnalises === 'boolean' ? next.showAnalises : true,
-          showOperacao: typeof next.showOperacao === 'boolean' ? next.showOperacao : true
+          showOperacao: typeof next.showOperacao === 'boolean' ? next.showOperacao : true,
+          showDashboard: typeof next.showDashboard === 'boolean' ? next.showDashboard : true,
+          showCaixa: typeof next.showCaixa === 'boolean' ? next.showCaixa : true,
+          showFluxoCaixa: typeof next.showFluxoCaixa === 'boolean' ? next.showFluxoCaixa : true,
+          showOrcamento: typeof next.showOrcamento === 'boolean' ? next.showOrcamento : true,
+          showIngredientes: typeof next.showIngredientes === 'boolean' ? next.showIngredientes : true,
+          showReceitas: typeof next.showReceitas === 'boolean' ? next.showReceitas : true,
+          showCustos: typeof next.showCustos === 'boolean' ? next.showCustos : true,
+          showSimulador: typeof next.showSimulador === 'boolean' ? next.showSimulador : true,
+          showLucratividade: typeof next.showLucratividade === 'boolean' ? next.showLucratividade : true,
+          showCustosFixos: typeof next.showCustosFixos === 'boolean' ? next.showCustosFixos : true,
+          showPricing: typeof next.showPricing === 'boolean' ? next.showPricing : true,
+          showSimulacao: typeof next.showSimulacao === 'boolean' ? next.showSimulacao : true,
+          showEstoque: typeof next.showEstoque === 'boolean' ? next.showEstoque : true,
+          showRelatorios: typeof next.showRelatorios === 'boolean' ? next.showRelatorios : true
         })
       } else {
         readSidebarSettings()
@@ -258,19 +314,49 @@ export function MainLayout({ onLogout, user }) {
               if (group.section === 'Operação') return sidebarSettings.showOperacao
               return true
             })
-            .map((group) => (
-              <div key={group.section} className="sidebar-section">
-                <span className="sidebar-section-label">{group.section}</span>
-                {group.items.map((item) => (
-                  <NavLink key={item.path} to={item.path} className={({ isActive }) => `sidebar-link${isActive ? ' active' : ''}`}>
-                    <span aria-hidden="true" className="sidebar-link-icon">
-                      {item.icon}
-                    </span>
-                    {item.label}
-                  </NavLink>
-                ))}
-              </div>
-            ))}
+            .map((group) => {
+              // Mapeamento de paths para configurações
+              const pathToSettingMap = {
+                '/dashboard': sidebarSettings.showDashboard,
+                '/caixa': sidebarSettings.showCaixa,
+                '/fluxo-caixa': sidebarSettings.showFluxoCaixa,
+                '/orcamento': sidebarSettings.showOrcamento,
+                '/ingredientes': sidebarSettings.showIngredientes,
+                '/receitas': sidebarSettings.showReceitas,
+                '/custos': sidebarSettings.showCustos,
+                '/simulador': sidebarSettings.showSimulador,
+                '/lucratividade': sidebarSettings.showLucratividade,
+                '/custos-fixos': sidebarSettings.showCustosFixos,
+                '/pricing': sidebarSettings.showPricing,
+                '/simulacao': sidebarSettings.showSimulacao,
+                '/estoque': sidebarSettings.showEstoque,
+                '/relatorios': sidebarSettings.showRelatorios
+              }
+
+              // Filtrar itens baseado nas configurações (Configurações sempre visível)
+              const filteredItems = group.items.filter((item) => {
+                if (item.path === '/config') return true // Sempre mostrar Configurações
+                const setting = pathToSettingMap[item.path]
+                return setting !== false && setting !== undefined
+              })
+
+              // Não mostrar a seção se não tiver itens visíveis
+              if (filteredItems.length === 0) return null
+
+              return (
+                <div key={group.section} className="sidebar-section">
+                  <span className="sidebar-section-label">{group.section}</span>
+                  {filteredItems.map((item) => (
+                    <NavLink key={item.path} to={item.path} className={({ isActive }) => `sidebar-link${isActive ? ' active' : ''}`}>
+                      <span aria-hidden="true" className="sidebar-link-icon">
+                        {item.icon}
+                      </span>
+                      {item.label}
+                    </NavLink>
+                  ))}
+                </div>
+              )
+            })}
         </nav>
         <div className="sidebar-footer">
           <button type="button" className="logout-btn" onClick={onLogout}>
@@ -478,22 +564,51 @@ export function MainLayout({ onLogout, user }) {
                   if (group.section === 'Operação') return sidebarSettings.showOperacao
                   return true
                 })
-                .map((group) => (
-                  <div key={group.section} className="mobile-menu-section">
-                    <span className="mobile-menu-section-label">{group.section}</span>
-                    {group.items.map((item) => (
-                      <NavLink
-                        key={item.path}
-                        to={item.path}
-                        className={({ isActive }) => `mobile-menu-link${isActive ? ' active' : ''}`}
-                        onClick={closeMobileMenu}
-                      >
-                        <span className="mobile-menu-link-icon">{item.icon}</span>
-                        <span className="mobile-menu-link-label">{item.label}</span>
-                      </NavLink>
-                    ))}
-                  </div>
-                ))}
+                .map((group) => {
+                  // Mapeamento de paths para configurações
+                  const pathToSettingMap = {
+                    '/dashboard': sidebarSettings.showDashboard,
+                    '/caixa': sidebarSettings.showCaixa,
+                    '/fluxo-caixa': sidebarSettings.showFluxoCaixa,
+                    '/orcamento': sidebarSettings.showOrcamento,
+                    '/ingredientes': sidebarSettings.showIngredientes,
+                    '/receitas': sidebarSettings.showReceitas,
+                    '/custos': sidebarSettings.showCustos,
+                    '/simulador': sidebarSettings.showSimulador,
+                    '/lucratividade': sidebarSettings.showLucratividade,
+                    '/custos-fixos': sidebarSettings.showCustosFixos,
+                    '/pricing': sidebarSettings.showPricing,
+                    '/simulacao': sidebarSettings.showSimulacao,
+                    '/estoque': sidebarSettings.showEstoque,
+                    '/relatorios': sidebarSettings.showRelatorios
+                  }
+
+                  // Filtrar itens baseado nas configurações (Configurações sempre visível)
+                  const filteredItems = group.items.filter((item) => {
+                    if (item.path === '/config') return true // Sempre mostrar Configurações
+                    return pathToSettingMap[item.path] !== false
+                  })
+
+                  // Não mostrar a seção se não tiver itens visíveis
+                  if (filteredItems.length === 0) return null
+
+                  return (
+                    <div key={group.section} className="mobile-menu-section">
+                      <span className="mobile-menu-section-label">{group.section}</span>
+                      {filteredItems.map((item) => (
+                        <NavLink
+                          key={item.path}
+                          to={item.path}
+                          className={({ isActive }) => `mobile-menu-link${isActive ? ' active' : ''}`}
+                          onClick={closeMobileMenu}
+                        >
+                          <span className="mobile-menu-link-icon">{item.icon}</span>
+                          <span className="mobile-menu-link-label">{item.label}</span>
+                        </NavLink>
+                      ))}
+                    </div>
+                  )
+                })}
             </nav>
             <div className="mobile-menu-footer">
               <button type="button" className="mobile-menu-logout" onClick={onLogout}>

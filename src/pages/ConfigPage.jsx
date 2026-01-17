@@ -31,7 +31,24 @@ const defaultCashflowPageSettings = {
 const defaultSidebarSettings = {
   showVisaoGeral: true,
   showAnalises: true,
-  showOperacao: true
+  showOperacao: true,
+  // Visão Geral - itens individuais
+  showDashboard: true,
+  showCaixa: true,
+  showFluxoCaixa: true,
+  showOrcamento: true,
+  showIngredientes: true,
+  showReceitas: true,
+  // Análises - itens individuais
+  showCustos: true,
+  showSimulador: true,
+  showLucratividade: true,
+  showCustosFixos: true,
+  showPricing: true,
+  showSimulacao: true,
+  // Operação - itens individuais (Configurações sempre visível)
+  showEstoque: true,
+  showRelatorios: true
 }
 
 export function ConfigPage() {
@@ -397,14 +414,15 @@ export function ConfigPage() {
           <section className="config-section">
             <h2 className="config-section-title">Barra Lateral</h2>
             <p className="config-section-description">
-              Configure quais seções devem ser exibidas na barra lateral do sistema.
+              Configure quais seções e itens devem ser exibidos na barra lateral do sistema.
             </p>
             <div className="config-dashboard-settings">
+              {/* Visão Geral */}
               <div className="config-dashboard-item">
                 <div className="config-dashboard-item-content">
                   <div className="config-dashboard-item-header">
                     <h3 className="config-dashboard-item-title">Visão Geral</h3>
-                    <Tooltip content="Exibe a seção Visão Geral na barra lateral com links para Home, Caixa, Fluxo de Caixa, Orçamentos, Ingredientes e Receitas">
+                    <Tooltip content="Exibe a seção Visão Geral na barra lateral">
                       <span className="tooltip-icon">ⓘ</span>
                     </Tooltip>
                   </div>
@@ -422,11 +440,131 @@ export function ConfigPage() {
                 />
               </div>
 
+              {/* Itens da Visão Geral */}
+              {sidebarSettings.showVisaoGeral && (
+                <>
+                  <div className="config-dashboard-item" style={{ marginLeft: '2rem', paddingLeft: '1rem', borderLeft: '2px solid var(--border-color)' }}>
+                    <div className="config-dashboard-item-content">
+                      <div className="config-dashboard-item-header">
+                        <h4 style={{ fontSize: '0.95rem', fontWeight: 600 }}>Home</h4>
+                      </div>
+                      <p className="config-dashboard-item-description" style={{ fontSize: '0.85rem' }}>
+                        Link para página inicial do dashboard
+                      </p>
+                    </div>
+                    <ToggleSwitch
+                      checked={sidebarSettings.showDashboard}
+                      onChange={() => {
+                        const newSettings = { ...sidebarSettings, showDashboard: !sidebarSettings.showDashboard }
+                        saveSidebarSettings(newSettings)
+                      }}
+                      label={sidebarSettings.showDashboard ? 'Exibindo' : 'Oculto'}
+                    />
+                  </div>
+
+                  <div className="config-dashboard-item" style={{ marginLeft: '2rem', paddingLeft: '1rem', borderLeft: '2px solid var(--border-color)' }}>
+                    <div className="config-dashboard-item-content">
+                      <div className="config-dashboard-item-header">
+                        <h4 style={{ fontSize: '0.95rem', fontWeight: 600 }}>Caixa</h4>
+                      </div>
+                      <p className="config-dashboard-item-description" style={{ fontSize: '0.85rem' }}>
+                        Link para tela de PDV/Caixa
+                      </p>
+                    </div>
+                    <ToggleSwitch
+                      checked={sidebarSettings.showCaixa}
+                      onChange={() => {
+                        const newSettings = { ...sidebarSettings, showCaixa: !sidebarSettings.showCaixa }
+                        saveSidebarSettings(newSettings)
+                      }}
+                      label={sidebarSettings.showCaixa ? 'Exibindo' : 'Oculto'}
+                    />
+                  </div>
+
+                  <div className="config-dashboard-item" style={{ marginLeft: '2rem', paddingLeft: '1rem', borderLeft: '2px solid var(--border-color)' }}>
+                    <div className="config-dashboard-item-content">
+                      <div className="config-dashboard-item-header">
+                        <h4 style={{ fontSize: '0.95rem', fontWeight: 600 }}>Fluxo de Caixa</h4>
+                      </div>
+                      <p className="config-dashboard-item-description" style={{ fontSize: '0.85rem' }}>
+                        Link para gestão de fluxo de caixa
+                      </p>
+                    </div>
+                    <ToggleSwitch
+                      checked={sidebarSettings.showFluxoCaixa}
+                      onChange={() => {
+                        const newSettings = { ...sidebarSettings, showFluxoCaixa: !sidebarSettings.showFluxoCaixa }
+                        saveSidebarSettings(newSettings)
+                      }}
+                      label={sidebarSettings.showFluxoCaixa ? 'Exibindo' : 'Oculto'}
+                    />
+                  </div>
+
+                  <div className="config-dashboard-item" style={{ marginLeft: '2rem', paddingLeft: '1rem', borderLeft: '2px solid var(--border-color)' }}>
+                    <div className="config-dashboard-item-content">
+                      <div className="config-dashboard-item-header">
+                        <h4 style={{ fontSize: '0.95rem', fontWeight: 600 }}>Orçamentos</h4>
+                      </div>
+                      <p className="config-dashboard-item-description" style={{ fontSize: '0.85rem' }}>
+                        Link para gestão de orçamentos
+                      </p>
+                    </div>
+                    <ToggleSwitch
+                      checked={sidebarSettings.showOrcamento}
+                      onChange={() => {
+                        const newSettings = { ...sidebarSettings, showOrcamento: !sidebarSettings.showOrcamento }
+                        saveSidebarSettings(newSettings)
+                      }}
+                      label={sidebarSettings.showOrcamento ? 'Exibindo' : 'Oculto'}
+                    />
+                  </div>
+
+                  <div className="config-dashboard-item" style={{ marginLeft: '2rem', paddingLeft: '1rem', borderLeft: '2px solid var(--border-color)' }}>
+                    <div className="config-dashboard-item-content">
+                      <div className="config-dashboard-item-header">
+                        <h4 style={{ fontSize: '0.95rem', fontWeight: 600 }}>Ingredientes</h4>
+                      </div>
+                      <p className="config-dashboard-item-description" style={{ fontSize: '0.85rem' }}>
+                        Link para gestão de ingredientes
+                      </p>
+                    </div>
+                    <ToggleSwitch
+                      checked={sidebarSettings.showIngredientes}
+                      onChange={() => {
+                        const newSettings = { ...sidebarSettings, showIngredientes: !sidebarSettings.showIngredientes }
+                        saveSidebarSettings(newSettings)
+                      }}
+                      label={sidebarSettings.showIngredientes ? 'Exibindo' : 'Oculto'}
+                    />
+                  </div>
+
+                  <div className="config-dashboard-item" style={{ marginLeft: '2rem', paddingLeft: '1rem', borderLeft: '2px solid var(--border-color)' }}>
+                    <div className="config-dashboard-item-content">
+                      <div className="config-dashboard-item-header">
+                        <h4 style={{ fontSize: '0.95rem', fontWeight: 600 }}>Receitas</h4>
+                      </div>
+                      <p className="config-dashboard-item-description" style={{ fontSize: '0.85rem' }}>
+                        Link para gestão de receitas
+                      </p>
+                    </div>
+                    <ToggleSwitch
+                      checked={sidebarSettings.showReceitas}
+                      onChange={() => {
+                        const newSettings = { ...sidebarSettings, showReceitas: !sidebarSettings.showReceitas }
+                        saveSidebarSettings(newSettings)
+                      }}
+                      label={sidebarSettings.showReceitas ? 'Exibindo' : 'Oculto'}
+                    />
+                  </div>
+                </>
+              )}
+
+              {/* Análises */}
               <div className="config-dashboard-item">
                 <div className="config-dashboard-item-content">
                   <div className="config-dashboard-item-header">
                     <h3 className="config-dashboard-item-title">Análises</h3>
-                    <Tooltip content="Exibe a seção Análises na barra lateral com links para Custos, Simulador, Lucratividade, Custos Fixos, Pricing e Sensibilidade">
+                    <Tooltip content="Exibe a seção Análises na barra lateral">
                       <span className="tooltip-icon">ⓘ</span>
                     </Tooltip>
                   </div>
@@ -444,11 +582,131 @@ export function ConfigPage() {
                 />
               </div>
 
+              {/* Itens das Análises */}
+              {sidebarSettings.showAnalises && (
+                <>
+                  <div className="config-dashboard-item" style={{ marginLeft: '2rem', paddingLeft: '1rem', borderLeft: '2px solid var(--border-color)' }}>
+                    <div className="config-dashboard-item-content">
+                      <div className="config-dashboard-item-header">
+                        <h4 style={{ fontSize: '0.95rem', fontWeight: 600 }}>Custos</h4>
+                      </div>
+                      <p className="config-dashboard-item-description" style={{ fontSize: '0.85rem' }}>
+                        Link para análise de custos
+                      </p>
+                    </div>
+                    <ToggleSwitch
+                      checked={sidebarSettings.showCustos}
+                      onChange={() => {
+                        const newSettings = { ...sidebarSettings, showCustos: !sidebarSettings.showCustos }
+                        saveSidebarSettings(newSettings)
+                      }}
+                      label={sidebarSettings.showCustos ? 'Exibindo' : 'Oculto'}
+                    />
+                  </div>
+
+                  <div className="config-dashboard-item" style={{ marginLeft: '2rem', paddingLeft: '1rem', borderLeft: '2px solid var(--border-color)' }}>
+                    <div className="config-dashboard-item-content">
+                      <div className="config-dashboard-item-header">
+                        <h4 style={{ fontSize: '0.95rem', fontWeight: 600 }}>Simulador</h4>
+                      </div>
+                      <p className="config-dashboard-item-description" style={{ fontSize: '0.85rem' }}>
+                        Link para simulador de receitas
+                      </p>
+                    </div>
+                    <ToggleSwitch
+                      checked={sidebarSettings.showSimulador}
+                      onChange={() => {
+                        const newSettings = { ...sidebarSettings, showSimulador: !sidebarSettings.showSimulador }
+                        saveSidebarSettings(newSettings)
+                      }}
+                      label={sidebarSettings.showSimulador ? 'Exibindo' : 'Oculto'}
+                    />
+                  </div>
+
+                  <div className="config-dashboard-item" style={{ marginLeft: '2rem', paddingLeft: '1rem', borderLeft: '2px solid var(--border-color)' }}>
+                    <div className="config-dashboard-item-content">
+                      <div className="config-dashboard-item-header">
+                        <h4 style={{ fontSize: '0.95rem', fontWeight: 600 }}>Lucratividade</h4>
+                      </div>
+                      <p className="config-dashboard-item-description" style={{ fontSize: '0.85rem' }}>
+                        Link para análise de lucratividade
+                      </p>
+                    </div>
+                    <ToggleSwitch
+                      checked={sidebarSettings.showLucratividade}
+                      onChange={() => {
+                        const newSettings = { ...sidebarSettings, showLucratividade: !sidebarSettings.showLucratividade }
+                        saveSidebarSettings(newSettings)
+                      }}
+                      label={sidebarSettings.showLucratividade ? 'Exibindo' : 'Oculto'}
+                    />
+                  </div>
+
+                  <div className="config-dashboard-item" style={{ marginLeft: '2rem', paddingLeft: '1rem', borderLeft: '2px solid var(--border-color)' }}>
+                    <div className="config-dashboard-item-content">
+                      <div className="config-dashboard-item-header">
+                        <h4 style={{ fontSize: '0.95rem', fontWeight: 600 }}>Custos Fixos</h4>
+                      </div>
+                      <p className="config-dashboard-item-description" style={{ fontSize: '0.85rem' }}>
+                        Link para gestão de custos fixos
+                      </p>
+                    </div>
+                    <ToggleSwitch
+                      checked={sidebarSettings.showCustosFixos}
+                      onChange={() => {
+                        const newSettings = { ...sidebarSettings, showCustosFixos: !sidebarSettings.showCustosFixos }
+                        saveSidebarSettings(newSettings)
+                      }}
+                      label={sidebarSettings.showCustosFixos ? 'Exibindo' : 'Oculto'}
+                    />
+                  </div>
+
+                  <div className="config-dashboard-item" style={{ marginLeft: '2rem', paddingLeft: '1rem', borderLeft: '2px solid var(--border-color)' }}>
+                    <div className="config-dashboard-item-content">
+                      <div className="config-dashboard-item-header">
+                        <h4 style={{ fontSize: '0.95rem', fontWeight: 600 }}>Pricing</h4>
+                      </div>
+                      <p className="config-dashboard-item-description" style={{ fontSize: '0.85rem' }}>
+                        Link para gestão de precificação
+                      </p>
+                    </div>
+                    <ToggleSwitch
+                      checked={sidebarSettings.showPricing}
+                      onChange={() => {
+                        const newSettings = { ...sidebarSettings, showPricing: !sidebarSettings.showPricing }
+                        saveSidebarSettings(newSettings)
+                      }}
+                      label={sidebarSettings.showPricing ? 'Exibindo' : 'Oculto'}
+                    />
+                  </div>
+
+                  <div className="config-dashboard-item" style={{ marginLeft: '2rem', paddingLeft: '1rem', borderLeft: '2px solid var(--border-color)' }}>
+                    <div className="config-dashboard-item-content">
+                      <div className="config-dashboard-item-header">
+                        <h4 style={{ fontSize: '0.95rem', fontWeight: 600 }}>Sensibilidade</h4>
+                      </div>
+                      <p className="config-dashboard-item-description" style={{ fontSize: '0.85rem' }}>
+                        Link para análise de sensibilidade
+                      </p>
+                    </div>
+                    <ToggleSwitch
+                      checked={sidebarSettings.showSimulacao}
+                      onChange={() => {
+                        const newSettings = { ...sidebarSettings, showSimulacao: !sidebarSettings.showSimulacao }
+                        saveSidebarSettings(newSettings)
+                      }}
+                      label={sidebarSettings.showSimulacao ? 'Exibindo' : 'Oculto'}
+                    />
+                  </div>
+                </>
+              )}
+
+              {/* Operação */}
               <div className="config-dashboard-item">
                 <div className="config-dashboard-item-content">
                   <div className="config-dashboard-item-header">
                     <h3 className="config-dashboard-item-title">Operação</h3>
-                    <Tooltip content="Exibe a seção Operação na barra lateral com links para Estoque, Relatórios e Configurações">
+                    <Tooltip content="Exibe a seção Operação na barra lateral">
                       <span className="tooltip-icon">ⓘ</span>
                     </Tooltip>
                   </div>
@@ -465,6 +723,49 @@ export function ConfigPage() {
                   label={sidebarSettings.showOperacao ? 'Exibindo' : 'Oculto'}
                 />
               </div>
+
+              {/* Itens da Operação (exceto Configurações) */}
+              {sidebarSettings.showOperacao && (
+                <>
+                  <div className="config-dashboard-item" style={{ marginLeft: '2rem', paddingLeft: '1rem', borderLeft: '2px solid var(--border-color)' }}>
+                    <div className="config-dashboard-item-content">
+                      <div className="config-dashboard-item-header">
+                        <h4 style={{ fontSize: '0.95rem', fontWeight: 600 }}>Estoque</h4>
+                      </div>
+                      <p className="config-dashboard-item-description" style={{ fontSize: '0.85rem' }}>
+                        Link para gestão de estoque
+                      </p>
+                    </div>
+                    <ToggleSwitch
+                      checked={sidebarSettings.showEstoque}
+                      onChange={() => {
+                        const newSettings = { ...sidebarSettings, showEstoque: !sidebarSettings.showEstoque }
+                        saveSidebarSettings(newSettings)
+                      }}
+                      label={sidebarSettings.showEstoque ? 'Exibindo' : 'Oculto'}
+                    />
+                  </div>
+
+                  <div className="config-dashboard-item" style={{ marginLeft: '2rem', paddingLeft: '1rem', borderLeft: '2px solid var(--border-color)' }}>
+                    <div className="config-dashboard-item-content">
+                      <div className="config-dashboard-item-header">
+                        <h4 style={{ fontSize: '0.95rem', fontWeight: 600 }}>Relatórios</h4>
+                      </div>
+                      <p className="config-dashboard-item-description" style={{ fontSize: '0.85rem' }}>
+                        Link para relatórios do sistema
+                      </p>
+                    </div>
+                    <ToggleSwitch
+                      checked={sidebarSettings.showRelatorios}
+                      onChange={() => {
+                        const newSettings = { ...sidebarSettings, showRelatorios: !sidebarSettings.showRelatorios }
+                        saveSidebarSettings(newSettings)
+                      }}
+                      label={sidebarSettings.showRelatorios ? 'Exibindo' : 'Oculto'}
+                    />
+                  </div>
+                </>
+              )}
             </div>
           </section>
         </div>
