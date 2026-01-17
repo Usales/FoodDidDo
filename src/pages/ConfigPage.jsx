@@ -16,7 +16,8 @@ const defaultDashboardSettings = {
   showHeader: false,
   showStatusPanel: true,
   showBusinessInsights: true,
-  showMealSection: true
+  showMealSection: true,
+  showOrdersInPreparation: true
 }
 
 const defaultCashflowPageSettings = {
@@ -470,6 +471,28 @@ export function ConfigPage() {
                     saveDashboardSettings(newSettings)
                   }}
                   label={dashboardSettings.showMealSection ? 'Exibindo' : 'Oculto'}
+                />
+              </div>
+
+              <div className="config-dashboard-item">
+                <div className="config-dashboard-item-content">
+                  <div className="config-dashboard-item-header">
+                    <h3 className="config-dashboard-item-title">Pedidos em Preparo</h3>
+                    <Tooltip content="Exibe a lista de pedidos que estão sendo preparados na cozinha para entrega">
+                      <span className="tooltip-icon">ⓘ</span>
+                    </Tooltip>
+                  </div>
+                  <p className="config-dashboard-item-description">
+                    Mostra os pedidos em preparo com status fazer e finalizado
+                  </p>
+                </div>
+                <ToggleSwitch
+                  checked={dashboardSettings.showOrdersInPreparation}
+                  onChange={() => {
+                    const newSettings = { ...dashboardSettings, showOrdersInPreparation: !dashboardSettings.showOrdersInPreparation }
+                    saveDashboardSettings(newSettings)
+                  }}
+                  label={dashboardSettings.showOrdersInPreparation ? 'Exibindo' : 'Oculto'}
                 />
               </div>
             </div>

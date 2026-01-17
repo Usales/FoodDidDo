@@ -290,10 +290,35 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1.5rem;
+  position: relative;
 }
 
 .meal-list > div {
   display: contents;
+}
+
+.meal-divider-vertical {
+  grid-column: 1;
+  grid-row: 1 / -1;
+  position: absolute;
+  left: calc(50% + 0.75rem);
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(to bottom, 
+    transparent 0%, 
+    var(--border-primary) 5%, 
+    var(--border-primary) 95%, 
+    transparent 100%);
+  z-index: 10;
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+@media (max-width: 1020px) {
+  .meal-divider-vertical {
+    display: none;
+  }
 }
 
 /* Desktop: mostrar formulário no topo, ocultar abaixo do card */
@@ -587,6 +612,7 @@
   justify-content: center;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 1001;
+  flex-shrink: 0;
 }
 
 .fab-button:hover {
@@ -606,6 +632,8 @@
   gap: 0.5rem;
   margin-bottom: 0.5rem;
   animation: slideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  max-width: calc(100vw - 4rem);
+  width: max-content;
 }
 
 @keyframes slideUp {
@@ -634,6 +662,10 @@
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
+  width: 100%;
+  min-width: max-content;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .fab-menu-item:hover {
@@ -766,16 +798,25 @@
   .fab-container {
     bottom: 1.5rem;
     right: 1.5rem;
+    gap: 0.75rem;
   }
 
   .fab-button {
     width: 56px;
     height: 56px;
+    flex-shrink: 0;
+  }
+
+  .fab-menu {
+    max-width: calc(100vw - 3rem);
+    margin-bottom: 0.5rem;
   }
 
   .fab-menu-item {
     padding: 0.75rem 1rem;
     font-size: 0.9rem;
+    white-space: normal;
+    word-wrap: break-word;
   }
 }
 
@@ -833,6 +874,28 @@
   .fab-container {
     bottom: 1rem;
     right: 1rem;
+    gap: 0.5rem;
+  }
+
+  .fab-button {
+    width: 52px;
+    height: 52px;
+  }
+
+  .fab-menu {
+    max-width: calc(100vw - 2rem);
+    gap: 0.4rem;
+  }
+
+  .fab-menu-item {
+    padding: 0.65rem 0.875rem;
+    font-size: 0.85rem;
+    gap: 0.5rem;
+  }
+
+  .fab-menu-item span {
+    flex: 1;
+    text-align: left;
   }
 }
 

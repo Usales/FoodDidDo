@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useRef } from 'react'
+import { useEffect, useMemo, useState, useRef, Fragment } from 'react'
 import { useAppStore } from '../stores/appStore'
 import { useAuth } from '../components/AuthProvider'
 import { FiEdit3, FiTrash2, FiPlus, FiClock, FiDollarSign, FiThermometer } from 'react-icons/fi'
@@ -11,7 +11,8 @@ const defaultDashboardSettings = {
   showHeader: false,
   showStatusPanel: true,
   showBusinessInsights: true,
-  showMealSection: true
+  showMealSection: true,
+  showOrdersInPreparation: true
 }
 
 const defaultMeals = [
@@ -1203,6 +1204,7 @@ export function DashboardPage() {
   const [formData, setFormData] = useState(initialForm)
   const [editingId, setEditingId] = useState(null)
   const [showFabMenu, setShowFabMenu] = useState(false)
+  const [isOrderInPreparation, setIsOrderInPreparation] = useState(false)
   const ingredientsTimerRef = useRef(null)
   const [dashboardSettings, setDashboardSettings] = useState(defaultDashboardSettings)
 
@@ -1216,6 +1218,18 @@ export function DashboardPage() {
       }
     } catch (error) {
       console.error('Erro ao carregar configurações do dashboard:', error)
+    }
+
+    // Escutar mudanças nas configurações em tempo real
+    const handleSettingsChange = (event) => {
+      const newSettings = event.detail
+      setDashboardSettings({ ...defaultDashboardSettings, ...newSettings })
+    }
+
+    window.addEventListener('dashboardSettingsChanged', handleSettingsChange)
+
+    return () => {
+      window.removeEventListener('dashboardSettingsChanged', handleSettingsChange)
     }
   }, [])
 
@@ -1307,6 +1321,8 @@ export function DashboardPage() {
 
   const handleEdit = (meal) => {
     setEditingId(meal.id)
+    // Detectar se é um pedido em preparo (status 'fazer' ou 'finalizado')
+    setIsOrderInPreparation(meal.status === 'fazer' || meal.status === 'finalizado')
     // Extrair valor, unidade, quantidade e medida de calorias (ex: "250 Cal 100 KG" -> "250", "Cal", "100", "KG")
     const caloriesStr = meal.calories || ''
     // Primeiro tenta encontrar padrão com quantidade e medida: "250 Cal 100 KG"
@@ -1380,6 +1396,26 @@ export function DashboardPage() {
     setEditingId(null)
     setShowForm(false)
     setShowFabMenu(false)
+    setIsOrderInPreparation(false)
+  }
+
+  const handleNewOrder = () => {
+    setShowForm(true)
+    setShowFabMenu(false)
+    setIsOrderInPreparation(true)
+    setFormData({
+      ...initialForm,
+      status: 'fazer' // Status padrão para pedidos em preparo
+    })
+    setEditingId(null)
+  }
+
+  const handleNewMeal = () => {
+    setShowForm(true)
+    setShowFabMenu(false)
+    setIsOrderInPreparation(false)
+    setFormData(initialForm)
+    setEditingId(null)
   }
 
   // Função para obter lista de ingredientes
@@ -1619,6 +1655,7 @@ export function DashboardPage() {
                   setEditingId(null)
                   setFormData(initialForm)
                   setShowFabMenu(false)
+                  setIsOrderInPreparation(false)
                 }}
                 aria-label="Fechar formulário"
               >
@@ -1772,15 +1809,16 @@ export function DashboardPage() {
         ) : null}
 
         <div className="meal-list">
-          {meals.map((meal) => (
-            <div key={meal.id} style={{ width: '100%' }}>
-              <article
-                className="meal-card"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  handleEdit(meal)
-                }}
-              >
+          {meals.map((meal, index) => (
+            <Fragment key={meal.id}>
+              <div style={{ width: '100%' }}>
+                <article
+                  className="meal-card"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleEdit(meal)
+                  }}
+                >
                 <div className="meal-card-content">
                   <header>
                     <h3>{meal.title}</h3>
@@ -1829,6 +1867,7 @@ export function DashboardPage() {
                         setEditingId(null)
                         setFormData(initialForm)
                         setShowFabMenu(false)
+                        setIsOrderInPreparation(false)
                       }}
                       aria-label="Fechar formulário"
                     >
@@ -1979,6 +2018,398 @@ export function DashboardPage() {
                 </div>
               )}
             </div>
+            {index === 0 && <div className="meal-divider-vertical"></div>}
+            </Fragment>
+          ))}
+        </div>
+      </section>
+      )}
+
+      {dashboardSettings.showOrdersInPreparation && (
+      <section className="page-stack meal-section">
+        <header className="meal-section-header">
+          <div>
+            <h2>Pedidos em Preparo</h2>
+            <p className="meal-section-subtitle">
+              {stats.completed} de {stats.total} concluídos • {stats.percent}% de progresso
+            </p>
+          </div>
+        </header>
+
+        {(showForm && isOrderInPreparation) && (
+          <div className={`meal-form meal-form-desktop ${editingId ? 'meal-form-edit' : ''}`}>
+            <div className="meal-form-header">
+              <h3>{editingId ? 'Editar pedido' : 'Novo pedido em preparo'}</h3>
+              <button
+                type="button"
+                className="meal-form-close"
+                onClick={() => {
+                  setShowForm(false)
+                  setEditingId(null)
+                  setFormData(initialForm)
+                  setShowFabMenu(false)
+                  setIsOrderInPreparation(false)
+                }}
+                aria-label="Fechar formulário"
+              >
+                ×
+              </button>
+            </div>
+            <div className="meal-form-row">
+              <label>
+                <span>Título</span>
+                <input
+                  type="text"
+                  value={formData.title}
+                  onChange={(event) => setFormData((prev) => ({ ...prev, title: event.target.value }))}
+                  placeholder="Ex.: Avocado toast"
+                />
+              </label>
+              <label>
+                <span>Calorias</span>
+                <div className="calories-input-group">
+                  <div className="input-with-select">
+                    <input
+                      type="text"
+                      value={formData.calories}
+                      onChange={(event) => setFormData((prev) => ({ ...prev, calories: event.target.value }))}
+                      placeholder="Ex.: 250"
+                    />
+                    <select
+                      value={formData.caloriesUnit}
+                      className="unit-select unit-select-fixed"
+                      disabled
+                    >
+                      <option value="Cal">Cal</option>
+                    </select>
+                  </div>
+                  <div className="input-with-select">
+                    <input
+                      type="text"
+                      value={formData.caloriesMeasureValue}
+                      onChange={(event) => setFormData((prev) => ({ ...prev, caloriesMeasureValue: event.target.value }))}
+                      placeholder="Ex.: 100"
+                    />
+                    <select
+                      value={formData.caloriesMeasure}
+                      onChange={(event) => setFormData((prev) => ({ ...prev, caloriesMeasure: event.target.value }))}
+                      className="unit-select"
+                    >
+                      <option value="">-</option>
+                      <option value="KG">KG</option>
+                      <option value="g">g</option>
+                      <option value="Ml">Ml</option>
+                      <option value="L">L</option>
+                      <option value="mg">mg</option>
+                      <option value="ml">ml</option>
+                    </select>
+                  </div>
+                </div>
+              </label>
+            </div>
+            <div className="meal-form-row">
+              <label>
+                <span>Ingredientes</span>
+                <input
+                  type="text"
+                  value={formData.ingredients}
+                  onChange={(event) => handleIngredientsChange(event.target.value)}
+                  onKeyDown={handleIngredientsKeyDown}
+                  placeholder="Ex.: Avocado, Bread, Eggs"
+                />
+                {getIngredientsList().length > 0 && (
+                  <div className="ingredients-chips">
+                    {getIngredientsList().map((ingredient, index) => (
+                      <span 
+                        key={index} 
+                        className="ingredient-chip"
+                        onClick={() => handleRemoveIngredient(index)}
+                        style={{ cursor: 'pointer' }}
+                        title="Clique para remover"
+                      >
+                        {getIngredientEmoji(ingredient)}{capitalizeFirst(ingredient)}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </label>
+              <label>
+                <span>Tempo</span>
+                <div className="input-with-select">
+                  <input
+                    type="text"
+                    value={formData.time}
+                    onChange={(event) => setFormData((prev) => ({ ...prev, time: event.target.value }))}
+                    placeholder="Ex.: 15"
+                  />
+                  <select
+                    value={formData.timeUnit}
+                    onChange={(event) => setFormData((prev) => ({ ...prev, timeUnit: event.target.value }))}
+                    className="unit-select"
+                  >
+                    <option value="Seg">Seg</option>
+                    <option value="Min">Min</option>
+                    <option value="Hrs">Hrs</option>
+                    <option value="KG">KG</option>
+                    <option value="G">G</option>
+                    <option value="Litro">Litro</option>
+                  </select>
+                </div>
+              </label>
+              <label>
+                <span>Custo (R$)</span>
+                <input
+                  type="text"
+                  value={formData.cost}
+                  onChange={(event) => setFormData((prev) => ({ ...prev, cost: event.target.value }))}
+                  placeholder="Ex.: 8.20"
+                />
+              </label>
+              <label>
+                <span>Status</span>
+                <select
+                  value={formData.status}
+                  onChange={(event) => setFormData((prev) => ({ ...prev, status: event.target.value }))}
+                >
+                  <option value="fazer">Fazer</option>
+                  <option value="finalizado">Finalizado</option>
+                </select>
+              </label>
+            </div>
+            <div className="meal-form-actions">
+              {editingId && (
+                <button
+                  type="button"
+                  className="delete-meal-btn"
+                  onClick={() => {
+                    handleDelete(editingId)
+                    setShowForm(false)
+                    setEditingId(null)
+                    setFormData(initialForm)
+                    setShowFabMenu(false)
+                    setIsOrderInPreparation(false)
+                  }}
+                  title="Excluir pedido"
+                >
+                  <FiTrash2 size={18} />
+                </button>
+              )}
+              <button type="button" className="primary-btn" onClick={handleSubmit}>
+                {editingId ? 'Atualizar pedido' : 'Salvar pedido'}
+              </button>
+            </div>
+          </div>
+        )}
+
+        <div className="meal-list">
+          {meals.filter((meal) => meal.status === 'fazer' || meal.status === 'finalizado').map((meal) => (
+            <div key={meal.id} style={{ width: '100%' }}>
+              <article
+                className="meal-card"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleEdit(meal)
+                }}
+              >
+                <div className="meal-card-content">
+                  <header>
+                    <h3>{meal.title}</h3>
+                    <span className={`status-pill status-${meal.status}`}>{meal.status}</span>
+                  </header>
+                  <div className="meal-details">
+                    <span className="meal-detail-item">
+                      <FiClock size={14} />
+                      {meal.time}
+                    </span>
+                    {meal.cost && (
+                      <span className="meal-detail-item">
+                        <FiDollarSign size={14} />
+                        R$ {parseFloat(meal.cost).toFixed(2)}
+                      </span>
+                    )}
+                    <span className="meal-detail-item">
+                      <FiThermometer size={14} />
+                      {formatCalories(meal.calories)}
+                    </span>
+                  </div>
+                  <div className="meal-ingredients">
+                    <span className="meal-ingredients-label">Ingredientes:</span>
+                    <div className="ingredients-chips">
+                      {meal.ingredients?.split(',').map((ing, index) => {
+                        const trimmedIng = ing.trim()
+                        return trimmedIng ? (
+                          <span key={index} className="ingredient-chip">
+                            {getIngredientEmoji(trimmedIng)}{capitalizeFirst(trimmedIng)}
+                          </span>
+                        ) : null
+                      })}
+                    </div>
+                  </div>
+                </div>
+              </article>
+              {showForm && editingId === meal.id && isOrderInPreparation && (
+                <div className="meal-form meal-form-mobile">
+                  <div className="meal-form-header">
+                    <h3>Editar pedido</h3>
+                    <button
+                      type="button"
+                      className="meal-form-close"
+                      onClick={() => {
+                        setShowForm(false)
+                        setEditingId(null)
+                        setFormData(initialForm)
+                        setShowFabMenu(false)
+                        setIsOrderInPreparation(false)
+                      }}
+                      aria-label="Fechar formulário"
+                    >
+                      ×
+                    </button>
+                  </div>
+                  <div className="meal-form-row">
+                    <label>
+                      <span>Título</span>
+                      <input
+                        type="text"
+                        value={formData.title}
+                        onChange={(event) => setFormData((prev) => ({ ...prev, title: event.target.value }))}
+                        placeholder="Ex.: Avocado toast"
+                      />
+                    </label>
+                    <label>
+                      <span>Calorias</span>
+                      <div className="calories-input-group">
+                        <div className="input-with-select">
+                          <input
+                            type="text"
+                            value={formData.calories}
+                            onChange={(event) => setFormData((prev) => ({ ...prev, calories: event.target.value }))}
+                            placeholder="Ex.: 250"
+                          />
+                          <select
+                            value={formData.caloriesUnit}
+                            className="unit-select unit-select-fixed"
+                            disabled
+                          >
+                            <option value="Cal">Cal</option>
+                          </select>
+                        </div>
+                        <div className="input-with-select">
+                          <input
+                            type="text"
+                            value={formData.caloriesMeasureValue}
+                            onChange={(event) => setFormData((prev) => ({ ...prev, caloriesMeasureValue: event.target.value }))}
+                            placeholder="Ex.: 100"
+                          />
+                          <select
+                            value={formData.caloriesMeasure}
+                            onChange={(event) => setFormData((prev) => ({ ...prev, caloriesMeasure: event.target.value }))}
+                            className="unit-select"
+                          >
+                            <option value="">-</option>
+                            <option value="KG">KG</option>
+                            <option value="g">g</option>
+                            <option value="Ml">Ml</option>
+                            <option value="L">L</option>
+                            <option value="mg">mg</option>
+                            <option value="ml">ml</option>
+                          </select>
+                        </div>
+                      </div>
+                    </label>
+                  </div>
+                  <div className="meal-form-row">
+                    <label>
+                      <span>Ingredientes</span>
+                      <input
+                        type="text"
+                        value={formData.ingredients}
+                        onChange={(event) => handleIngredientsChange(event.target.value)}
+                        onKeyDown={handleIngredientsKeyDown}
+                        placeholder="Ex.: Avocado, Bread, Eggs"
+                      />
+                      {getIngredientsList().length > 0 && (
+                        <div className="ingredients-chips">
+                          {getIngredientsList().map((ingredient, index) => (
+                            <span 
+                              key={index} 
+                              className="ingredient-chip"
+                              onClick={() => handleRemoveIngredient(index)}
+                              style={{ cursor: 'pointer' }}
+                              title="Clique para remover"
+                            >
+                              {getIngredientEmoji(ingredient)}{capitalizeFirst(ingredient)}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </label>
+                    <label>
+                      <span>Tempo</span>
+                      <div className="input-with-select">
+                        <input
+                          type="text"
+                          value={formData.time}
+                          onChange={(event) => setFormData((prev) => ({ ...prev, time: event.target.value }))}
+                          placeholder="Ex.: 15"
+                        />
+                        <select
+                          value={formData.timeUnit}
+                          onChange={(event) => setFormData((prev) => ({ ...prev, timeUnit: event.target.value }))}
+                          className="unit-select"
+                        >
+                          <option value="Seg">Seg</option>
+                          <option value="Min">Min</option>
+                          <option value="Hrs">Hrs</option>
+                          <option value="KG">KG</option>
+                          <option value="G">G</option>
+                          <option value="Litro">Litro</option>
+                        </select>
+                      </div>
+                    </label>
+                    <label>
+                      <span>Custo (R$)</span>
+                      <input
+                        type="text"
+                        value={formData.cost}
+                        onChange={(event) => setFormData((prev) => ({ ...prev, cost: event.target.value }))}
+                        placeholder="Ex.: 8.20"
+                      />
+                    </label>
+                    <label>
+                      <span>Status</span>
+                      <select
+                        value={formData.status}
+                        onChange={(event) => setFormData((prev) => ({ ...prev, status: event.target.value }))}
+                      >
+                        <option value="fazer">Fazer</option>
+                        <option value="finalizado">Finalizado</option>
+                      </select>
+                    </label>
+                  </div>
+                  <div className="meal-form-actions">
+                    <button
+                      type="button"
+                      className="delete-meal-btn"
+                      onClick={() => {
+                        handleDelete(editingId)
+                        setShowForm(false)
+                        setEditingId(null)
+                        setFormData(initialForm)
+                        setShowFabMenu(false)
+                        setIsOrderInPreparation(false)
+                      }}
+                      title="Excluir pedido"
+                    >
+                      <FiTrash2 size={18} />
+                    </button>
+                    <button type="button" className="primary-btn" onClick={handleSubmit}>
+                      Atualizar pedido
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           ))}
         </div>
       </section>
@@ -1993,15 +2424,25 @@ export function DashboardPage() {
               className="fab-menu-item"
               onClick={(e) => {
                 e.stopPropagation()
-                setShowForm(true)
-                setShowFabMenu(false)
-                setFormData(initialForm)
-                setEditingId(null)
+                handleNewMeal()
               }}
             >
               <FiPlus size={20} />
               <span>Nova refeição</span>
             </button>
+            {dashboardSettings.showOrdersInPreparation && (
+              <button
+                type="button"
+                className="fab-menu-item"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleNewOrder()
+                }}
+              >
+                <FiPlus size={20} />
+                <span>Novo pedido em preparo</span>
+              </button>
+            )}
           </div>
         )}
         <button
@@ -2011,7 +2452,7 @@ export function DashboardPage() {
             e.stopPropagation()
             setShowFabMenu(!showFabMenu)
           }}
-          aria-label="Nova refeição"
+          aria-label="Adicionar"
         >
           <FiPlus size={24} />
         </button>
