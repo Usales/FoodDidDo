@@ -24,6 +24,7 @@ import { useTheme } from '../../contexts/ThemeContext'
 import './MainLayout.css'
 
 const DASHBOARD_SETTINGS_KEY = 'dashboardSettings'
+const SIDEBAR_SETTINGS_KEY = 'sidebarSettings'
 
 const navigation = [
   {
@@ -65,6 +66,11 @@ export function MainLayout({ onLogout, user }) {
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, transform: 'translate(-50%, -50%)' })
   const [isMobile, setIsMobile] = useState(false)
   const [dashboardSettings, setDashboardSettings] = useState({ showHeader: false })
+  const [sidebarSettings, setSidebarSettings] = useState({
+    showVisaoGeral: true,
+    showAnalises: true,
+    showOperacao: true
+  })
   const dropdownRef = useRef(null)
   const userChipRef = useRef(null)
   const mobileMenuRef = useRef(null)
@@ -125,6 +131,52 @@ export function MainLayout({ onLogout, user }) {
     readSettings()
     window.addEventListener('dashboardSettingsChanged', handleCustom)
     return () => window.removeEventListener('dashboardSettingsChanged', handleCustom)
+  }, [])
+
+  // Carregar e reagir às configurações da Sidebar
+  useEffect(() => {
+    const readSidebarSettings = () => {
+      try {
+        const saved = localStorage.getItem(SIDEBAR_SETTINGS_KEY)
+        if (!saved) {
+          setSidebarSettings({
+            showVisaoGeral: true,
+            showAnalises: true,
+            showOperacao: true
+          })
+          return
+        }
+        const parsed = JSON.parse(saved)
+        setSidebarSettings({
+          showVisaoGeral: typeof parsed?.showVisaoGeral === 'boolean' ? parsed.showVisaoGeral : true,
+          showAnalises: typeof parsed?.showAnalises === 'boolean' ? parsed.showAnalises : true,
+          showOperacao: typeof parsed?.showOperacao === 'boolean' ? parsed.showOperacao : true
+        })
+      } catch {
+        setSidebarSettings({
+          showVisaoGeral: true,
+          showAnalises: true,
+          showOperacao: true
+        })
+      }
+    }
+
+    const handleSidebarSettingsChange = (event) => {
+      const next = event?.detail
+      if (next && typeof next === 'object') {
+        setSidebarSettings({
+          showVisaoGeral: typeof next.showVisaoGeral === 'boolean' ? next.showVisaoGeral : true,
+          showAnalises: typeof next.showAnalises === 'boolean' ? next.showAnalises : true,
+          showOperacao: typeof next.showOperacao === 'boolean' ? next.showOperacao : true
+        })
+      } else {
+        readSidebarSettings()
+      }
+    }
+
+    readSidebarSettings()
+    window.addEventListener('sidebarSettingsChanged', handleSidebarSettingsChange)
+    return () => window.removeEventListener('sidebarSettingsChanged', handleSidebarSettingsChange)
   }, [])
 
   // Verificar se é mobile
@@ -199,19 +251,26 @@ export function MainLayout({ onLogout, user }) {
           <img src="/images_/2.png" alt="FoodIDDO" />
         </div>
         <nav>
-          {navigation.map((group) => (
-            <div key={group.section} className="sidebar-section">
-              <span className="sidebar-section-label">{group.section}</span>
-              {group.items.map((item) => (
-                <NavLink key={item.path} to={item.path} className={({ isActive }) => `sidebar-link${isActive ? ' active' : ''}`}>
-                  <span aria-hidden="true" className="sidebar-link-icon">
-                    {item.icon}
-                  </span>
-                  {item.label}
-                </NavLink>
-              ))}
-            </div>
-          ))}
+          {navigation
+            .filter((group) => {
+              if (group.section === 'Visão Geral') return sidebarSettings.showVisaoGeral
+              if (group.section === 'Análises') return sidebarSettings.showAnalises
+              if (group.section === 'Operação') return sidebarSettings.showOperacao
+              return true
+            })
+            .map((group) => (
+              <div key={group.section} className="sidebar-section">
+                <span className="sidebar-section-label">{group.section}</span>
+                {group.items.map((item) => (
+                  <NavLink key={item.path} to={item.path} className={({ isActive }) => `sidebar-link${isActive ? ' active' : ''}`}>
+                    <span aria-hidden="true" className="sidebar-link-icon">
+                      {item.icon}
+                    </span>
+                    {item.label}
+                  </NavLink>
+                ))}
+              </div>
+            ))}
         </nav>
         <div className="sidebar-footer">
           <button type="button" className="logout-btn" onClick={onLogout}>
@@ -412,22 +471,29 @@ export function MainLayout({ onLogout, user }) {
               </button>
             </div>
             <nav className="mobile-menu-nav">
-              {navigation.map((group) => (
-                <div key={group.section} className="mobile-menu-section">
-                  <span className="mobile-menu-section-label">{group.section}</span>
-                  {group.items.map((item) => (
-                    <NavLink
-                      key={item.path}
-                      to={item.path}
-                      className={({ isActive }) => `mobile-menu-link${isActive ? ' active' : ''}`}
-                      onClick={closeMobileMenu}
-                    >
-                      <span className="mobile-menu-link-icon">{item.icon}</span>
-                      <span className="mobile-menu-link-label">{item.label}</span>
-                    </NavLink>
-                  ))}
-                </div>
-              ))}
+              {navigation
+                .filter((group) => {
+                  if (group.section === 'Visão Geral') return sidebarSettings.showVisaoGeral
+                  if (group.section === 'Análises') return sidebarSettings.showAnalises
+                  if (group.section === 'Operação') return sidebarSettings.showOperacao
+                  return true
+                })
+                .map((group) => (
+                  <div key={group.section} className="mobile-menu-section">
+                    <span className="mobile-menu-section-label">{group.section}</span>
+                    {group.items.map((item) => (
+                      <NavLink
+                        key={item.path}
+                        to={item.path}
+                        className={({ isActive }) => `mobile-menu-link${isActive ? ' active' : ''}`}
+                        onClick={closeMobileMenu}
+                      >
+                        <span className="mobile-menu-link-icon">{item.icon}</span>
+                        <span className="mobile-menu-link-label">{item.label}</span>
+                      </NavLink>
+                    ))}
+                  </div>
+                ))}
             </nav>
             <div className="mobile-menu-footer">
               <button type="button" className="mobile-menu-logout" onClick={onLogout}>

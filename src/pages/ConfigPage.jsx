@@ -10,6 +10,7 @@ import './ConfigPage.css'
 
 const DASHBOARD_SETTINGS_KEY = 'dashboardSettings'
 const CASHFLOW_PAGE_SETTINGS_KEY = 'cashflowPageSettings'
+const SIDEBAR_SETTINGS_KEY = 'sidebarSettings'
 
 const defaultDashboardSettings = {
   // Quando true, oculta todos os cabeçalhos do layout/Home
@@ -27,6 +28,12 @@ const defaultCashflowPageSettings = {
   showMovementsSection: true
 }
 
+const defaultSidebarSettings = {
+  showVisaoGeral: true,
+  showAnalises: true,
+  showOperacao: true
+}
+
 export function ConfigPage() {
   const { theme, setTheme } = useTheme()
   const exportData = useAppStore((state) => state.exportData)
@@ -35,6 +42,7 @@ export function ConfigPage() {
   const [settings, setSettings] = useState(() => getAppSettings())
   const [dashboardSettings, setDashboardSettings] = useState(defaultDashboardSettings)
   const [cashflowPageSettings, setCashflowPageSettings] = useState(defaultCashflowPageSettings)
+  const [sidebarSettings, setSidebarSettings] = useState(defaultSidebarSettings)
   const [activeTab, setActiveTab] = useState('geral')
 
   // Carregar preferências gerais (moeda/idioma/backup) do localStorage
@@ -68,6 +76,19 @@ export function ConfigPage() {
     }
   }, [])
 
+  // Carregar configurações da sidebar do localStorage
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(SIDEBAR_SETTINGS_KEY)
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        setSidebarSettings({ ...defaultSidebarSettings, ...parsed })
+      }
+    } catch (error) {
+      console.error('Erro ao carregar configurações da sidebar:', error)
+    }
+  }, [])
+
   // Salvar configurações do dashboard no localStorage
   const saveDashboardSettings = (newSettings) => {
     try {
@@ -88,6 +109,18 @@ export function ConfigPage() {
       window.dispatchEvent(new CustomEvent('cashflowPageSettingsChanged', { detail: newSettings }))
     } catch (error) {
       console.error('Erro ao salvar configurações do fluxo de caixa:', error)
+    }
+  }
+
+  // Salvar configurações da sidebar no localStorage
+  const saveSidebarSettings = (newSettings) => {
+    try {
+      localStorage.setItem(SIDEBAR_SETTINGS_KEY, JSON.stringify(newSettings))
+      setSidebarSettings(newSettings)
+      // Atualizar UI em tempo real sem reload
+      window.dispatchEvent(new CustomEvent('sidebarSettingsChanged', { detail: newSettings }))
+    } catch (error) {
+      console.error('Erro ao salvar configurações da sidebar:', error)
     }
   }
 
@@ -345,6 +378,91 @@ export function ConfigPage() {
                   value={settings.backupEmail}
                   onChange={handleChange('backupEmail')}
                   placeholder="exemplo@empresa.com"
+                />
+              </div>
+            </div>
+          </section>
+        </div>
+      )
+    }
+
+    if (activeTab === 'barra-lateral') {
+      return (
+        <div
+          id="config-panel-barra-lateral"
+          role="tabpanel"
+          aria-labelledby="config-tab-barra-lateral"
+          className="config-tab-panel"
+        >
+          <section className="config-section">
+            <h2 className="config-section-title">Barra Lateral</h2>
+            <p className="config-section-description">
+              Configure quais seções devem ser exibidas na barra lateral do sistema.
+            </p>
+            <div className="config-dashboard-settings">
+              <div className="config-dashboard-item">
+                <div className="config-dashboard-item-content">
+                  <div className="config-dashboard-item-header">
+                    <h3 className="config-dashboard-item-title">Visão Geral</h3>
+                    <Tooltip content="Exibe a seção Visão Geral na barra lateral com links para Home, Caixa, Fluxo de Caixa, Orçamentos, Ingredientes e Receitas">
+                      <span className="tooltip-icon">ⓘ</span>
+                    </Tooltip>
+                  </div>
+                  <p className="config-dashboard-item-description">
+                    Mostra a seção Visão Geral com seus itens de navegação
+                  </p>
+                </div>
+                <ToggleSwitch
+                  checked={sidebarSettings.showVisaoGeral}
+                  onChange={() => {
+                    const newSettings = { ...sidebarSettings, showVisaoGeral: !sidebarSettings.showVisaoGeral }
+                    saveSidebarSettings(newSettings)
+                  }}
+                  label={sidebarSettings.showVisaoGeral ? 'Exibindo' : 'Oculto'}
+                />
+              </div>
+
+              <div className="config-dashboard-item">
+                <div className="config-dashboard-item-content">
+                  <div className="config-dashboard-item-header">
+                    <h3 className="config-dashboard-item-title">Análises</h3>
+                    <Tooltip content="Exibe a seção Análises na barra lateral com links para Custos, Simulador, Lucratividade, Custos Fixos, Pricing e Sensibilidade">
+                      <span className="tooltip-icon">ⓘ</span>
+                    </Tooltip>
+                  </div>
+                  <p className="config-dashboard-item-description">
+                    Mostra a seção Análises com seus itens de navegação
+                  </p>
+                </div>
+                <ToggleSwitch
+                  checked={sidebarSettings.showAnalises}
+                  onChange={() => {
+                    const newSettings = { ...sidebarSettings, showAnalises: !sidebarSettings.showAnalises }
+                    saveSidebarSettings(newSettings)
+                  }}
+                  label={sidebarSettings.showAnalises ? 'Exibindo' : 'Oculto'}
+                />
+              </div>
+
+              <div className="config-dashboard-item">
+                <div className="config-dashboard-item-content">
+                  <div className="config-dashboard-item-header">
+                    <h3 className="config-dashboard-item-title">Operação</h3>
+                    <Tooltip content="Exibe a seção Operação na barra lateral com links para Estoque, Relatórios e Configurações">
+                      <span className="tooltip-icon">ⓘ</span>
+                    </Tooltip>
+                  </div>
+                  <p className="config-dashboard-item-description">
+                    Mostra a seção Operação com seus itens de navegação
+                  </p>
+                </div>
+                <ToggleSwitch
+                  checked={sidebarSettings.showOperacao}
+                  onChange={() => {
+                    const newSettings = { ...sidebarSettings, showOperacao: !sidebarSettings.showOperacao }
+                    saveSidebarSettings(newSettings)
+                  }}
+                  label={sidebarSettings.showOperacao ? 'Exibindo' : 'Oculto'}
                 />
               </div>
             </div>
@@ -719,6 +837,17 @@ export function ConfigPage() {
             onClick={() => setActiveTab('geral')}
           >
             Geral
+          </button>
+          <button
+            id="config-tab-barra-lateral"
+            type="button"
+            role="tab"
+            className={`config-tab ${activeTab === 'barra-lateral' ? 'active' : ''}`}
+            aria-selected={activeTab === 'barra-lateral'}
+            aria-controls="config-panel-barra-lateral"
+            onClick={() => setActiveTab('barra-lateral')}
+          >
+            Barra Lateral
           </button>
           <button
             id="config-tab-cabecalho"
