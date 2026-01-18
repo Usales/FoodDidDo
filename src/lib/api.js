@@ -103,6 +103,12 @@ export const api = {
 
   // Backup/Restore
   exportData: () => request('/api/export'),
-  restoreData: (data) => request('/api/restore', { method: 'POST', body: data })
+  restoreData: (data) => request('/api/restore', { method: 'POST', body: data }),
+
+  // Pedidos/Vendas (Orders)
+  getOrders: () => request('/api/orders'),
+  getOrder: (id) => request(`/api/orders/${id}`),
+  createOrder: (data) => request('/api/orders', { method: 'POST', body: data }),
+  updateOrder: (id, data) => request(`/api/orders/${id}`, { method: 'PATCH', body: data })
 }
 
