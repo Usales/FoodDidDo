@@ -207,7 +207,23 @@ export function CashboxPage() {
         }
       }
 
-      // 3. Registrar entrada no fluxo de caixa (vinculado ao pedido)
+      // 3. Criar movimentações de estoque (baixa automática)
+      for (const movement of stockMovementsToCreate) {
+        try {
+          await addStockMovement({
+            id: crypto.randomUUID(),
+            ingredientId: movement.ingredientId,
+            type: 'saída',
+            quantity: movement.quantity,
+            reference: movement.reference
+          })
+        } catch (error) {
+          console.error(`Erro ao baixar estoque do ingrediente ${movement.ingredientName}:`, error)
+          // Continuar com outros ingredientes mesmo se um falhar
+        }
+      }
+
+      // 4. Registrar entrada no fluxo de caixa (vinculado ao pedido)
       await addCashflowEntry({
         id: crypto.randomUUID(),
         type: 'entrada',
