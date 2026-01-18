@@ -1228,10 +1228,24 @@ export function DashboardPage() {
       const saved = localStorage.getItem(DASHBOARD_SETTINGS_KEY)
       if (saved) {
         const parsed = JSON.parse(saved)
-        setDashboardSettings({ ...defaultDashboardSettings, ...parsed })
+        // Garantir que valores não definidos usem false (desmarcado = exibindo)
+        const settings = { ...defaultDashboardSettings }
+        Object.keys(defaultDashboardSettings).forEach(key => {
+          if (parsed[key] === undefined || parsed[key] === null) {
+            settings[key] = false
+          } else {
+            settings[key] = parsed[key]
+          }
+        })
+        setDashboardSettings(settings)
+      } else {
+        // Se não houver valores salvos, usar padrões (todos false = desmarcados = exibindo)
+        setDashboardSettings(defaultDashboardSettings)
       }
     } catch (error) {
       console.error('Erro ao carregar configurações do dashboard:', error)
+      // Em caso de erro, usar padrões
+      setDashboardSettings(defaultDashboardSettings)
     }
 
     // Escutar mudanças nas configurações em tempo real
