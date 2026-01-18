@@ -45,6 +45,9 @@ export function OrdersPage() {
     search: ''
   })
   const [showFilters, setShowFilters] = useState(false)
+  const [cancelModalOpen, setCancelModalOpen] = useState(false)
+  const [selectedOrderId, setSelectedOrderId] = useState(null)
+  const [cancelReason, setCancelReason] = useState('')
 
   // Carregar orders ao montar
   useEffect(() => {
