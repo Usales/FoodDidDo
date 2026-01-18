@@ -116,6 +116,33 @@ export function OrdersPage() {
     })
   }
 
+  const handleCancelOrder = async () => {
+    if (!selectedOrderId || !cancelReason.trim()) {
+      alert('Por favor, informe o motivo do cancelamento.')
+      return
+    }
+
+    try {
+      await updateOrder(selectedOrderId, {
+        status: 'cancelled',
+        notes: `Cancelado: ${cancelReason}`
+      })
+      
+      await loadData()
+      setCancelModalOpen(false)
+      setSelectedOrderId(null)
+      setCancelReason('')
+      alert('Pedido cancelado com sucesso!')
+    } catch (error) {
+      console.error('Erro ao cancelar pedido:', error)
+      alert(`Erro ao cancelar pedido: ${error.message || 'Tente novamente.'}`)
+    }
+  }
+
+  const openCancelModal = (orderId) => {
+    setSelectedOrderId(orderId)
+    setCancelModalOpen(true)
+  }
 
   return (
     <div className="page orders-page">
