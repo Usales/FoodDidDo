@@ -24,6 +24,7 @@ const defaultCashboxData = {
   totalExits: 0
 }
 
+// Valores padrão: false = desmarcado (OFF) = exibindo, true = marcado (ON) = oculto
 const defaultCashflowPageSettings = {
   showStatusSection: false,
   showSummarySection: false,

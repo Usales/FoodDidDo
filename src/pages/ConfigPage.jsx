@@ -21,6 +21,7 @@ const defaultDashboardSettings = {
   showOrdersInPreparation: false
 }
 
+// Valores padrão: false = desmarcado (OFF) = exibindo, true = marcado (ON) = oculto
 const defaultCashflowPageSettings = {
   showStatusSection: false,
   showSummarySection: false,
