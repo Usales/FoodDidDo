@@ -676,7 +676,7 @@ fastify.get('/api/export', async (request, reply) => {
       }
     }
 
-    const [budgets, ingredients, recipes, fixedCosts, cashflow, stockMovements, warehouses, pricing] = await Promise.all([
+    const [budgets, ingredients, recipes, fixedCosts, cashflow, stockMovements, warehouses, pricing, customers, orders] = await Promise.all([
       prisma.budget.findMany(),
       prisma.ingredient.findMany(),
       prisma.recipe.findMany({
@@ -692,7 +692,15 @@ fastify.get('/api/export', async (request, reply) => {
       prisma.warehouse.findMany({
         include: { items: true }
       }),
-      prisma.pricing.findMany()
+      prisma.pricing.findMany(),
+      prisma.customer.findMany().catch(() => []),
+      prisma.order.findMany({
+        include: {
+          items: true,
+          payment: true,
+          invoice: true
+        }
+      }).catch(() => [])
     ])
     
     return {
@@ -713,7 +721,9 @@ fastify.get('/api/export', async (request, reply) => {
         cashflow: cashflow || [],
         stockMovements: stockMovements || [],
         warehouses: warehouses || [],
-        pricing: pricing || []
+        pricing: pricing || [],
+        customers: customers || [],
+        orders: orders || []
       }
     }
   } catch (error) {
@@ -739,6 +749,11 @@ fastify.post('/api/restore', async (request, reply) => {
     
     // Limpar dados existentes (em ordem para respeitar foreign keys)
     await Promise.all([
+      prisma.orderItem.deleteMany().catch(() => {}),
+      prisma.payment.deleteMany().catch(() => {}),
+      prisma.invoice.deleteMany().catch(() => {}),
+      prisma.order.deleteMany().catch(() => {}),
+      prisma.customer.deleteMany().catch(() => {}),
       prisma.recipeIngredient.deleteMany(),
       prisma.stockMovement.deleteMany(),
       prisma.warehouseItem.deleteMany(),
@@ -980,6 +995,124 @@ fastify.post('/api/restore', async (request, reply) => {
       }
     }
     
+    // 9. Clientes (antes dos pedidos)
+    if (data.customers && Array.isArray(data.customers)) {
+      if (data.customers.length > 0) {
+        await prisma.customer.createMany({
+          data: data.customers.map(c => ({
+            id: c.id,
+            name: c.name,
+            email: c.email || null,
+            cpfCnpj: c.cpfCnpj || null,
+            phone: c.phone || null,
+            address: c.address || null,
+            city: c.city || null,
+            state: c.state || null,
+            zipCode: c.zipCode || null,
+            notes: c.notes || null,
+            createdAt: c.createdAt ? new Date(c.createdAt) : new Date(),
+            updatedAt: c.updatedAt ? new Date(c.updatedAt) : new Date()
+          }))
+        })
+      }
+    }
+    
+    // 10. Pedidos (Orders) com Items, Payment e Invoice
+    if (data.orders && Array.isArray(data.orders)) {
+      for (const order of data.orders) {
+        const { items, payment, invoice, ...orderData } = order
+        
+        const createdOrder = await prisma.order.create({
+          data: {
+            id: orderData.id,
+            customerId: orderData.customerId || null,
+            orderNumber: orderData.orderNumber || null,
+            status: orderData.status || 'pending',
+            total: Number(orderData.total),
+            subtotal: Number(orderData.subtotal || orderData.total),
+            discount: Number(orderData.discount || 0),
+            tax: Number(orderData.tax || 0),
+            deliveryFee: Number(orderData.deliveryFee || 0),
+            notes: orderData.notes || null,
+            createdAt: orderData.createdAt ? new Date(orderData.createdAt) : new Date(),
+            updatedAt: orderData.updatedAt ? new Date(orderData.updatedAt) : new Date()
+          }
+        })
+        
+        // Restaurar items do pedido
+        if (items && Array.isArray(items) && items.length > 0) {
+          await prisma.orderItem.createMany({
+            data: items.map(item => ({
+              id: item.id,
+              orderId: createdOrder.id,
+              recipeId: item.recipeId || null,
+              recipeName: item.recipeName || item.name,
+              name: item.name,
+              quantity: Number(item.quantity),
+              unitPrice: Number(item.unitPrice),
+              totalPrice: Number(item.totalPrice || (item.unitPrice * item.quantity)),
+              notes: item.notes || null,
+              createdAt: item.createdAt ? new Date(item.createdAt) : new Date()
+            }))
+          })
+        }
+        
+        // Restaurar pagamento
+        if (payment) {
+          await prisma.payment.create({
+            data: {
+              id: payment.id,
+              orderId: createdOrder.id,
+              amount: Number(payment.amount),
+              method: payment.method || 'cash',
+              status: payment.status || 'pending',
+              provider: payment.provider || null,
+              providerId: payment.providerId || null,
+              qrCode: payment.qrCode || null,
+              qrCodeText: payment.qrCodeText || null,
+              barcode: payment.barcode || null,
+              barcodeUrl: payment.barcodeUrl || null,
+              pixCopyPaste: payment.pixCopyPaste || null,
+              expirationDate: payment.expirationDate ? new Date(payment.expirationDate) : null,
+              paidAt: payment.paidAt ? new Date(payment.paidAt) : null,
+              failureReason: payment.failureReason || null,
+              metadata: payment.metadata || null,
+              createdAt: payment.createdAt ? new Date(payment.createdAt) : new Date(),
+              updatedAt: payment.updatedAt ? new Date(payment.updatedAt) : new Date()
+            }
+          })
+        }
+        
+        // Restaurar nota fiscal (se houver)
+        if (invoice) {
+          await prisma.invoice.create({
+            data: {
+              id: invoice.id,
+              orderId: createdOrder.id,
+              type: invoice.type || 'NFCe',
+              number: invoice.number || null,
+              series: invoice.series || null,
+              accessKey: invoice.accessKey || null,
+              status: invoice.status || 'pending',
+              provider: invoice.provider || null,
+              providerId: invoice.providerId || null,
+              xml: invoice.xml || null,
+              xmlUrl: invoice.xmlUrl || null,
+              pdfUrl: invoice.pdfUrl || null,
+              pdfBase64: invoice.pdfBase64 || null,
+              cancellationReason: invoice.cancellationReason || null,
+              cancelledAt: invoice.cancelledAt ? new Date(invoice.cancelledAt) : null,
+              issuedAt: invoice.issuedAt ? new Date(invoice.issuedAt) : null,
+              errorMessage: invoice.errorMessage || null,
+              metadata: invoice.metadata || null,
+              createdAt: invoice.createdAt ? new Date(invoice.createdAt) : new Date(),
+              updatedAt: invoice.updatedAt ? new Date(invoice.updatedAt) : new Date()
+            }
+          })
+        }
+      }
+    }
+    
     return { 
       success: true,
       message: 'Dados restaurados com sucesso',
@@ -991,13 +1124,214 @@ fastify.post('/api/restore', async (request, reply) => {
         pricing: data.pricing?.length || 0,
         cashflow: data.cashflow?.length || 0,
         stockMovements: data.stockMovements?.length || 0,
-        warehouses: data.warehouses?.length || 0
+        warehouses: data.warehouses?.length || 0,
+        customers: data.customers?.length || 0,
+        orders: data.orders?.length || 0
       }
     }
   } catch (error) {
     fastify.log.error('Erro ao restaurar dados:', error)
     return reply.status(500).send({ 
       error: 'Erro ao restaurar dados', 
+      message: error.message 
+    })
+  }
+})
+
+// ============================================
+// ROTAS DE PEDIDOS/VENDAS (Orders)
+// ============================================
+
+// Listar pedidos
+fastify.get('/api/orders', async (request, reply) => {
+  try {
+    const orders = await prisma.order.findMany({
+      include: {
+        items: true,
+        payment: true,
+        customer: true
+      },
+      orderBy: { createdAt: 'desc' }
+    })
+    return orders
+  } catch (error) {
+    fastify.log.error('Erro ao listar pedidos:', error)
+    return reply.status(500).send({ 
+      error: 'Erro ao listar pedidos', 
+      message: error.message 
+    })
+  }
+})
+
+// Buscar pedido específico
+fastify.get('/api/orders/:id', async (request, reply) => {
+  try {
+    const { id } = request.params
+    const order = await prisma.order.findUnique({
+      where: { id },
+      include: {
+        items: true,
+        payment: true,
+        customer: true
+      }
+    })
+    
+    if (!order) {
+      return reply.status(404).send({ 
+        error: 'Pedido não encontrado', 
+        message: `Pedido com ID ${id} não foi encontrado` 
+      })
+    }
+    
+    return order
+  } catch (error) {
+    fastify.log.error('Erro ao buscar pedido:', error)
+    return reply.status(500).send({ 
+      error: 'Erro ao buscar pedido', 
+      message: error.message 
+    })
+  }
+})
+
+// Criar pedido (com items e payment)
+fastify.post('/api/orders', async (request, reply) => {
+  try {
+    const { 
+      customerId, 
+      orderNumber, 
+      status, 
+      total, 
+      subtotal, 
+      discount, 
+      tax, 
+      deliveryFee, 
+      notes,
+      items, // Array de OrderItems
+      payment // Objeto Payment
+    } = request.body
+    
+    // Validar dados obrigatórios
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      return reply.status(400).send({ 
+        error: 'Dados inválidos', 
+        message: 'O pedido deve conter pelo menos um item' 
+      })
+    }
+    
+    if (!total || total <= 0) {
+      return reply.status(400).send({ 
+        error: 'Dados inválidos', 
+        message: 'O total do pedido deve ser maior que zero' 
+      })
+    }
+    
+    // Criar pedido com items e payment em uma transação
+    const order = await prisma.$transaction(async (tx) => {
+      // 1. Criar o pedido
+      const createdOrder = await tx.order.create({
+        data: {
+          customerId: customerId || null,
+          orderNumber: orderNumber || null,
+          status: status || 'confirmed',
+          total: Number(total),
+          subtotal: Number(subtotal || total),
+          discount: Number(discount || 0),
+          tax: Number(tax || 0),
+          deliveryFee: Number(deliveryFee || 0),
+          notes: notes || null
+        }
+      })
+      
+      // 2. Criar os itens do pedido
+      const orderItems = await Promise.all(
+        items.map(async (item) => {
+          return await tx.orderItem.create({
+            data: {
+              orderId: createdOrder.id,
+              recipeId: item.recipeId || null,
+              recipeName: item.recipeName || item.name,
+              name: item.name,
+              quantity: Number(item.quantity),
+              unitPrice: Number(item.unitPrice),
+              totalPrice: Number(item.totalPrice || (item.unitPrice * item.quantity)),
+              notes: item.notes || null
+            }
+          })
+        })
+      )
+      
+      // 3. Criar o pagamento (se fornecido)
+      let createdPayment = null
+      if (payment) {
+        createdPayment = await tx.payment.create({
+          data: {
+            orderId: createdOrder.id,
+            amount: Number(payment.amount || total),
+            method: payment.method || 'cash',
+            status: payment.status || 'paid',
+            provider: payment.provider || null,
+            providerId: payment.providerId || null,
+            qrCode: payment.qrCode || null,
+            qrCodeText: payment.qrCodeText || null,
+            barcode: payment.barcode || null,
+            barcodeUrl: payment.barcodeUrl || null,
+            pixCopyPaste: payment.pixCopyPaste || null,
+            expirationDate: payment.expirationDate ? new Date(payment.expirationDate) : null,
+            paidAt: payment.paidAt ? new Date(payment.paidAt) : (payment.status === 'paid' ? new Date() : null),
+            failureReason: payment.failureReason || null,
+            metadata: payment.metadata || null
+          }
+        })
+      }
+      
+      // Retornar pedido completo
+      return {
+        ...createdOrder,
+        items: orderItems,
+        payment: createdPayment
+      }
+    })
+    
+    return order
+  } catch (error) {
+    fastify.log.error('Erro ao criar pedido:', error)
+    return reply.status(500).send({ 
+      error: 'Erro ao criar pedido', 
+      message: error.message 
+    })
+  }
+})
+
+// Atualizar status do pedido (para cancelamento, etc)
+fastify.patch('/api/orders/:id', async (request, reply) => {
+  try {
+    const { id } = request.params
+    const { status, notes } = request.body
+    
+    const order = await prisma.order.update({
+      where: { id },
+      data: {
+        ...(status && { status }),
+        ...(notes !== undefined && { notes })
+      },
+      include: {
+        items: true,
+        payment: true,
+        customer: true
+      }
+    })
+    
+    return order
+  } catch (error) {
+    fastify.log.error('Erro ao atualizar pedido:', error)
+    if (error.code === 'P2025') {
+      return reply.status(404).send({ 
+        error: 'Pedido não encontrado', 
+        message: error.meta?.cause || 'Pedido não foi encontrado' 
+      })
+    }
+    return reply.status(500).send({ 
+      error: 'Erro ao atualizar pedido', 
       message: error.message 
     })
   }
