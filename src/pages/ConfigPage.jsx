@@ -22,10 +22,10 @@ const defaultDashboardSettings = {
 }
 
 const defaultCashflowPageSettings = {
-  showStatusSection: true,
-  showSummarySection: true,
-  showDetailsSection: true,
-  showMovementsSection: true
+  showStatusSection: false,
+  showSummarySection: false,
+  showDetailsSection: false,
+  showMovementsSection: false
 }
 
 const defaultSidebarSettings = {
@@ -86,10 +86,23 @@ export function ConfigPage() {
       const saved = localStorage.getItem(CASHFLOW_PAGE_SETTINGS_KEY)
       if (saved) {
         const parsed = JSON.parse(saved)
-        setCashflowPageSettings({ ...defaultCashflowPageSettings, ...parsed })
+        // Garantir que valores não definidos usem false (desmarcado = exibindo)
+        const settings = { ...defaultCashflowPageSettings }
+        Object.keys(defaultCashflowPageSettings).forEach(key => {
+          if (parsed[key] === undefined || parsed[key] === null) {
+            settings[key] = false
+          } else {
+            settings[key] = parsed[key]
+          }
+        })
+        setCashflowPageSettings(settings)
+      } else {
+        // Se não houver valores salvos, usar padrões (todos false = desmarcados)
+        setCashflowPageSettings(defaultCashflowPageSettings)
       }
     } catch (error) {
       console.error('Erro ao carregar configurações do fluxo de caixa:', error)
+      setCashflowPageSettings(defaultCashflowPageSettings)
     }
   }, [])
 
@@ -996,7 +1009,7 @@ export function ConfigPage() {
                     }
                     saveCashflowPageSettings(newSettings)
                   }}
-                  label={cashflowPageSettings.showStatusSection ? 'Exibindo' : 'Oculto'}
+                  label={cashflowPageSettings.showStatusSection ? 'Oculto' : 'Exibindo'}
                 />
               </div>
 
@@ -1021,7 +1034,7 @@ export function ConfigPage() {
                     }
                     saveCashflowPageSettings(newSettings)
                   }}
-                  label={cashflowPageSettings.showSummarySection ? 'Exibindo' : 'Oculto'}
+                  label={cashflowPageSettings.showSummarySection ? 'Oculto' : 'Exibindo'}
                 />
               </div>
 
@@ -1046,7 +1059,7 @@ export function ConfigPage() {
                     }
                     saveCashflowPageSettings(newSettings)
                   }}
-                  label={cashflowPageSettings.showDetailsSection ? 'Exibindo' : 'Oculto'}
+                  label={cashflowPageSettings.showDetailsSection ? 'Oculto' : 'Exibindo'}
                 />
               </div>
 
@@ -1071,7 +1084,7 @@ export function ConfigPage() {
                     }
                     saveCashflowPageSettings(newSettings)
                   }}
-                  label={cashflowPageSettings.showMovementsSection ? 'Exibindo' : 'Oculto'}
+                  label={cashflowPageSettings.showMovementsSection ? 'Oculto' : 'Exibindo'}
                 />
               </div>
             </div>

@@ -25,10 +25,10 @@ const defaultCashboxData = {
 }
 
 const defaultCashflowPageSettings = {
-  showStatusSection: true,
-  showSummarySection: true,
-  showDetailsSection: true,
-  showMovementsSection: true
+  showStatusSection: false,
+  showSummarySection: false,
+  showDetailsSection: false,
+  showMovementsSection: false
 }
 
 export function CashflowPage() {
@@ -83,7 +83,16 @@ export function CashflowPage() {
         const saved = localStorage.getItem(CASHFLOW_PAGE_SETTINGS_KEY)
         if (saved) {
           const parsed = JSON.parse(saved)
-          setCashflowPageSettings({ ...defaultCashflowPageSettings, ...parsed })
+          // Garantir que valores não definidos usem false (desmarcado = exibindo)
+          const settings = { ...defaultCashflowPageSettings }
+          Object.keys(defaultCashflowPageSettings).forEach(key => {
+            if (parsed[key] === undefined || parsed[key] === null) {
+              settings[key] = false
+            } else {
+              settings[key] = parsed[key]
+            }
+          })
+          setCashflowPageSettings(settings)
         } else {
           setCashflowPageSettings(defaultCashflowPageSettings)
         }
@@ -382,7 +391,7 @@ export function CashflowPage() {
   return (
     <div className="page cashflow-page">
       {/* CAMADA 1 — Status do Caixa (fixa e enxuta) */}
-      {cashflowPageSettings.showStatusSection && (
+      {!cashflowPageSettings.showStatusSection && (
         <section className="page-stack">
           <div className="cashflow-status-bar">
             <div className="cashflow-status-left">
@@ -420,7 +429,7 @@ export function CashflowPage() {
       )}
 
       {/* CAMADA 2 — Resumo Financeiro (unificado) */}
-      {cashflowPageSettings.showSummarySection && (
+      {!cashflowPageSettings.showSummarySection && (
         <section className="page-stack">
           <div className="cashflow-layer-label">Resumo Financeiro</div>
           <div className="cashflow-mini-cards">
@@ -449,7 +458,7 @@ export function CashflowPage() {
       )}
 
       {/* CAMADA 3 — Detalhes do Caixa (colapsável) */}
-      {cashflowPageSettings.showDetailsSection && (
+      {!cashflowPageSettings.showDetailsSection && (
         <section className="page-stack">
           <div className="cashflow-layer-label">Detalhes do Caixa</div>
           <button
@@ -515,7 +524,7 @@ export function CashflowPage() {
       )}
 
       {/* CAMADA 4 — Movimentações (foco operacional) */}
-      {cashflowPageSettings.showMovementsSection && (
+      {!cashflowPageSettings.showMovementsSection && (
         <section className="page-stack">
         <div className="page-header">
           <h2 className="cashflow-section-title">Movimentações</h2>
