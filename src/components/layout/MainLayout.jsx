@@ -15,10 +15,9 @@ import {
   AiOutlineFileText,
   AiOutlineSetting,
   AiOutlineRise,
-  AiOutlineWallet,
-  AiOutlineShoppingBag
+  AiOutlineWallet
 } from 'react-icons/ai'
-import { FiLogOut, FiSearch, FiChevronDown, FiMenu, FiX } from 'react-icons/fi'
+import { FiLogOut, FiSearch, FiChevronDown, FiMenu, FiX, FiShoppingBag } from 'react-icons/fi'
 import { HiMoon, HiSun } from 'react-icons/hi'
 import { useState, useEffect, useRef } from 'react'
 import { useTheme } from '../../contexts/ThemeContext'
@@ -54,7 +53,7 @@ const navigation = [
     section: 'Operação',
     items: [
       { path: '/estoque', label: 'Estoque', icon: <AiOutlineInbox /> },
-      { path: '/vendas', label: 'Vendas', icon: <AiOutlineShoppingBag /> },
+      { path: '/vendas', label: 'Vendas', icon: <FiShoppingBag /> },
       { path: '/relatorios', label: 'Relatórios', icon: <AiOutlineFileText /> },
       { path: '/config', label: 'Configurações', icon: <AiOutlineSetting /> }
     ]
