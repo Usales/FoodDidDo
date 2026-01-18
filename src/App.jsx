@@ -20,7 +20,8 @@ import {
   StockPage,
   CashflowPage,
   ReportsPage,
-  ConfigPage
+  ConfigPage,
+  OrdersPage
 } from './pages'
 import './styles/themes.css'
 import './App.css'
@@ -56,6 +57,7 @@ function AppRoutes() {
           <Route path="/estoque" element={<StockPage />} />
           <Route path="/financeiro" element={<CashflowPage />} />
           <Route path="/relatorios" element={<ReportsPage />} />
+          <Route path="/vendas" element={<OrdersPage />} />
           <Route path="/config" element={<ConfigPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
