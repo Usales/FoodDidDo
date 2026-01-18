@@ -311,7 +311,12 @@ export function MainLayout({ onLogout, user }) {
             .filter((group) => {
               if (group.section === 'Visão Geral') return !sidebarSettings.showVisaoGeral
               if (group.section === 'Análises') return !sidebarSettings.showAnalises
-              if (group.section === 'Operação') return !sidebarSettings.showOperacao
+              // Sempre exibir seção Operação se contiver Configurações
+              if (group.section === 'Operação') {
+                const hasConfig = group.items.some(item => item.path === '/config')
+                if (hasConfig) return true // Sempre mostrar seção que contém Configurações
+                return !sidebarSettings.showOperacao
+              }
               return true
             })
             .map((group) => {
@@ -562,7 +567,12 @@ export function MainLayout({ onLogout, user }) {
                 .filter((group) => {
                   if (group.section === 'Visão Geral') return !sidebarSettings.showVisaoGeral
                   if (group.section === 'Análises') return !sidebarSettings.showAnalises
-                  if (group.section === 'Operação') return !sidebarSettings.showOperacao
+                  // Sempre exibir seção Operação se contiver Configurações
+                  if (group.section === 'Operação') {
+                    const hasConfig = group.items.some(item => item.path === '/config')
+                    if (hasConfig) return true // Sempre mostrar seção que contém Configurações
+                    return !sidebarSettings.showOperacao
+                  }
                   return true
                 })
                 .map((group) => {
