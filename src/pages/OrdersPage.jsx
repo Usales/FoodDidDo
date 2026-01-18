@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useAppStore } from '../stores/appStore'
-import { FiX, FiFilter, FiChevronDown, FiChevronUp, FiEye } from 'react-icons/fi'
+import { FiX, FiFilter, FiChevronDown, FiChevronUp, FiEye, FiXCircle } from 'react-icons/fi'
 import { FormModal } from '../components/ui/FormModal'
 import './PageCommon.css'
 import './OrdersPage.css'
@@ -260,6 +260,16 @@ export function OrdersPage() {
                   <strong className="orders-card-total">
                     {formatCurrency(order.total)}
                   </strong>
+                  {order.status !== 'cancelled' && (
+                    <button
+                      type="button"
+                      className="orders-cancel-btn"
+                      onClick={() => openCancelModal(order.id)}
+                      title="Cancelar pedido"
+                    >
+                      <FiXCircle size={18} />
+                    </button>
+                  )}
                   <button
                     type="button"
                     className="orders-expand-btn"
