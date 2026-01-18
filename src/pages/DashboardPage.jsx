@@ -197,7 +197,7 @@ const ingredientEmojis = {
   'macaxeira': '🍠', 'cassava': '🍠', 'mandioca': '🍠',
   'taro': '🍠', 'taro root': '🍠',
   'grão-de-bico': '🟢', 'chickpeas': '🟢',
-  'mostarda': '🥬', 'mustard greens': '🥬',
+  'folha de mostarda': '🥬', 'mustard greens': '🥬',
   'radicchio': '🥬',
   'chicória': '🥬', 'chicory': '🥬',
   'alho-poró': '🥬', 'leek': '🥬',
