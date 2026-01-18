@@ -3,8 +3,67 @@
 .reports-page {
   display: flex;
   flex-direction: column;
-  gap: 2.5rem;
+  gap: 2rem;
   padding: 2rem 0;
+}
+
+/* Header Section */
+.reports-header-section {
+  margin-bottom: 1rem;
+}
+
+.reports-header-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.reports-page-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.reports-page-subtitle {
+  font-size: 1rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* Filters Section */
+.reports-filters-section {
+  margin-bottom: 1rem;
+}
+
+.reports-filters {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.reports-filter-btn {
+  padding: 0.6rem 1.2rem;
+  border-radius: 10px;
+  border: 1px solid var(--border-primary);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-weight: 500;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.reports-filter-btn:hover {
+  background: var(--bg-secondary);
+  border-color: var(--primary);
+}
+
+.reports-filter-btn.active {
+  background: var(--primary);
+  color: #ffffff;
+  border-color: var(--primary);
 }
 
 /* Cards de Indicadores */
@@ -124,8 +183,26 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  min-height: 220px;
+  min-height: 240px;
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.report-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary), var(--primary-light));
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.report-card:hover::before {
+  opacity: 1;
 }
 
 .report-card:hover {
@@ -134,10 +211,29 @@
   border-color: rgba(59, 130, 246, 0.3);
 }
 
+.report-card-icon {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+  opacity: 0.9;
+}
+
 .report-card-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
+}
+
+.report-card-category {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  background: var(--bg-secondary);
+  border-radius: 6px;
 }
 
 .report-card-header h3 {
@@ -223,6 +319,12 @@
 
 .report-btn--excel:active {
   transform: translateY(0);
+}
+
+.report-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
 }
 
 /* Responsividade */

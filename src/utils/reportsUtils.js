@@ -69,6 +69,11 @@ export const generatePDF = (title, content, filename) => {
   // Criar uma nova janela com o conteúdo formatado
   const printWindow = window.open('', '_blank')
   
+  if (!printWindow) {
+    alert('Por favor, permita pop-ups para gerar o PDF.')
+    return
+  }
+  
   const htmlContent = `
     <!DOCTYPE html>
     <html>
@@ -162,14 +167,14 @@ export const generatePDF = (title, content, filename) => {
 export const generateCostsAndProfitsReport = (recipes, pricing = []) => {
   if (!recipes || recipes.length === 0) {
     alert('Não há receitas cadastradas para gerar o relatório.')
-    return
+    return null
   }
 
   // Preparar dados para CSV
   const csvData = recipes.map(recipe => {
     // Buscar preço sugerido se existir
     const pricingEntry = pricing.find(p => p.recipeId === recipe.id)
-    const suggestedPrice = pricingEntry?.suggestedPrice || 0
+    const suggestedPrice = pricingEntry?.price || pricingEntry?.suggestedPrice || 0
     const unitCost = recipe.unitCost || 0
     const profit = suggestedPrice - unitCost
     const margin = suggestedPrice > 0 ? (profit / suggestedPrice) * 100 : 0
@@ -204,7 +209,7 @@ export const generateCostsAndProfitsReport = (recipes, pricing = []) => {
       <tbody>
         ${recipes.map(recipe => {
           const pricingEntry = pricing.find(p => p.recipeId === recipe.id)
-          const suggestedPrice = pricingEntry?.suggestedPrice || 0
+          const suggestedPrice = pricingEntry?.price || pricingEntry?.suggestedPrice || 0
           const unitCost = recipe.unitCost || 0
           const profit = suggestedPrice - unitCost
           const margin = suggestedPrice > 0 ? (profit / suggestedPrice) * 100 : 0
@@ -263,13 +268,24 @@ export const generateMonthlyPerformanceReport = (cashflow = [], budgets = []) =>
     }
   })
 
-  // Adicionar orçamentos
+  // Adicionar orçamentos (usar period se não houver date)
   budgets.forEach(budget => {
-    if (!budget.date) return
-    const date = new Date(budget.date)
-    const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+    let monthKey = null
+    if (budget.date) {
+      const date = new Date(budget.date)
+      monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+    } else if (budget.period) {
+      // Tentar extrair mês/ano do period (ex: "Janeiro/2024")
+      const [monthName, year] = budget.period.split('/')
+      const months = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
+                     'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
+      const monthIndex = months.indexOf(monthName)
+      if (monthIndex !== -1 && year) {
+        monthKey = `${year}-${String(monthIndex + 1).padStart(2, '0')}`
+      }
+    }
     
-    if (monthlyData[monthKey]) {
+    if (monthKey && monthlyData[monthKey]) {
       monthlyData[monthKey].budgets += budget.amount || 0
     }
   })
@@ -360,7 +376,7 @@ export const generateSensitivityAnalysisReport = (pricing = [], recipes = []) =>
   const csvData = pricing.map(price => {
     const recipe = recipes.find(r => r.id === price.recipeId)
     const unitCost = recipe?.unitCost || 0
-    const basePrice = price.suggestedPrice || 0
+    const basePrice = price.price || price.suggestedPrice || 0
     const currentPrice = price.currentPrice || basePrice
     
     // Calcular margem base
@@ -413,7 +429,7 @@ export const generateSensitivityAnalysisReport = (pricing = [], recipes = []) =>
         ${pricing.map(price => {
           const recipe = recipes.find(r => r.id === price.recipeId)
           const unitCost = recipe?.unitCost || 0
-          const basePrice = price.suggestedPrice || 0
+          const basePrice = price.price || price.suggestedPrice || 0
           const currentPrice = price.currentPrice || basePrice
           const baseMargin = basePrice > 0 ? ((basePrice - unitCost) / basePrice) * 100 : 0
           const currentMargin = currentPrice > 0 ? ((currentPrice - unitCost) / currentPrice) * 100 : 0
@@ -447,7 +463,7 @@ export const generateSensitivityAnalysisReport = (pricing = [], recipes = []) =>
         ${pricing.map(price => {
           const recipe = recipes.find(r => r.id === price.recipeId)
           const unitCost = recipe?.unitCost || 0
-          const basePrice = price.suggestedPrice || 0
+          const basePrice = price.price || price.suggestedPrice || 0
           const variations = [-20, -10, 0, 10, 20]
           const scenarioCells = variations.map(variation => {
             const scenarioPrice = basePrice * (1 + variation / 100)
@@ -483,7 +499,7 @@ export const generateProductionVsBudgetReport = (budgets = [], recipes = [], sto
   
   budgets.forEach(budget => {
     productionByBudget[budget.id] = {
-      budgetName: budget.name || budget.description || 'Orçamento',
+      budgetName: budget.period || budget.name || budget.description || 'Orçamento',
       budgetAmount: budget.amount || 0,
       spent: budget.spent || 0,
       balance: (budget.amount || 0) - (budget.spent || 0),
@@ -570,3 +586,438 @@ export const generateProductionVsBudgetReport = (budgets = [], recipes = [], sto
   return { csvData, pdfContent }
 }
 
+/**
+ * Relatório 5: Vendas e Pedidos
+ */
+export const generateSalesReport = (orders = []) => {
+  if (!orders || orders.length === 0) {
+    alert('Não há vendas registradas para gerar o relatório.')
+    return null
+  }
+
+  // Filtrar apenas pedidos confirmados/entregues (não cancelados)
+  const validOrders = orders.filter(order => order.status !== 'cancelled')
+  
+  // Agrupar por data
+  const salesByDate = {}
+  let totalRevenue = 0
+  let totalItems = 0
+  let totalProfit = 0
+
+  validOrders.forEach(order => {
+    const date = new Date(order.createdAt)
+    const dateKey = date.toLocaleDateString('pt-BR')
+    
+    if (!salesByDate[dateKey]) {
+      salesByDate[dateKey] = {
+        date: dateKey,
+        orders: 0,
+        revenue: 0,
+        items: 0,
+        profit: 0
+      }
+    }
+    
+    salesByDate[dateKey].orders += 1
+    salesByDate[dateKey].revenue += order.total || 0
+    salesByDate[dateKey].items += (order.items?.length || 0)
+    
+    // Calcular lucro se houver dados de custo
+    const orderProfit = order.items?.reduce((sum, item) => {
+      const itemCost = (item.unitCost || 0) * (item.quantity || 0)
+      return sum + ((item.totalPrice || 0) - itemCost)
+    }, 0) || 0
+    
+    salesByDate[dateKey].profit += orderProfit
+    totalRevenue += order.total || 0
+    totalItems += (order.items?.length || 0)
+    totalProfit += orderProfit
+  })
+
+  const salesData = Object.values(salesByDate).sort((a, b) => 
+    new Date(b.date.split('/').reverse().join('-')) - new Date(a.date.split('/').reverse().join('-'))
+  )
+
+  // Preparar dados para CSV
+  const csvData = salesData.map(data => ({
+    'Data': data.date,
+    'Pedidos': data.orders,
+    'Receita': formatCurrency(data.revenue),
+    'Itens Vendidos': data.items,
+    'Lucro': formatCurrency(data.profit),
+    'Ticket Médio': formatCurrency(data.orders > 0 ? data.revenue / data.orders : 0)
+  }))
+
+  // Adicionar linha de totais
+  csvData.push({
+    'Data': 'TOTAL',
+    'Pedidos': validOrders.length,
+    'Receita': formatCurrency(totalRevenue),
+    'Itens Vendidos': totalItems,
+    'Lucro': formatCurrency(totalProfit),
+    'Ticket Médio': formatCurrency(validOrders.length > 0 ? totalRevenue / validOrders.length : 0)
+  })
+
+  // Preparar HTML para PDF
+  const pdfContent = `
+    <h2>Relatório de Vendas</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th>Pedidos</th>
+          <th>Receita</th>
+          <th>Itens</th>
+          <th>Lucro</th>
+          <th>Ticket Médio</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${salesData.map(data => `
+          <tr>
+            <td>${data.date}</td>
+            <td>${data.orders}</td>
+            <td>${formatCurrency(data.revenue)}</td>
+            <td>${data.items}</td>
+            <td>${formatCurrency(data.profit)}</td>
+            <td>${formatCurrency(data.orders > 0 ? data.revenue / data.orders : 0)}</td>
+          </tr>
+        `).join('')}
+        <tr style="font-weight: bold; background-color: #f3f4f6;">
+          <td>TOTAL</td>
+          <td>${validOrders.length}</td>
+          <td>${formatCurrency(totalRevenue)}</td>
+          <td>${totalItems}</td>
+          <td>${formatCurrency(totalProfit)}</td>
+          <td>${formatCurrency(validOrders.length > 0 ? totalRevenue / validOrders.length : 0)}</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="summary">
+      <strong>Total de Pedidos:</strong> ${validOrders.length}<br>
+      <strong>Receita Total:</strong> ${formatCurrency(totalRevenue)}<br>
+      <strong>Lucro Total:</strong> ${formatCurrency(totalProfit)}<br>
+      <strong>Ticket Médio:</strong> ${formatCurrency(validOrders.length > 0 ? totalRevenue / validOrders.length : 0)}
+    </div>
+  `
+
+  return { csvData, pdfContent }
+}
+
+/**
+ * Relatório 6: Estoque e Movimentações
+ */
+export const generateStockReport = (ingredients = [], stockMovements = []) => {
+  if (!ingredients || ingredients.length === 0) {
+    alert('Não há ingredientes cadastrados para gerar o relatório.')
+    return null
+  }
+
+  // Calcular movimentações por ingrediente
+  const ingredientMovements = {}
+  
+  ingredients.forEach(ing => {
+    ingredientMovements[ing.id] = {
+      name: ing.name,
+      category: ing.category || 'Outros',
+      currentStock: ing.stockQty || 0,
+      lowStockThreshold: ing.lowStockThreshold || 0,
+      unitCost: ing.unitCost || 0,
+      totalValue: (ing.stockQty || 0) * (ing.unitCost || 0),
+      entries: 0,
+      exits: 0,
+      isLowStock: (ing.stockQty || 0) <= (ing.lowStockThreshold || 0)
+    }
+  })
+
+  stockMovements.forEach(movement => {
+    const ing = ingredientMovements[movement.ingredientId]
+    if (ing) {
+      if (movement.type === 'entrada') {
+        ing.entries += movement.quantity || 0
+      } else if (movement.type === 'saída') {
+        ing.exits += movement.quantity || 0
+      }
+    }
+  })
+
+  const stockData = Object.values(ingredientMovements)
+
+  // Preparar dados para CSV
+  const csvData = stockData.map(data => ({
+    'Ingrediente': data.name,
+    'Categoria': data.category,
+    'Estoque Atual': data.currentStock.toFixed(2),
+    'Estoque Mínimo': data.lowStockThreshold.toFixed(2),
+    'Status': data.isLowStock ? '⚠️ Estoque Baixo' : '✓ OK',
+    'Custo Unitário': formatCurrency(data.unitCost),
+    'Valor Total': formatCurrency(data.totalValue),
+    'Entradas': data.entries.toFixed(2),
+    'Saídas': data.exits.toFixed(2)
+  }))
+
+  // Preparar HTML para PDF
+  const pdfContent = `
+    <h2>Relatório de Estoque</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Ingrediente</th>
+          <th>Categoria</th>
+          <th>Estoque</th>
+          <th>Mínimo</th>
+          <th>Status</th>
+          <th>Custo Unit.</th>
+          <th>Valor Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${stockData.map(data => `
+          <tr style="${data.isLowStock ? 'background-color: #fef2f2;' : ''}">
+            <td>${data.name}</td>
+            <td>${data.category}</td>
+            <td>${data.currentStock.toFixed(2)}</td>
+            <td>${data.lowStockThreshold.toFixed(2)}</td>
+            <td>${data.isLowStock ? '⚠️ Estoque Baixo' : '✓ OK'}</td>
+            <td>${formatCurrency(data.unitCost)}</td>
+            <td>${formatCurrency(data.totalValue)}</td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+    <div class="summary">
+      <strong>Total de Ingredientes:</strong> ${stockData.length}<br>
+      <strong>Itens com Estoque Baixo:</strong> ${stockData.filter(d => d.isLowStock).length}<br>
+      <strong>Valor Total em Estoque:</strong> ${formatCurrency(
+        stockData.reduce((sum, d) => sum + d.totalValue, 0)
+      )}
+    </div>
+  `
+
+  return { csvData, pdfContent }
+}
+
+/**
+ * Relatório 7: Fluxo de Caixa Detalhado
+ */
+export const generateDetailedCashflowReport = (cashflow = []) => {
+  if (!cashflow || cashflow.length === 0) {
+    alert('Não há movimentações de fluxo de caixa para gerar o relatório.')
+    return null
+  }
+
+  // Ordenar por data (mais recente primeiro)
+  const sortedCashflow = [...cashflow].sort((a, b) => 
+    new Date(b.date) - new Date(a.date)
+  )
+
+  const totalIncome = cashflow
+    .filter(e => e.type === 'entrada')
+    .reduce((sum, e) => sum + (e.amount || 0), 0)
+  
+  const totalExpense = cashflow
+    .filter(e => e.type === 'saída')
+    .reduce((sum, e) => sum + (e.amount || 0), 0)
+  
+  const balance = totalIncome - totalExpense
+
+  // Preparar dados para CSV
+  const csvData = sortedCashflow.map(entry => ({
+    'Data': formatDate(entry.date),
+    'Tipo': entry.type === 'entrada' ? 'Entrada' : 'Saída',
+    'Descrição': entry.description || '-',
+    'Categoria': entry.category || '-',
+    'Valor': formatCurrency(entry.amount || 0),
+    'Custo': entry.cost ? formatCurrency(entry.cost) : '-',
+    'Lucro': entry.profit ? formatCurrency(entry.profit) : '-'
+  }))
+
+  // Adicionar linha de totais
+  csvData.push({
+    'Data': 'TOTAL',
+    'Tipo': '-',
+    'Descrição': '-',
+    'Categoria': '-',
+    'Valor': formatCurrency(balance),
+    'Custo': formatCurrency(
+      cashflow.reduce((sum, e) => sum + (e.cost || 0), 0)
+    ),
+    'Lucro': formatCurrency(
+      cashflow.reduce((sum, e) => sum + (e.profit || 0), 0)
+    )
+  })
+
+  // Preparar HTML para PDF
+  const pdfContent = `
+    <h2>Fluxo de Caixa Detalhado</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th>Tipo</th>
+          <th>Descrição</th>
+          <th>Categoria</th>
+          <th>Valor</th>
+          <th>Custo</th>
+          <th>Lucro</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${sortedCashflow.map(entry => `
+          <tr>
+            <td>${formatDate(entry.date)}</td>
+            <td>${entry.type === 'entrada' ? 'Entrada' : 'Saída'}</td>
+            <td>${entry.description || '-'}</td>
+            <td>${entry.category || '-'}</td>
+            <td style="color: ${entry.type === 'entrada' ? '#22c55e' : '#ef4444'};">
+              ${entry.type === 'entrada' ? '+' : '-'}${formatCurrency(entry.amount || 0)}
+            </td>
+            <td>${entry.cost ? formatCurrency(entry.cost) : '-'}</td>
+            <td>${entry.profit ? formatCurrency(entry.profit) : '-'}</td>
+          </tr>
+        `).join('')}
+        <tr style="font-weight: bold; background-color: #f3f4f6;">
+          <td colspan="4">TOTAL</td>
+          <td>${formatCurrency(balance)}</td>
+          <td>${formatCurrency(
+            cashflow.reduce((sum, e) => sum + (e.cost || 0), 0)
+          )}</td>
+          <td>${formatCurrency(
+            cashflow.reduce((sum, e) => sum + (e.profit || 0), 0)
+          )}</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="summary">
+      <strong>Total de Entradas:</strong> ${formatCurrency(totalIncome)}<br>
+      <strong>Total de Saídas:</strong> ${formatCurrency(totalExpense)}<br>
+      <strong>Saldo:</strong> ${formatCurrency(balance)}<br>
+      <strong>Total de Movimentações:</strong> ${cashflow.length}
+    </div>
+  `
+
+  return { csvData, pdfContent }
+}
+
+/**
+ * Relatório 8: Ingredientes e Custos
+ */
+export const generateIngredientsReport = (ingredients = []) => {
+  if (!ingredients || ingredients.length === 0) {
+    alert('Não há ingredientes cadastrados para gerar o relatório.')
+    return null
+  }
+
+  // Agrupar por categoria
+  const byCategory = {}
+  let totalValue = 0
+
+  ingredients.forEach(ing => {
+    const category = ing.category || 'Outros'
+    if (!byCategory[category]) {
+      byCategory[category] = {
+        category,
+        count: 0,
+        totalStock: 0,
+        totalValue: 0
+      }
+    }
+    
+    const itemValue = (ing.stockQty || 0) * (ing.unitCost || 0)
+    byCategory[category].count += 1
+    byCategory[category].totalStock += ing.stockQty || 0
+    byCategory[category].totalValue += itemValue
+    totalValue += itemValue
+  })
+
+  // Preparar dados para CSV
+  const csvData = ingredients.map(ing => ({
+    'Ingrediente': ing.name,
+    'Categoria': ing.category || 'Outros',
+    'Preço do Pacote': formatCurrency(ing.packagePrice || 0),
+    'Quantidade do Pacote': ing.packageQty || 0,
+    'Custo Unitário': formatCurrency(ing.unitCost || 0),
+    'Estoque Atual': ing.stockQty || 0,
+    'Estoque Mínimo': ing.lowStockThreshold || 0,
+    'Valor em Estoque': formatCurrency((ing.stockQty || 0) * (ing.unitCost || 0)),
+    'Status': (ing.stockQty || 0) <= (ing.lowStockThreshold || 0) ? '⚠️ Estoque Baixo' : '✓ OK'
+  }))
+
+  // Adicionar resumo por categoria
+  Object.values(byCategory).forEach(cat => {
+    csvData.push({
+      'Ingrediente': `TOTAL ${cat.category}`,
+      'Categoria': '-',
+      'Preço do Pacote': '-',
+      'Quantidade do Pacote': '-',
+      'Custo Unitário': '-',
+      'Estoque Atual': cat.totalStock.toFixed(2),
+      'Estoque Mínimo': '-',
+      'Valor em Estoque': formatCurrency(cat.totalValue),
+      'Status': `${cat.count} itens`
+    })
+  })
+
+  // Preparar HTML para PDF
+  const pdfContent = `
+    <h2>Relatório de Ingredientes</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Ingrediente</th>
+          <th>Categoria</th>
+          <th>Custo Unit.</th>
+          <th>Estoque</th>
+          <th>Mínimo</th>
+          <th>Valor Estoque</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${ingredients.map(ing => {
+          const itemValue = (ing.stockQty || 0) * (ing.unitCost || 0)
+          const isLowStock = (ing.stockQty || 0) <= (ing.lowStockThreshold || 0)
+          return `
+            <tr style="${isLowStock ? 'background-color: #fef2f2;' : ''}">
+              <td>${ing.name}</td>
+              <td>${ing.category || 'Outros'}</td>
+              <td>${formatCurrency(ing.unitCost || 0)}</td>
+              <td>${ing.stockQty || 0}</td>
+              <td>${ing.lowStockThreshold || 0}</td>
+              <td>${formatCurrency(itemValue)}</td>
+              <td>${isLowStock ? '⚠️ Estoque Baixo' : '✓ OK'}</td>
+            </tr>
+          `
+        }).join('')}
+      </tbody>
+    </table>
+    <h2>Resumo por Categoria</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Categoria</th>
+          <th>Itens</th>
+          <th>Estoque Total</th>
+          <th>Valor Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${Object.values(byCategory).map(cat => `
+          <tr>
+            <td>${cat.category}</td>
+            <td>${cat.count}</td>
+            <td>${cat.totalStock.toFixed(2)}</td>
+            <td>${formatCurrency(cat.totalValue)}</td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+    <div class="summary">
+      <strong>Total de Ingredientes:</strong> ${ingredients.length}<br>
+      <strong>Valor Total em Estoque:</strong> ${formatCurrency(totalValue)}<br>
+      <strong>Categorias:</strong> ${Object.keys(byCategory).length}
+    </div>
+  `
+
+  return { csvData, pdfContent }
+}
