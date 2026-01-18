@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useAppStore } from '../stores/appStore'
-import { FiX, FiFilter, FiChevronDown, FiChevronUp, FiEye, FiXCircle } from 'react-icons/fi'
+import { FiX, FiFilter, FiChevronDown, FiChevronUp, FiEye } from 'react-icons/fi'
 import { FormModal } from '../components/ui/FormModal'
 import './PageCommon.css'
 import './OrdersPage.css'
@@ -45,9 +45,6 @@ export function OrdersPage() {
     search: ''
   })
   const [showFilters, setShowFilters] = useState(false)
-  const [cancelModalOpen, setCancelModalOpen] = useState(false)
-  const [selectedOrderId, setSelectedOrderId] = useState(null)
-  const [cancelReason, setCancelReason] = useState('')
 
   // Carregar orders ao montar
   useEffect(() => {
@@ -116,33 +113,6 @@ export function OrdersPage() {
     })
   }
 
-  const handleCancelOrder = async () => {
-    if (!selectedOrderId || !cancelReason.trim()) {
-      alert('Por favor, informe o motivo do cancelamento.')
-      return
-    }
-
-    try {
-      await updateOrder(selectedOrderId, {
-        status: 'cancelled',
-        notes: `Cancelado: ${cancelReason}`
-      })
-      
-      await loadData()
-      setCancelModalOpen(false)
-      setSelectedOrderId(null)
-      setCancelReason('')
-      alert('Pedido cancelado com sucesso!')
-    } catch (error) {
-      console.error('Erro ao cancelar pedido:', error)
-      alert(`Erro ao cancelar pedido: ${error.message || 'Tente novamente.'}`)
-    }
-  }
-
-  const openCancelModal = (orderId) => {
-    setSelectedOrderId(orderId)
-    setCancelModalOpen(true)
-  }
 
   return (
     <div className="page orders-page">
@@ -260,16 +230,6 @@ export function OrdersPage() {
                   <strong className="orders-card-total">
                     {formatCurrency(order.total)}
                   </strong>
-                  {order.status !== 'cancelled' && (
-                    <button
-                      type="button"
-                      className="orders-cancel-btn"
-                      onClick={() => openCancelModal(order.id)}
-                      title="Cancelar pedido"
-                    >
-                      <FiXCircle size={18} />
-                    </button>
-                  )}
                   <button
                     type="button"
                     className="orders-expand-btn"
@@ -366,51 +326,6 @@ export function OrdersPage() {
         )}
       </div>
 
-      {/* Modal de Cancelamento */}
-      <FormModal
-        isOpen={cancelModalOpen}
-        onClose={() => {
-          setCancelModalOpen(false)
-          setSelectedOrderId(null)
-          setCancelReason('')
-        }}
-        title="Cancelar Pedido"
-        description="Informe o motivo do cancelamento. Esta ação não pode ser desfeita."
-      >
-        <div className="orders-cancel-form">
-          <label>
-            Motivo do Cancelamento *
-            <textarea
-              value={cancelReason}
-              onChange={(e) => setCancelReason(e.target.value)}
-              placeholder="Ex: Cliente desistiu, produto indisponível, etc."
-              rows={4}
-              required
-            />
-          </label>
-          <div className="orders-cancel-actions">
-            <button
-              type="button"
-              className="page-btn-secondary"
-              onClick={() => {
-                setCancelModalOpen(false)
-                setSelectedOrderId(null)
-                setCancelReason('')
-              }}
-            >
-              Cancelar
-            </button>
-            <button
-              type="button"
-              className="page-btn-primary"
-              onClick={handleCancelOrder}
-              disabled={!cancelReason.trim()}
-            >
-              Confirmar Cancelamento
-            </button>
-          </div>
-        </div>
-      </FormModal>
     </div>
   )
 }
