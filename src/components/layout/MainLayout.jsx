@@ -156,36 +156,65 @@ export function MainLayout({ onLogout, user }) {
       try {
         const saved = localStorage.getItem(SIDEBAR_SETTINGS_KEY)
         if (!saved) {
-        setSidebarSettings({
-          showVisaoGeral: false,
-          showAnalises: false,
-          showOperacao: false
-        })
+          // Se não houver configurações salvas, usar padrões (todos false = exibindo)
+          const defaultSettings = {
+            showVisaoGeral: false,
+            showAnalises: false,
+            showOperacao: false,
+            showDashboard: false,
+            showCaixa: false,
+            showFluxoCaixa: false,
+            showOrcamento: false,
+            showIngredientes: false,
+            showReceitas: false,
+            showCustos: false,
+            showSimulador: false,
+            showLucratividade: false,
+            showCustosFixos: false,
+            showPricing: false,
+            showSimulacao: false,
+            showEstoque: false,
+            showVendas: false,
+            showRelatorios: false,
+            showConfig: false
+          }
+          setSidebarSettings(defaultSettings)
           return
         }
         const parsed = JSON.parse(saved)
-        setSidebarSettings({
-          showVisaoGeral: typeof parsed?.showVisaoGeral === 'boolean' ? parsed.showVisaoGeral : false,
-          showAnalises: typeof parsed?.showAnalises === 'boolean' ? parsed.showAnalises : false,
-          showOperacao: typeof parsed?.showOperacao === 'boolean' ? parsed.showOperacao : false,
-          showDashboard: typeof parsed?.showDashboard === 'boolean' ? parsed.showDashboard : false,
-          showCaixa: typeof parsed?.showCaixa === 'boolean' ? parsed.showCaixa : false,
-          showFluxoCaixa: typeof parsed?.showFluxoCaixa === 'boolean' ? parsed.showFluxoCaixa : false,
-          showOrcamento: typeof parsed?.showOrcamento === 'boolean' ? parsed.showOrcamento : false,
-          showIngredientes: typeof parsed?.showIngredientes === 'boolean' ? parsed.showIngredientes : false,
-          showReceitas: typeof parsed?.showReceitas === 'boolean' ? parsed.showReceitas : false,
-          showCustos: typeof parsed?.showCustos === 'boolean' ? parsed.showCustos : false,
-          showSimulador: typeof parsed?.showSimulador === 'boolean' ? parsed.showSimulador : false,
-          showLucratividade: typeof parsed?.showLucratividade === 'boolean' ? parsed.showLucratividade : false,
-          showCustosFixos: typeof parsed?.showCustosFixos === 'boolean' ? parsed.showCustosFixos : false,
-          showPricing: typeof parsed?.showPricing === 'boolean' ? parsed.showPricing : false,
-          showSimulacao: typeof parsed?.showSimulacao === 'boolean' ? parsed.showSimulacao : false,
-          showEstoque: typeof parsed?.showEstoque === 'boolean' ? parsed.showEstoque : false,
-          showVendas: typeof parsed?.showVendas === 'boolean' ? parsed.showVendas : false,
-          showRelatorios: typeof parsed?.showRelatorios === 'boolean' ? parsed.showRelatorios : false,
-          showConfig: typeof parsed?.showConfig === 'boolean' ? parsed.showConfig : false
+        // Garantir que valores não definidos ou null usem false (desmarcado = exibindo)
+        const defaultSettings = {
+          showVisaoGeral: false,
+          showAnalises: false,
+          showOperacao: false,
+          showDashboard: false,
+          showCaixa: false,
+          showFluxoCaixa: false,
+          showOrcamento: false,
+          showIngredientes: false,
+          showReceitas: false,
+          showCustos: false,
+          showSimulador: false,
+          showLucratividade: false,
+          showCustosFixos: false,
+          showPricing: false,
+          showSimulacao: false,
+          showEstoque: false,
+          showVendas: false,
+          showRelatorios: false,
+          showConfig: false
+        }
+        // Aplicar valores salvos, mas garantir que undefined/null virem false
+        Object.keys(defaultSettings).forEach(key => {
+          if (parsed[key] === undefined || parsed[key] === null) {
+            defaultSettings[key] = false
+          } else {
+            defaultSettings[key] = parsed[key]
+          }
         })
+        setSidebarSettings(defaultSettings)
       } catch {
+        // Em caso de erro, usar padrões (todos false = exibindo)
         setSidebarSettings({
           showVisaoGeral: false,
           showAnalises: false,
@@ -213,27 +242,37 @@ export function MainLayout({ onLogout, user }) {
     const handleSidebarSettingsChange = (event) => {
       const next = event?.detail
       if (next && typeof next === 'object') {
-        setSidebarSettings({
-          showVisaoGeral: typeof next.showVisaoGeral === 'boolean' ? next.showVisaoGeral : false,
-          showAnalises: typeof next.showAnalises === 'boolean' ? next.showAnalises : false,
-          showOperacao: typeof next.showOperacao === 'boolean' ? next.showOperacao : false,
-          showDashboard: typeof next.showDashboard === 'boolean' ? next.showDashboard : false,
-          showCaixa: typeof next.showCaixa === 'boolean' ? next.showCaixa : false,
-          showFluxoCaixa: typeof next.showFluxoCaixa === 'boolean' ? next.showFluxoCaixa : false,
-          showOrcamento: typeof next.showOrcamento === 'boolean' ? next.showOrcamento : false,
-          showIngredientes: typeof next.showIngredientes === 'boolean' ? next.showIngredientes : false,
-          showReceitas: typeof next.showReceitas === 'boolean' ? next.showReceitas : false,
-          showCustos: typeof next.showCustos === 'boolean' ? next.showCustos : false,
-          showSimulador: typeof next.showSimulador === 'boolean' ? next.showSimulador : false,
-          showLucratividade: typeof next.showLucratividade === 'boolean' ? next.showLucratividade : false,
-          showCustosFixos: typeof next.showCustosFixos === 'boolean' ? next.showCustosFixos : false,
-          showPricing: typeof next.showPricing === 'boolean' ? next.showPricing : false,
-          showSimulacao: typeof next.showSimulacao === 'boolean' ? next.showSimulacao : false,
-          showEstoque: typeof next.showEstoque === 'boolean' ? next.showEstoque : false,
-          showVendas: typeof next.showVendas === 'boolean' ? next.showVendas : false,
-          showRelatorios: typeof next.showRelatorios === 'boolean' ? next.showRelatorios : false,
-          showConfig: typeof next.showConfig === 'boolean' ? next.showConfig : false
+        // Garantir que valores não definidos ou null usem false (desmarcado = exibindo)
+        const defaultSettings = {
+          showVisaoGeral: false,
+          showAnalises: false,
+          showOperacao: false,
+          showDashboard: false,
+          showCaixa: false,
+          showFluxoCaixa: false,
+          showOrcamento: false,
+          showIngredientes: false,
+          showReceitas: false,
+          showCustos: false,
+          showSimulador: false,
+          showLucratividade: false,
+          showCustosFixos: false,
+          showPricing: false,
+          showSimulacao: false,
+          showEstoque: false,
+          showVendas: false,
+          showRelatorios: false,
+          showConfig: false
+        }
+        // Aplicar valores do evento, garantindo que undefined/null virem false
+        Object.keys(defaultSettings).forEach(key => {
+          if (next[key] === undefined || next[key] === null) {
+            defaultSettings[key] = false
+          } else {
+            defaultSettings[key] = next[key]
+          }
         })
+        setSidebarSettings(defaultSettings)
       } else {
         readSidebarSettings()
       }
