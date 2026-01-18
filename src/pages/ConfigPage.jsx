@@ -99,10 +99,23 @@ export function ConfigPage() {
       const saved = localStorage.getItem(SIDEBAR_SETTINGS_KEY)
       if (saved) {
         const parsed = JSON.parse(saved)
-        setSidebarSettings({ ...defaultSidebarSettings, ...parsed })
+        // Garantir que valores não definidos usem false (desmarcado = exibindo)
+        const settings = { ...defaultSidebarSettings }
+        Object.keys(defaultSidebarSettings).forEach(key => {
+          if (parsed[key] === undefined || parsed[key] === null) {
+            settings[key] = false
+          } else {
+            settings[key] = parsed[key]
+          }
+        })
+        setSidebarSettings(settings)
+      } else {
+        // Se não houver valores salvos, usar padrões (todos false = desmarcados)
+        setSidebarSettings(defaultSidebarSettings)
       }
     } catch (error) {
       console.error('Erro ao carregar configurações da sidebar:', error)
+      setSidebarSettings(defaultSidebarSettings)
     }
   }, [])
 
