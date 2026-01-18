@@ -84,7 +84,9 @@ export function MainLayout({ onLogout, user }) {
     showPricing: false,
     showSimulacao: false,
     showEstoque: false,
-    showRelatorios: false
+    showVendas: false,
+    showRelatorios: false,
+    showConfig: false
   })
   const dropdownRef = useRef(null)
   const userChipRef = useRef(null)
@@ -179,7 +181,9 @@ export function MainLayout({ onLogout, user }) {
           showPricing: typeof parsed?.showPricing === 'boolean' ? parsed.showPricing : false,
           showSimulacao: typeof parsed?.showSimulacao === 'boolean' ? parsed.showSimulacao : false,
           showEstoque: typeof parsed?.showEstoque === 'boolean' ? parsed.showEstoque : false,
-          showRelatorios: typeof parsed?.showRelatorios === 'boolean' ? parsed.showRelatorios : false
+          showVendas: typeof parsed?.showVendas === 'boolean' ? parsed.showVendas : false,
+          showRelatorios: typeof parsed?.showRelatorios === 'boolean' ? parsed.showRelatorios : false,
+          showConfig: typeof parsed?.showConfig === 'boolean' ? parsed.showConfig : false
         })
       } catch {
         setSidebarSettings({
@@ -199,7 +203,9 @@ export function MainLayout({ onLogout, user }) {
           showPricing: false,
           showSimulacao: false,
           showEstoque: false,
-          showRelatorios: false
+          showVendas: false,
+          showRelatorios: false,
+          showConfig: false
         })
       }
     }
@@ -224,7 +230,9 @@ export function MainLayout({ onLogout, user }) {
           showPricing: typeof next.showPricing === 'boolean' ? next.showPricing : false,
           showSimulacao: typeof next.showSimulacao === 'boolean' ? next.showSimulacao : false,
           showEstoque: typeof next.showEstoque === 'boolean' ? next.showEstoque : false,
-          showRelatorios: typeof next.showRelatorios === 'boolean' ? next.showRelatorios : false
+          showVendas: typeof next.showVendas === 'boolean' ? next.showVendas : false,
+          showRelatorios: typeof next.showRelatorios === 'boolean' ? next.showRelatorios : false,
+          showConfig: typeof next.showConfig === 'boolean' ? next.showConfig : false
         })
       } else {
         readSidebarSettings()
@@ -312,12 +320,7 @@ export function MainLayout({ onLogout, user }) {
             .filter((group) => {
               if (group.section === 'Visão Geral') return !sidebarSettings.showVisaoGeral
               if (group.section === 'Análises') return !sidebarSettings.showAnalises
-              // Sempre exibir seção Operação se contiver Configurações
-              if (group.section === 'Operação') {
-                const hasConfig = group.items.some(item => item.path === '/config')
-                if (hasConfig) return true // Sempre mostrar seção que contém Configurações
-                return !sidebarSettings.showOperacao
-              }
+              if (group.section === 'Operação') return !sidebarSettings.showOperacao
               return true
             })
             .map((group) => {
@@ -336,13 +339,14 @@ export function MainLayout({ onLogout, user }) {
                 '/pricing': sidebarSettings.showPricing,
                 '/simulacao': sidebarSettings.showSimulacao,
                 '/estoque': sidebarSettings.showEstoque,
-                '/relatorios': sidebarSettings.showRelatorios
+                '/vendas': sidebarSettings.showVendas,
+                '/relatorios': sidebarSettings.showRelatorios,
+                '/config': sidebarSettings.showConfig
               }
 
-              // Filtrar itens baseado nas configurações (Configurações sempre visível)
+              // Filtrar itens baseado nas configurações
               // Quando marcado (true), o item fica oculto, então exibimos quando é false ou undefined
               const filteredItems = group.items.filter((item) => {
-                if (item.path === '/config') return true // Sempre mostrar Configurações
                 const setting = pathToSettingMap[item.path]
                 return setting !== true
               })
@@ -568,12 +572,7 @@ export function MainLayout({ onLogout, user }) {
                 .filter((group) => {
                   if (group.section === 'Visão Geral') return !sidebarSettings.showVisaoGeral
                   if (group.section === 'Análises') return !sidebarSettings.showAnalises
-                  // Sempre exibir seção Operação se contiver Configurações
-                  if (group.section === 'Operação') {
-                    const hasConfig = group.items.some(item => item.path === '/config')
-                    if (hasConfig) return true // Sempre mostrar seção que contém Configurações
-                    return !sidebarSettings.showOperacao
-                  }
+                  if (group.section === 'Operação') return !sidebarSettings.showOperacao
                   return true
                 })
                 .map((group) => {
@@ -592,14 +591,16 @@ export function MainLayout({ onLogout, user }) {
                     '/pricing': sidebarSettings.showPricing,
                     '/simulacao': sidebarSettings.showSimulacao,
                     '/estoque': sidebarSettings.showEstoque,
-                    '/relatorios': sidebarSettings.showRelatorios
+                    '/vendas': sidebarSettings.showVendas,
+                    '/relatorios': sidebarSettings.showRelatorios,
+                    '/config': sidebarSettings.showConfig
                   }
 
-                  // Filtrar itens baseado nas configurações (Configurações sempre visível)
+                  // Filtrar itens baseado nas configurações
                   // Quando marcado (true), o item fica oculto, então exibimos quando é false ou undefined
                   const filteredItems = group.items.filter((item) => {
-                    if (item.path === '/config') return true // Sempre mostrar Configurações
-                    return pathToSettingMap[item.path] !== true
+                    const setting = pathToSettingMap[item.path]
+                    return setting !== true
                   })
 
                   // Não mostrar a seção se não tiver itens visíveis

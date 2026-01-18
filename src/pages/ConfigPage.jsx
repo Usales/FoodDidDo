@@ -47,9 +47,11 @@ const defaultSidebarSettings = {
   showCustosFixos: false,
   showPricing: false,
   showSimulacao: false,
-  // Operação - itens individuais (Configurações sempre visível)
+  // Operação - itens individuais
   showEstoque: false,
-  showRelatorios: false
+  showVendas: false,
+  showRelatorios: false,
+  showConfig: false
 }
 
 export function ConfigPage() {
@@ -751,7 +753,7 @@ export function ConfigPage() {
                 />
               </div>
 
-              {/* Itens da Operação (exceto Configurações) */}
+              {/* Itens da Operação */}
               {!(sidebarSettings.showOperacao ?? false) && (
                 <>
                   <div className="config-dashboard-item" style={{ marginLeft: '2rem', paddingLeft: '1rem', borderLeft: '2px solid var(--border-color)' }}>
@@ -776,6 +778,25 @@ export function ConfigPage() {
                   <div className="config-dashboard-item" style={{ marginLeft: '2rem', paddingLeft: '1rem', borderLeft: '2px solid var(--border-color)' }}>
                     <div className="config-dashboard-item-content">
                       <div className="config-dashboard-item-header">
+                        <h4 style={{ fontSize: '0.95rem', fontWeight: 600 }}>Vendas</h4>
+                      </div>
+                      <p className="config-dashboard-item-description" style={{ fontSize: '0.85rem' }}>
+                        Link para histórico de vendas
+                      </p>
+                    </div>
+                <ToggleSwitch
+                  checked={sidebarSettings.showVendas ?? false}
+                  onChange={() => {
+                    const newSettings = { ...sidebarSettings, showVendas: !(sidebarSettings.showVendas ?? false) }
+                    saveSidebarSettings(newSettings)
+                  }}
+                  label={(sidebarSettings.showVendas ?? false) ? 'Oculto' : 'Exibindo'}
+                />
+                  </div>
+
+                  <div className="config-dashboard-item" style={{ marginLeft: '2rem', paddingLeft: '1rem', borderLeft: '2px solid var(--border-color)' }}>
+                    <div className="config-dashboard-item-content">
+                      <div className="config-dashboard-item-header">
                         <h4 style={{ fontSize: '0.95rem', fontWeight: 600 }}>Relatórios</h4>
                       </div>
                       <p className="config-dashboard-item-description" style={{ fontSize: '0.85rem' }}>
@@ -789,6 +810,25 @@ export function ConfigPage() {
                     saveSidebarSettings(newSettings)
                   }}
                   label={(sidebarSettings.showRelatorios ?? false) ? 'Oculto' : 'Exibindo'}
+                />
+                  </div>
+
+                  <div className="config-dashboard-item" style={{ marginLeft: '2rem', paddingLeft: '1rem', borderLeft: '2px solid var(--border-color)' }}>
+                    <div className="config-dashboard-item-content">
+                      <div className="config-dashboard-item-header">
+                        <h4 style={{ fontSize: '0.95rem', fontWeight: 600 }}>Configurações</h4>
+                      </div>
+                      <p className="config-dashboard-item-description" style={{ fontSize: '0.85rem' }}>
+                        Link para página de configurações
+                      </p>
+                    </div>
+                <ToggleSwitch
+                  checked={sidebarSettings.showConfig ?? false}
+                  onChange={() => {
+                    const newSettings = { ...sidebarSettings, showConfig: !(sidebarSettings.showConfig ?? false) }
+                    saveSidebarSettings(newSettings)
+                  }}
+                  label={(sidebarSettings.showConfig ?? false) ? 'Oculto' : 'Exibindo'}
                 />
                   </div>
                 </>
