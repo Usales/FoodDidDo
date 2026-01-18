@@ -16,6 +16,7 @@ export function CashboxPage() {
   const recipes = useAppStore((state) => state.recipes)
   const pricing = useAppStore((state) => state.pricing)
   const addCashflowEntry = useAppStore((state) => state.addCashflowEntry)
+  const addOrder = useAppStore((state) => state.addOrder)
   const loadData = useAppStore((state) => state.loadData)
 
   const [cart, setCart] = useState([])
@@ -148,11 +149,41 @@ export function CashboxPage() {
         `${item.quantity}x ${item.name}`
       ).join(', ')
 
-      // Registrar entrada no fluxo de caixa
+      // 1. Criar Order com OrderItems e Payment
+      const orderData = {
+        status: 'confirmed',
+        total: totals.total,
+        subtotal: totals.subtotal,
+        discount: totals.discount,
+        tax: 0,
+        deliveryFee: 0,
+        notes: null,
+        items: cart.map(item => ({
+          recipeId: item.id,
+          recipeName: item.name,
+          name: item.name,
+          quantity: item.quantity,
+          unitPrice: item.price,
+          totalPrice: item.price * item.quantity
+        })),
+        payment: {
+          amount: totals.total,
+          method: selectedPaymentMethod === 'dinheiro' ? 'cash' : 
+                  selectedPaymentMethod === 'pix' ? 'pix' :
+                  selectedPaymentMethod === 'cartao_credito' ? 'credit_card' :
+                  selectedPaymentMethod === 'cartao_debito' ? 'debit_card' : 'other',
+          status: 'paid',
+          paidAt: new Date().toISOString()
+        }
+      }
+
+      const order = await addOrder(orderData)
+
+      // 2. Registrar entrada no fluxo de caixa (vinculado ao pedido)
       await addCashflowEntry({
         id: crypto.randomUUID(),
         type: 'entrada',
-        description: `Venda: ${itemsDescription}`,
+        description: `Venda #${order.orderNumber || order.id.slice(0, 8)}: ${itemsDescription}`,
         amount: totals.total,
         cost: totals.cost,
         profit: totals.profit,
@@ -172,12 +203,13 @@ export function CashboxPage() {
 
       alert(
         `✅ Venda finalizada com sucesso!\n\n` +
+        `Pedido: #${order.orderNumber || order.id.slice(0, 8)}\n` +
         `Total: R$ ${totals.total.toFixed(2)}\n` +
         `Forma de pagamento: ${PAYMENT_METHODS.find(m => m.value === selectedPaymentMethod)?.label || 'Outros'}`
       )
     } catch (error) {
       console.error('Erro ao finalizar venda:', error)
-      alert('❌ Erro ao finalizar venda. Tente novamente.')
+      alert(`❌ Erro ao finalizar venda: ${error.message || 'Tente novamente.'}`)
     } finally {
       setIsProcessing(false)
     }
