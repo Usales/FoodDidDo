@@ -1285,6 +1285,44 @@ fastify.post('/api/restore', async (request, reply) => {
       }
     }
     
+    // 8. Restauração de Sessões de Caixa (antes de clientes/pedidos para manter histórico)
+    if (data.cashboxSessions && Array.isArray(data.cashboxSessions)) {
+      if (data.cashboxSessions.length > 0) {
+        for (const session of data.cashboxSessions) {
+          const { cashMovements, ...sessionData } = session
+          const createdSession = await prisma.cashboxSession.create({
+            data: {
+              id: sessionData.id,
+              isOpen: sessionData.isOpen || false,
+              openingAmount: sessionData.openingAmount || 0,
+              openingDate: sessionData.openingDate ? new Date(sessionData.openingDate) : null,
+              closingDate: sessionData.closingDate ? new Date(sessionData.closingDate) : null,
+              closingBalance: sessionData.closingBalance || null,
+              expectedBalance: sessionData.expectedBalance || null,
+              difference: sessionData.difference || null,
+              notes: sessionData.notes || null,
+              createdAt: sessionData.createdAt ? new Date(sessionData.createdAt) : new Date(),
+              updatedAt: sessionData.updatedAt ? new Date(sessionData.updatedAt) : new Date()
+            }
+          })
+          
+          // Restaurar movimentações da sessão
+          if (cashMovements && Array.isArray(cashMovements) && cashMovements.length > 0) {
+            await prisma.cashMovement.createMany({
+              data: cashMovements.map(m => ({
+                id: m.id,
+                sessionId: createdSession.id,
+                type: m.type,
+                amount: m.amount,
+                description: m.description || null,
+                createdAt: m.createdAt ? new Date(m.createdAt) : new Date()
+              }))
+            })
+          }
+        }
+      }
+    }
+    
     // 9. Clientes (antes dos pedidos)
     if (data.customers && Array.isArray(data.customers)) {
       if (data.customers.length > 0) {
