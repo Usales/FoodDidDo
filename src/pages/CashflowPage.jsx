@@ -534,22 +534,50 @@ export function CashflowPage() {
             {showSessionDetails ? <FiChevronUp size={18} /> : <FiChevronDown size={18} />}
           </button>
 
-          {showSessionDetails && (
+          {showSessionDetails && cashboxSession && (
             <div className="cashflow-accordion-content">
               <div className="cashflow-details-grid">
                 <div className="cashflow-detail">
                   <span>Valor de abertura</span>
-                  <strong>{formatCurrency(cashboxData.openingAmount)}</strong>
+                  <strong>{formatCurrency(cashboxSession.openingAmount || 0)}</strong>
                 </div>
                 <div className="cashflow-detail">
                   <span>Data/Hora de abertura</span>
-                  <strong>{formatDateTime(cashboxData.openingDate)}</strong>
+                  <strong>{formatDateTime(cashboxSession.openingDate)}</strong>
                 </div>
-                {!cashboxData.isOpen && (
-                  <div className="cashflow-detail">
-                    <span>Data/Hora de fechamento</span>
-                    <strong>{formatDateTime(cashboxData.closingDate)}</strong>
-                  </div>
+                {!cashboxSession.isOpen && cashboxSession.closingDate && (
+                  <>
+                    <div className="cashflow-detail">
+                      <span>Data/Hora de fechamento</span>
+                      <strong>{formatDateTime(cashboxSession.closingDate)}</strong>
+                    </div>
+                    <div className="cashflow-detail">
+                      <span>Saldo esperado</span>
+                      <strong>{formatCurrency(cashboxSession.expectedBalance || 0)}</strong>
+                    </div>
+                    <div className="cashflow-detail">
+                      <span>Saldo real</span>
+                      <strong>{formatCurrency(cashboxSession.closingBalance || 0)}</strong>
+                    </div>
+                    <div className="cashflow-detail">
+                      <span>Diferença (conferência)</span>
+                      <strong style={{ color: (cashboxSession.difference || 0) === 0 ? 'var(--success)' : 'var(--error)' }}>
+                        {formatCurrency(cashboxSession.difference || 0)}
+                      </strong>
+                    </div>
+                  </>
+                )}
+                {cashboxSession.isOpen && (
+                  <>
+                    <div className="cashflow-detail">
+                      <span>Total suprimentos</span>
+                      <strong style={{ color: 'var(--success)' }}>{formatCurrency(cashboxSession.totalSuprimentos || 0)}</strong>
+                    </div>
+                    <div className="cashflow-detail">
+                      <span>Total sangrias</span>
+                      <strong style={{ color: 'var(--error)' }}>{formatCurrency(cashboxSession.totalSangrias || 0)}</strong>
+                    </div>
+                  </>
                 )}
                 <div className="cashflow-detail">
                   <span>Lucro médio por venda</span>
@@ -558,6 +586,50 @@ export function CashflowPage() {
                   </strong>
                 </div>
               </div>
+              
+              {/* Lista de movimentações (suprimento/sangria) */}
+              {cashboxSession.isOpen && cashboxMovements.length > 0 && (
+                <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border-color)' }}>
+                  <h4 style={{ marginBottom: '1rem', fontSize: '0.95rem', fontWeight: 600 }}>Movimentações do Caixa</h4>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    {cashboxMovements.map((movement) => (
+                      <div 
+                        key={movement.id} 
+                        style={{ 
+                          display: 'flex', 
+                          justifyContent: 'space-between', 
+                          alignItems: 'center',
+                          padding: '0.75rem',
+                          backgroundColor: 'var(--bg-secondary)',
+                          borderRadius: '0.5rem'
+                        }}
+                      >
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                          <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>
+                            {movement.type === 'suprimento' ? '➕ Suprimento' : '➖ Sangria'}
+                          </span>
+                          {movement.description && (
+                            <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                              {movement.description}
+                            </span>
+                          )}
+                          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                            {formatDateTime(movement.createdAt)}
+                          </span>
+                        </div>
+                        <strong style={{ 
+                          color: movement.type === 'suprimento' ? 'var(--success)' : 'var(--error)',
+                          fontSize: '1.1rem'
+                        }}>
+                          {movement.type === 'suprimento' ? '+' : '-'}{formatCurrency(movement.amount)}
+                        </strong>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
               {currentBudget && (
                 <div className="cashflow-details-budget">
