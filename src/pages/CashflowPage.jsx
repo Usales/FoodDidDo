@@ -659,7 +659,7 @@ export function CashflowPage() {
       {/* CAMADA 4 — Movimentações (foco operacional) */}
       {!cashflowPageSettings.showMovementsSection && (
         <section className="page-stack">
-        <div className="page-header">
+          <div className="page-header">
           <h2 className="cashflow-section-title">Movimentações</h2>
           <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
             <button
