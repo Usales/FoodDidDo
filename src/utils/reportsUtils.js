@@ -66,13 +66,14 @@ export const exportToCSV = (data, filename, headers = null) => {
  * Gera PDF usando window.print() com conteúdo formatado
  */
 export const generatePDF = (title, content, filename) => {
-  // Criar uma nova janela com o conteúdo formatado
-  const printWindow = window.open('', '_blank')
-  
-  if (!printWindow) {
-    alert('Por favor, permita pop-ups para gerar o PDF.')
-    return
-  }
+  try {
+    // Criar uma nova janela com o conteúdo formatado
+    const printWindow = window.open('', '_blank', 'width=800,height=600')
+    
+    if (!printWindow) {
+      alert('Por favor, permita pop-ups para gerar o PDF. Verifique as configurações do navegador.')
+      return
+    }
   
   const htmlContent = `
     <!DOCTYPE html>
@@ -157,8 +158,25 @@ export const generatePDF = (title, content, filename) => {
     </html>
   `
   
-  printWindow.document.write(htmlContent)
-  printWindow.document.close()
+    printWindow.document.write(htmlContent)
+    printWindow.document.close()
+    
+    // Aguardar o carregamento antes de imprimir
+    printWindow.onload = () => {
+      setTimeout(() => {
+        printWindow.print()
+        // Fechar após impressão (alguns navegadores não fecham automaticamente)
+        printWindow.onafterprint = () => {
+          setTimeout(() => {
+            printWindow.close()
+          }, 100)
+        }
+      }, 250)
+    }
+  } catch (error) {
+    console.error('Erro ao gerar PDF:', error)
+    alert(`Erro ao gerar PDF: ${error.message || 'Tente novamente.'}`)
+  }
 }
 
 /**
