@@ -280,3 +280,42 @@ model Invoice {
   @@index([status])
   @@index([createdAt])
 }
+
+// ============================================
+// MODELO PARA SISTEMA DE CAIXA (ABERTURA/FECHAMENTO)
+// ============================================
+model CashboxSession {
+  id              String   @id @default(uuid())
+  isOpen          Boolean  @default(false)
+  openingAmount   Float    @default(0) // Valor inicial ao abrir o caixa
+  openingDate     DateTime? // Data/hora de abertura
+  closingDate     DateTime? // Data/hora de fechamento
+  closingBalance  Float? // Saldo final ao fechar
+  expectedBalance Float? // Saldo esperado (abertura + entradas - saídas)
+  difference      Float? // Diferença entre esperado e real (conferência)
+  notes           String? // Observações do fechamento
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Movimentações de suprimento e sangria relacionadas a esta sessão
+  cashMovements CashMovement[]
+
+  @@index([isOpen])
+  @@index([openingDate])
+}
+
+// Movimentações de suprimento (adicionar dinheiro) e sangria (retirar dinheiro)
+model CashMovement {
+  id          String   @id @default(uuid())
+  sessionId   String
+  type        String // 'suprimento' (adicionar) ou 'sangria' (retirar)
+  amount      Float
+  description String? // Motivo/observação
+  createdAt   DateTime @default(now())
+
+  session CashboxSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+  @@index([type])
+  @@index([createdAt])
+}

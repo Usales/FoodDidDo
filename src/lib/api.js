@@ -109,6 +109,13 @@ export const api = {
   getOrders: () => request('/api/orders'),
   getOrder: (id) => request(`/api/orders/${id}`),
   createOrder: (data) => request('/api/orders', { method: 'POST', body: data }),
-  updateOrder: (id, data) => request(`/api/orders/${id}`, { method: 'PATCH', body: data })
+  updateOrder: (id, data) => request(`/api/orders/${id}`, { method: 'PATCH', body: data }),
+
+  // Caixa (Abertura/Fechamento/Suprimento/Sangria)
+  getCashboxSession: () => request('/api/cashbox/session'),
+  openCashbox: (data) => request('/api/cashbox/open', { method: 'POST', body: data }),
+  closeCashbox: (data) => request('/api/cashbox/close', { method: 'POST', body: data }),
+  getCashboxMovements: () => request('/api/cashbox/movements'),
+  createCashboxMovement: (data) => request('/api/cashbox/movements', { method: 'POST', body: data })
 }
 

@@ -2,26 +2,16 @@ import { useMemo, useState, useEffect, useRef } from 'react'
 import { FormModal } from '../components/ui/FormModal'
 import { CurrencyInput } from '../components/ui/CurrencyInput'
 import { useAppStore } from '../stores/appStore'
-import { FiEdit3, FiTrash2, FiLock, FiUnlock, FiFilter, FiChevronDown, FiChevronUp } from 'react-icons/fi'
+import { api } from '../lib/api'
+import { FiEdit3, FiTrash2, FiLock, FiUnlock, FiFilter, FiChevronDown, FiChevronUp, FiPlus, FiMinus } from 'react-icons/fi'
 import './PageCommon.css'
 import './CashflowPage.css'
 
-const CASHBOX_STORAGE_KEY = 'cashboxData'
 const CASHFLOW_PAGE_SETTINGS_KEY = 'cashflowPageSettings'
 const typeLabels = {
   entrada: 'Entrada',
   saída: 'Saída',
   orçamento: 'Orçamento'
-}
-
-const defaultCashboxData = {
-  isOpen: false,
-  openingAmount: 0,
-  openingDate: null,
-  closingDate: null,
-  closingBalance: 0,
-  totalEntries: 0,
-  totalExits: 0
 }
 
 // Valores padrão: false = desmarcado (OFF) = exibindo, true = marcado (ON) = oculto
@@ -42,12 +32,20 @@ export function CashflowPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingId, setEditingId] = useState(null)
   const [expandedCardId, setExpandedCardId] = useState(null)
-  const [cashboxData, setCashboxData] = useState(defaultCashboxData)
+  const [cashboxSession, setCashboxSession] = useState(null)
+  const [cashboxMovements, setCashboxMovements] = useState([])
   const [cashflowPageSettings, setCashflowPageSettings] = useState(defaultCashflowPageSettings)
   const [isOpenModalOpen, setIsOpenModalOpen] = useState(false)
   const [isCloseModalOpen, setIsCloseModalOpen] = useState(false)
+  const [isMovementModalOpen, setIsMovementModalOpen] = useState(false)
+  const [movementType, setMovementType] = useState('suprimento') // 'suprimento' ou 'sangria'
   const [openingAmount, setOpeningAmount] = useState('')
+  const [closingBalance, setClosingBalance] = useState('')
+  const [closingNotes, setClosingNotes] = useState('')
+  const [movementAmount, setMovementAmount] = useState('')
+  const [movementDescription, setMovementDescription] = useState('')
   const [showSessionDetails, setShowSessionDetails] = useState(false)
+  const [loading, setLoading] = useState(false)
   const [filters, setFilters] = useState({
     type: 'all',
     startDate: '',
@@ -64,17 +62,30 @@ export function CashflowPage() {
     budgetId: ''
   })
 
-  // Carregar dados do caixa do localStorage
-  useEffect(() => {
+  // Carregar sessão de caixa da API
+  const loadCashboxSession = async () => {
     try {
-      const saved = localStorage.getItem(CASHBOX_STORAGE_KEY)
-      if (saved) {
-        const parsed = JSON.parse(saved)
-        setCashboxData({ ...defaultCashboxData, ...parsed })
+      setLoading(true)
+      const data = await api.getCashboxSession()
+      setCashboxSession(data.session)
+      
+      if (data.isOpen && data.session) {
+        const movements = await api.getCashboxMovements()
+        setCashboxMovements(movements)
+      } else {
+        setCashboxMovements([])
       }
     } catch (error) {
-      console.error('Erro ao carregar dados do caixa:', error)
+      console.error('Erro ao carregar sessão de caixa:', error)
+      setCashboxSession(null)
+      setCashboxMovements([])
+    } finally {
+      setLoading(false)
     }
+  }
+
+  useEffect(() => {
+    loadCashboxSession()
   }, [])
 
   // Carregar/atualizar preferências de exibição (UI) do Fluxo de Caixa
@@ -117,14 +128,6 @@ export function CashflowPage() {
     return () => window.removeEventListener('cashflowPageSettingsChanged', handleSettingsChanged)
   }, [])
 
-  // Salvar dados do caixa no localStorage
-  useEffect(() => {
-    try {
-      localStorage.setItem(CASHBOX_STORAGE_KEY, JSON.stringify(cashboxData))
-    } catch (error) {
-      console.error('Erro ao salvar dados do caixa:', error)
-    }
-  }, [cashboxData])
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -221,24 +224,17 @@ export function CashflowPage() {
 
   // Calcular saldo atual do caixa
   const currentBalance = useMemo(() => {
-    if (cashboxData.isOpen) {
-      return cashboxData.openingAmount + summary.income - summary.expense
+    if (cashboxSession && cashboxSession.isOpen) {
+      return cashboxSession.currentBalance || 0
     }
 
-    // Se o caixa estiver fechado e houver um fechamento registrado, exibir o saldo final do último fechamento
-    if (!cashboxData.isOpen && cashboxData.closingDate) {
-      return cashboxData.closingBalance || 0
+    // Se o caixa estiver fechado, exibir o saldo final do último fechamento
+    if (cashboxSession && !cashboxSession.isOpen && cashboxSession.closingBalance !== null) {
+      return cashboxSession.closingBalance || 0
     }
 
     return 0
-  }, [
-    cashboxData.isOpen,
-    cashboxData.openingAmount,
-    cashboxData.closingDate,
-    cashboxData.closingBalance,
-    summary.income,
-    summary.expense
-  ])
+  }, [cashboxSession])
 
   // Orçamento atual (último orçamento)
   const currentBudget = useMemo(() => {
@@ -324,42 +320,80 @@ export function CashflowPage() {
     }
   }
 
-  const handleOpenCashbox = () => {
+  const handleOpenCashbox = async () => {
     const amount = Number(openingAmount)
     if (isNaN(amount) || amount < 0) {
       alert('Por favor, informe um valor válido para abertura do caixa.')
       return
     }
 
-    setCashboxData({
-      isOpen: true,
-      openingAmount: amount,
-      openingDate: new Date().toISOString(),
-      closingDate: null,
-      closingBalance: 0,
-      totalEntries: 0,
-      totalExits: 0
-    })
-
-    setOpeningAmount('')
-    setIsOpenModalOpen(false)
+    try {
+      setLoading(true)
+      await api.openCashbox({ openingAmount: amount })
+      setOpeningAmount('')
+      setIsOpenModalOpen(false)
+      await loadCashboxSession()
+      alert('Caixa aberto com sucesso!')
+    } catch (error) {
+      alert(`Erro ao abrir caixa: ${error.message || 'Tente novamente.'}`)
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const handleCloseCashbox = () => {
+  const handleCloseCashbox = async () => {
+    const balance = Number(closingBalance)
+    if (isNaN(balance) || balance < 0) {
+      alert('Por favor, informe um valor válido para o saldo de fechamento.')
+      return
+    }
+
     if (!window.confirm('Tem certeza que deseja fechar o caixa? Esta ação registrará o saldo final.')) {
       return
     }
 
-    setCashboxData((prev) => ({
-      ...prev,
-      isOpen: false,
-      closingDate: new Date().toISOString(),
-      closingBalance: currentBalance,
-      totalEntries: summary.income,
-      totalExits: summary.expense
-    }))
+    try {
+      setLoading(true)
+      await api.closeCashbox({ 
+        closingBalance: balance,
+        notes: closingNotes || null
+      })
+      setClosingBalance('')
+      setClosingNotes('')
+      setIsCloseModalOpen(false)
+      await loadCashboxSession()
+      alert('Caixa fechado com sucesso!')
+    } catch (error) {
+      alert(`Erro ao fechar caixa: ${error.message || 'Tente novamente.'}`)
+    } finally {
+      setLoading(false)
+    }
+  }
 
-    setIsCloseModalOpen(false)
+  const handleCreateMovement = async () => {
+    const amount = Number(movementAmount)
+    if (isNaN(amount) || amount <= 0) {
+      alert('Por favor, informe um valor válido maior que zero.')
+      return
+    }
+
+    try {
+      setLoading(true)
+      await api.createCashboxMovement({
+        type: movementType,
+        amount: amount,
+        description: movementDescription || null
+      })
+      setMovementAmount('')
+      setMovementDescription('')
+      setIsMovementModalOpen(false)
+      await loadCashboxSession()
+      alert(`${movementType === 'suprimento' ? 'Suprimento' : 'Sangria'} registrado com sucesso!`)
+    } catch (error) {
+      alert(`Erro ao registrar movimentação: ${error.message || 'Tente novamente.'}`)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const formatCurrency = (value) => {
@@ -397,8 +431,8 @@ export function CashflowPage() {
           <div className="cashflow-status-bar">
             <div className="cashflow-status-left">
               <h1 className="cashflow-title">Fluxo de Caixa</h1>
-              <span className={`cashflow-status-badge ${cashboxData.isOpen ? 'open' : 'closed'}`}>
-                {cashboxData.isOpen ? '🟢 Caixa aberto' : '🔒 Caixa fechado'}
+              <span className={`cashflow-status-badge ${cashboxSession?.isOpen ? 'open' : 'closed'}`}>
+                {cashboxSession?.isOpen ? '🟢 Caixa aberto' : '🔒 Caixa fechado'}
               </span>
             </div>
 
@@ -413,16 +447,44 @@ export function CashflowPage() {
             </div>
 
             <div className="cashflow-status-right">
-              {!cashboxData.isOpen ? (
-                <button className="primary-btn" type="button" onClick={() => setIsOpenModalOpen(true)}>
+              {!cashboxSession?.isOpen ? (
+                <button className="primary-btn" type="button" onClick={() => setIsOpenModalOpen(true)} disabled={loading}>
                   <FiUnlock size={18} />
                   Abrir Caixa
                 </button>
               ) : (
-                <button className="secondary-btn" type="button" onClick={() => setIsCloseModalOpen(true)}>
-                  <FiLock size={18} />
-                  Fechar Caixa
-                </button>
+                <>
+                  <button 
+                    className="secondary-btn" 
+                    type="button" 
+                    onClick={() => {
+                      setMovementType('suprimento')
+                      setIsMovementModalOpen(true)
+                    }}
+                    disabled={loading}
+                    style={{ marginRight: '0.5rem' }}
+                  >
+                    <FiPlus size={18} />
+                    Suprimento
+                  </button>
+                  <button 
+                    className="secondary-btn" 
+                    type="button" 
+                    onClick={() => {
+                      setMovementType('sangria')
+                      setIsMovementModalOpen(true)
+                    }}
+                    disabled={loading}
+                    style={{ marginRight: '0.5rem' }}
+                  >
+                    <FiMinus size={18} />
+                    Sangria
+                  </button>
+                  <button className="secondary-btn" type="button" onClick={() => setIsCloseModalOpen(true)} disabled={loading}>
+                    <FiLock size={18} />
+                    Fechar Caixa
+                  </button>
+                </>
               )}
             </div>
           </div>
@@ -739,7 +801,7 @@ export function CashflowPage() {
             }}>
               Cancelar
             </button>
-            <button className="primary-btn" type="button" onClick={handleOpenCashbox}>
+            <button className="primary-btn" type="button" onClick={handleOpenCashbox} disabled={loading}>
               Abrir Caixa
             </button>
           </>
@@ -758,36 +820,142 @@ export function CashflowPage() {
         isOpen={isCloseModalOpen}
         title="Fechar Caixa"
         description="Confirme o fechamento do caixa. O saldo final será registrado."
-        onClose={() => setIsCloseModalOpen(false)}
+        onClose={() => {
+          setIsCloseModalOpen(false)
+          setClosingBalance('')
+          setClosingNotes('')
+        }}
         footer={
           <>
-            <button className="ghost-btn" type="button" onClick={() => setIsCloseModalOpen(false)}>
+            <button className="ghost-btn" type="button" onClick={() => {
+              setIsCloseModalOpen(false)
+              setClosingBalance('')
+              setClosingNotes('')
+            }}>
               Cancelar
             </button>
-            <button className="primary-btn" type="button" onClick={handleCloseCashbox}>
+            <button className="primary-btn" type="button" onClick={handleCloseCashbox} disabled={loading}>
               Fechar Caixa
             </button>
           </>
         }
       >
-        <div className="cashflow-close-summary">
-          <div className="cashflow-close-item">
-            <span>Valor Inicial:</span>
-            <strong>{formatCurrency(cashboxData.openingAmount)}</strong>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1rem 0' }}>
+          <div>
+            <p style={{ marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+              Saldo esperado (calculado):
+            </p>
+            <p style={{ fontSize: '1.2rem', fontWeight: 600 }}>
+              {formatCurrency(cashboxSession?.expectedBalance || currentBalance)}
+            </p>
           </div>
-          <div className="cashflow-close-item">
-            <span>Total de Entradas:</span>
-            <strong style={{ color: 'var(--success)' }}>{formatCurrency(summary.income)}</strong>
+          <CurrencyInput
+            label="Saldo Real Encontrado"
+            value={closingBalance}
+            onChange={setClosingBalance}
+            placeholder="0,00"
+          />
+          <div>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', fontWeight: 500 }}>
+              Observações (opcional)
+            </label>
+            <textarea
+              value={closingNotes}
+              onChange={(e) => setClosingNotes(e.target.value)}
+              placeholder="Ex: Diferença devido a troco..."
+              style={{
+                width: '100%',
+                minHeight: '80px',
+                padding: '0.75rem',
+                border: '1px solid var(--border-color)',
+                borderRadius: '0.5rem',
+                backgroundColor: 'var(--bg-primary)',
+                color: 'var(--text-primary)',
+                fontSize: '0.9rem',
+                fontFamily: 'inherit',
+                resize: 'vertical'
+              }}
+            />
           </div>
-          <div className="cashflow-close-item">
-            <span>Total de Saídas:</span>
-            <strong style={{ color: 'var(--error)' }}>{formatCurrency(summary.expense)}</strong>
-          </div>
-          <div className="cashflow-close-item total">
-            <span>Saldo Final:</span>
-            <strong style={{ color: currentBalance >= 0 ? 'var(--success)' : 'var(--error)' }}>
-              {formatCurrency(currentBalance)}
-            </strong>
+          {cashboxSession && cashboxSession.expectedBalance !== null && (
+            <div style={{ 
+              padding: '0.75rem', 
+              backgroundColor: 'var(--bg-secondary)', 
+              borderRadius: '0.5rem',
+              fontSize: '0.85rem'
+            }}>
+              <strong>Diferença:</strong>{' '}
+              <span style={{ 
+                color: (Number(closingBalance || 0) - (cashboxSession.expectedBalance || 0)) === 0 
+                  ? 'var(--success)' 
+                  : 'var(--error)'
+              }}>
+                {formatCurrency((Number(closingBalance || 0) - (cashboxSession.expectedBalance || 0)))}
+              </span>
+            </div>
+          )}
+        </div>
+      </FormModal>
+
+      {/* Modal de Movimentação (Suprimento/Sangria) */}
+      <FormModal
+        isOpen={isMovementModalOpen}
+        title={movementType === 'suprimento' ? 'Adicionar Suprimento' : 'Registrar Sangria'}
+        description={movementType === 'suprimento' 
+          ? 'Adicione dinheiro ao caixa (ex: troco inicial, reposição).'
+          : 'Retire dinheiro do caixa (ex: troco para cliente, saque).'}
+        onClose={() => {
+          setIsMovementModalOpen(false)
+          setMovementAmount('')
+          setMovementDescription('')
+        }}
+        footer={
+          <>
+            <button className="ghost-btn" type="button" onClick={() => {
+              setIsMovementModalOpen(false)
+              setMovementAmount('')
+              setMovementDescription('')
+            }}>
+              Cancelar
+            </button>
+            <button 
+              className={movementType === 'suprimento' ? 'primary-btn' : 'secondary-btn'} 
+              type="button" 
+              onClick={handleCreateMovement}
+              disabled={loading}
+            >
+              {movementType === 'suprimento' ? 'Adicionar' : 'Retirar'}
+            </button>
+          </>
+        }
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1rem 0' }}>
+          <CurrencyInput
+            label="Valor"
+            value={movementAmount}
+            onChange={setMovementAmount}
+            placeholder="0,00"
+          />
+          <div>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', fontWeight: 500 }}>
+              Descrição/Motivo (opcional)
+            </label>
+            <input
+              type="text"
+              value={movementDescription}
+              onChange={(e) => setMovementDescription(e.target.value)}
+              placeholder={movementType === 'suprimento' ? 'Ex: Troco inicial' : 'Ex: Troco para cliente'}
+              style={{
+                width: '100%',
+                padding: '0.75rem',
+                border: '1px solid var(--border-color)',
+                borderRadius: '0.5rem',
+                backgroundColor: 'var(--bg-primary)',
+                color: 'var(--text-primary)',
+                fontSize: '0.9rem',
+                fontFamily: 'inherit'
+              }}
+            />
           </div>
         </div>
       </FormModal>

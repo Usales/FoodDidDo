@@ -41,6 +41,14 @@ Atualmente o projeto está sendo conduzido por uma **empresa unipessoal**, com *
 - **Custos fixos**: Rateio (mensal / por hora / por lote)
 - **Orçamento**: Gastos do mês consolidados (receitas + custos fixos mensais + custo de compra do estoque real)
 
+### 💵 Sistema de Caixa (PDV)
+- **Abertura/Fechamento de Caixa**: Controle completo de sessões de caixa com saldo inicial e final
+- **Suprimento**: Adicionar dinheiro ao caixa (ex: troco inicial, reposição)
+- **Sangria**: Retirar dinheiro do caixa (ex: troco para cliente, saque)
+- **Conferência**: Cálculo automático de saldo esperado vs. saldo real, com registro de diferenças
+- **Histórico de Movimentações**: Registro completo de todas as operações de suprimento e sangria
+- **Integração com Fluxo de Caixa**: Saldo calculado automaticamente considerando vendas, entradas e saídas
+
 ### 🧾 Backup e Restauração
 - **Exportação**: Backup JSON com todos os dados
 - **Restauração**: Importa backup e recria as entidades no banco
@@ -287,11 +295,11 @@ O FoodDidDo representa a evolução de um projeto que hoje segue em direção a 
 ## 🧾 Roadmap do PDV (para funcionamento completo no caixa)
 
 ### Operação de caixa (MVP)
-- [ ] **Abertura/fechamento de caixa** (suprimento, sangria, conferência)
-- [ ] **Vendas persistidas** (pedido/itens) e vínculo com **fluxo de caixa**
-- [ ] **Baixa de estoque automática** ao finalizar venda (por receita/insumo)
+- [x] **Abertura/fechamento de caixa** (suprimento, sangria, conferência) ✅
+- [x] **Vendas persistidas** (pedido/itens) e vínculo com **fluxo de caixa** ✅
+- [x] **Baixa de estoque automática** ao finalizar venda (por receita/insumo) ✅
 - [ ] **Descontos** por item e por venda com regras
-- [ ] **Cancelamento/estorno** com justificativa e permissões
+- [x] **Cancelamento/estorno** com justificativa e permissões ✅
 
 ### Pagamentos
 - [ ] Integração com **PIX / cartão** (Mercado Pago / PagSeguro / Asaas)

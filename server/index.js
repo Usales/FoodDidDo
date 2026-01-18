@@ -513,11 +513,292 @@ fastify.put('/api/cashflow/:id', async (request, reply) => {
 })
 
 fastify.delete('/api/cashflow/:id', async (request, reply) => {
-  const { id } = request.params
-  await prisma.cashflowEntry.delete({
-    where: { id }
-  })
-  return { success: true }
+  try {
+    const { id } = request.params
+    await prisma.cashflowEntry.delete({
+      where: { id }
+    })
+    return { success: true }
+  } catch (error) {
+    fastify.log.error(error)
+    return reply.status(500).send({ 
+      error: 'Erro ao deletar entrada de fluxo de caixa', 
+      message: error.message 
+    })
+  }
+})
+
+// ============================================
+// ROTAS DE CAIXA (ABERTURA/FECHAMENTO/SUPRIMENTO/SANGRIA)
+// ============================================
+
+// Obter sessão atual de caixa
+fastify.get('/api/cashbox/session', async (request, reply) => {
+  try {
+    const session = await prisma.cashboxSession.findFirst({
+      where: { isOpen: true },
+      include: {
+        cashMovements: {
+          orderBy: { createdAt: 'desc' }
+        }
+      },
+      orderBy: { openingDate: 'desc' }
+    })
+    
+    if (!session) {
+      return { isOpen: false, session: null }
+    }
+    
+    // Calcular saldo atual (abertura + suprimentos - sangrias + entradas - saídas do fluxo de caixa)
+    const totalSuprimentos = session.cashMovements
+      .filter(m => m.type === 'suprimento')
+      .reduce((sum, m) => sum + m.amount, 0)
+    
+    const totalSangrias = session.cashMovements
+      .filter(m => m.type === 'sangria')
+      .reduce((sum, m) => sum + m.amount, 0)
+    
+    // Buscar entradas e saídas do fluxo de caixa desde a abertura
+    const cashflowEntries = await prisma.cashflowEntry.findMany({
+      where: {
+        date: {
+          gte: session.openingDate
+        }
+      }
+    })
+    
+    const totalEntradas = cashflowEntries
+      .filter(e => e.type === 'entrada')
+      .reduce((sum, e) => sum + e.amount, 0)
+    
+    const totalSaidas = cashflowEntries
+      .filter(e => e.type === 'saída')
+      .reduce((sum, e) => sum + e.amount, 0)
+    
+    const currentBalance = session.openingAmount + totalSuprimentos - totalSangrias + totalEntradas - totalSaidas
+    
+    return {
+      isOpen: true,
+      session: {
+        ...session,
+        currentBalance,
+        totalSuprimentos,
+        totalSangrias,
+        totalEntradas,
+        totalSaidas
+      }
+    }
+  } catch (error) {
+    fastify.log.error(error)
+    return reply.status(500).send({ 
+      error: 'Erro ao buscar sessão de caixa', 
+      message: error.message 
+    })
+  }
+})
+
+// Abrir caixa
+fastify.post('/api/cashbox/open', async (request, reply) => {
+  try {
+    const { openingAmount } = request.body
+    
+    if (!openingAmount || openingAmount < 0) {
+      return reply.status(400).send({ 
+        error: 'Valor inválido', 
+        message: 'O valor de abertura deve ser maior ou igual a zero' 
+      })
+    }
+    
+    // Verificar se já existe uma sessão aberta
+    const existingSession = await prisma.cashboxSession.findFirst({
+      where: { isOpen: true }
+    })
+    
+    if (existingSession) {
+      return reply.status(400).send({ 
+        error: 'Caixa já aberto', 
+        message: 'Já existe uma sessão de caixa aberta. Feche o caixa antes de abrir uma nova sessão.' 
+      })
+    }
+    
+    const session = await prisma.cashboxSession.create({
+      data: {
+        isOpen: true,
+        openingAmount: Number(openingAmount),
+        openingDate: new Date()
+      },
+      include: {
+        cashMovements: true
+      }
+    })
+    
+    return session
+  } catch (error) {
+    fastify.log.error(error)
+    return reply.status(500).send({ 
+      error: 'Erro ao abrir caixa', 
+      message: error.message 
+    })
+  }
+})
+
+// Fechar caixa
+fastify.post('/api/cashbox/close', async (request, reply) => {
+  try {
+    const { closingBalance, notes } = request.body
+    
+    if (closingBalance === undefined || closingBalance < 0) {
+      return reply.status(400).send({ 
+        error: 'Valor inválido', 
+        message: 'O saldo de fechamento deve ser informado e maior ou igual a zero' 
+      })
+    }
+    
+    // Buscar sessão aberta
+    const session = await prisma.cashboxSession.findFirst({
+      where: { isOpen: true },
+      include: {
+        cashMovements: true
+      }
+    })
+    
+    if (!session) {
+      return reply.status(400).send({ 
+        error: 'Caixa não aberto', 
+        message: 'Não existe uma sessão de caixa aberta' 
+      })
+    }
+    
+    // Calcular saldo esperado
+    const totalSuprimentos = session.cashMovements
+      .filter(m => m.type === 'suprimento')
+      .reduce((sum, m) => sum + m.amount, 0)
+    
+    const totalSangrias = session.cashMovements
+      .filter(m => m.type === 'sangria')
+      .reduce((sum, m) => sum + m.amount, 0)
+    
+    // Buscar entradas e saídas do fluxo de caixa desde a abertura
+    const cashflowEntries = await prisma.cashflowEntry.findMany({
+      where: {
+        date: {
+          gte: session.openingDate
+        }
+      }
+    })
+    
+    const totalEntradas = cashflowEntries
+      .filter(e => e.type === 'entrada')
+      .reduce((sum, e) => sum + e.amount, 0)
+    
+    const totalSaidas = cashflowEntries
+      .filter(e => e.type === 'saída')
+      .reduce((sum, e) => sum + e.amount, 0)
+    
+    const expectedBalance = session.openingAmount + totalSuprimentos - totalSangrias + totalEntradas - totalSaidas
+    const difference = Number(closingBalance) - expectedBalance
+    
+    const updatedSession = await prisma.cashboxSession.update({
+      where: { id: session.id },
+      data: {
+        isOpen: false,
+        closingDate: new Date(),
+        closingBalance: Number(closingBalance),
+        expectedBalance,
+        difference,
+        notes: notes || null
+      },
+      include: {
+        cashMovements: {
+          orderBy: { createdAt: 'desc' }
+        }
+      }
+    })
+    
+    return updatedSession
+  } catch (error) {
+    fastify.log.error(error)
+    return reply.status(500).send({ 
+      error: 'Erro ao fechar caixa', 
+      message: error.message 
+    })
+  }
+})
+
+// Listar movimentações (suprimento/sangria) da sessão atual
+fastify.get('/api/cashbox/movements', async (request, reply) => {
+  try {
+    const session = await prisma.cashboxSession.findFirst({
+      where: { isOpen: true }
+    })
+    
+    if (!session) {
+      return []
+    }
+    
+    const movements = await prisma.cashMovement.findMany({
+      where: { sessionId: session.id },
+      orderBy: { createdAt: 'desc' }
+    })
+    
+    return movements
+  } catch (error) {
+    fastify.log.error(error)
+    return reply.status(500).send({ 
+      error: 'Erro ao buscar movimentações', 
+      message: error.message 
+    })
+  }
+})
+
+// Criar movimentação (suprimento ou sangria)
+fastify.post('/api/cashbox/movements', async (request, reply) => {
+  try {
+    const { type, amount, description } = request.body
+    
+    if (!type || !['suprimento', 'sangria'].includes(type)) {
+      return reply.status(400).send({ 
+        error: 'Tipo inválido', 
+        message: 'Tipo deve ser "suprimento" ou "sangria"' 
+      })
+    }
+    
+    if (!amount || amount <= 0) {
+      return reply.status(400).send({ 
+        error: 'Valor inválido', 
+        message: 'O valor deve ser maior que zero' 
+      })
+    }
+    
+    // Verificar se existe sessão aberta
+    const session = await prisma.cashboxSession.findFirst({
+      where: { isOpen: true }
+    })
+    
+    if (!session) {
+      return reply.status(400).send({ 
+        error: 'Caixa não aberto', 
+        message: 'É necessário abrir o caixa antes de fazer movimentações' 
+      })
+    }
+    
+    const movement = await prisma.cashMovement.create({
+      data: {
+        sessionId: session.id,
+        type,
+        amount: Number(amount),
+        description: description || null
+      }
+    })
+    
+    return movement
+  } catch (error) {
+    fastify.log.error(error)
+    return reply.status(500).send({ 
+      error: 'Erro ao criar movimentação', 
+      message: error.message 
+    })
+  }
 })
 
 // Rotas de Preços
@@ -677,7 +958,7 @@ fastify.get('/api/export', async (request, reply) => {
       }
     }
 
-    const [budgets, ingredients, recipes, fixedCosts, cashflow, stockMovements, warehouses, pricing, customers, orders] = await Promise.all([
+    const [budgets, ingredients, recipes, fixedCosts, cashflow, stockMovements, warehouses, pricing, customers, orders, cashboxSessions] = await Promise.all([
       prisma.budget.findMany(),
       prisma.ingredient.findMany(),
       prisma.recipe.findMany({
@@ -700,6 +981,11 @@ fastify.get('/api/export', async (request, reply) => {
           items: true,
           payment: true,
           invoice: true
+        }
+      }).catch(() => []),
+      prisma.cashboxSession.findMany({
+        include: {
+          cashMovements: true
         }
       }).catch(() => [])
     ])
@@ -724,7 +1010,8 @@ fastify.get('/api/export', async (request, reply) => {
         warehouses: warehouses || [],
         pricing: pricing || [],
         customers: customers || [],
-        orders: orders || []
+        orders: orders || [],
+        cashboxSessions: cashboxSessions || []
       }
     }
   } catch (error) {
@@ -750,6 +1037,8 @@ fastify.post('/api/restore', async (request, reply) => {
     
     // Limpar dados existentes (em ordem para respeitar foreign keys)
     await Promise.all([
+      prisma.cashMovement.deleteMany().catch(() => {}),
+      prisma.cashboxSession.deleteMany().catch(() => {}),
       prisma.orderItem.deleteMany().catch(() => {}),
       prisma.payment.deleteMany().catch(() => {}),
       prisma.invoice.deleteMany().catch(() => {}),
