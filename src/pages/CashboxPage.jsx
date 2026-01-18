@@ -180,7 +180,34 @@ export function CashboxPage() {
 
       const order = await addOrder(orderData)
 
-      // 2. Registrar entrada no fluxo de caixa (vinculado ao pedido)
+      // 2. Calcular ingredientes necessários para baixa de estoque
+      // Para cada item vendido, buscar a receita e seus ingredientes
+      const stockMovementsToCreate = []
+      for (const cartItem of cart) {
+        const recipe = recipes.find(r => r.id === cartItem.id)
+        if (recipe && recipe.ingredients && Array.isArray(recipe.ingredients)) {
+          // Calcular quantidade por unidade vendida
+          const quantityPerUnit = recipe.yield || 1
+          
+          for (const ingredient of recipe.ingredients) {
+            // Calcular quantidade total do ingrediente necessário
+            // (quantidade do ingrediente na receita / rendimento da receita) * quantidade vendida
+            const ingredientQuantityPerUnit = (ingredient.quantity || 0) / quantityPerUnit
+            const totalIngredientQuantity = ingredientQuantityPerUnit * cartItem.quantity
+            
+            if (totalIngredientQuantity > 0 && ingredient.id) {
+              stockMovementsToCreate.push({
+                ingredientId: ingredient.id,
+                ingredientName: ingredient.name,
+                quantity: totalIngredientQuantity,
+                reference: `Venda #${order.orderNumber || order.id.slice(0, 8)} - ${cartItem.name}`
+              })
+            }
+          }
+        }
+      }
+
+      // 3. Registrar entrada no fluxo de caixa (vinculado ao pedido)
       await addCashflowEntry({
         id: crypto.randomUUID(),
         type: 'entrada',
