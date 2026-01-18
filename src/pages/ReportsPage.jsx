@@ -154,18 +154,6 @@ export function ReportsPage() {
 
   return (
     <div className="reports-page">
-      {/* Cards de Indicadores */}
-      <section className="reports-indicators">
-        <div className="reports-indicator-card reports-indicator-card--dark">
-          <span className="reports-indicator-label">Relatórios Disponíveis</span>
-          <strong className="reports-indicator-value">{reports.length}</strong>
-        </div>
-        <div className="reports-indicator-card reports-indicator-card--dark">
-          <span className="reports-indicator-label">Exportações Recentes</span>
-          <strong className="reports-indicator-value">{getRecentExportsCount()}</strong>
-          <small className="reports-indicator-subtitle">Últimos 7 dias</small>
-        </div>
-      </section>
 
       {/* Sessão Principal - Relatórios */}
       <section className="reports-main-section">
