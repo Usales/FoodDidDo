@@ -17,6 +17,7 @@ export function CashboxPage() {
   const pricing = useAppStore((state) => state.pricing)
   const addCashflowEntry = useAppStore((state) => state.addCashflowEntry)
   const addOrder = useAppStore((state) => state.addOrder)
+  const addStockMovement = useAppStore((state) => state.addStockMovement)
   const loadData = useAppStore((state) => state.loadData)
 
   const [cart, setCart] = useState([])
