@@ -278,7 +278,47 @@ export function MainLayout({ onLogout, user }) {
       }
     }
 
-    readSidebarSettings()
+    // Verificar se há configurações que ocultam tudo e resetar se necessário
+    try {
+      const saved = localStorage.getItem(SIDEBAR_SETTINGS_KEY)
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        // Se todas as seções principais estiverem como true (ocultas), resetar
+        if (parsed.showVisaoGeral === true && parsed.showAnalises === true && parsed.showOperacao === true) {
+          // Resetar para garantir que tudo apareça
+          const resetSettings = {
+            showVisaoGeral: false,
+            showAnalises: false,
+            showOperacao: false,
+            showDashboard: false,
+            showCaixa: false,
+            showFluxoCaixa: false,
+            showOrcamento: false,
+            showIngredientes: false,
+            showReceitas: false,
+            showCustos: false,
+            showSimulador: false,
+            showLucratividade: false,
+            showCustosFixos: false,
+            showPricing: false,
+            showSimulacao: false,
+            showEstoque: false,
+            showVendas: false,
+            showRelatorios: false,
+            showConfig: false
+          }
+          localStorage.setItem(SIDEBAR_SETTINGS_KEY, JSON.stringify(resetSettings))
+          setSidebarSettings(resetSettings)
+        } else {
+          readSidebarSettings()
+        }
+      } else {
+        readSidebarSettings()
+      }
+    } catch {
+      readSidebarSettings()
+    }
+    
     window.addEventListener('sidebarSettingsChanged', handleSidebarSettingsChange)
     return () => window.removeEventListener('sidebarSettingsChanged', handleSidebarSettingsChange)
   }, [])
