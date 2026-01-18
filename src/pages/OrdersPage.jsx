@@ -366,6 +366,51 @@ export function OrdersPage() {
         )}
       </div>
 
+      {/* Modal de Cancelamento */}
+      <FormModal
+        isOpen={cancelModalOpen}
+        onClose={() => {
+          setCancelModalOpen(false)
+          setSelectedOrderId(null)
+          setCancelReason('')
+        }}
+        title="Cancelar Pedido"
+        description="Informe o motivo do cancelamento. Esta ação não pode ser desfeita."
+      >
+        <div className="orders-cancel-form">
+          <label>
+            Motivo do Cancelamento *
+            <textarea
+              value={cancelReason}
+              onChange={(e) => setCancelReason(e.target.value)}
+              placeholder="Ex: Cliente desistiu, produto indisponível, etc."
+              rows={4}
+              required
+            />
+          </label>
+          <div className="orders-cancel-actions">
+            <button
+              type="button"
+              className="page-btn-secondary"
+              onClick={() => {
+                setCancelModalOpen(false)
+                setSelectedOrderId(null)
+                setCancelReason('')
+              }}
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              className="page-btn-primary"
+              onClick={handleCancelOrder}
+              disabled={!cancelReason.trim()}
+            >
+              Confirmar Cancelamento
+            </button>
+          </div>
+        </div>
+      </FormModal>
     </div>
   )
 }
