@@ -67,23 +67,23 @@ export function MainLayout({ onLogout, user }) {
   const [isMobile, setIsMobile] = useState(false)
   const [dashboardSettings, setDashboardSettings] = useState({ showHeader: false })
   const [sidebarSettings, setSidebarSettings] = useState({
-    showVisaoGeral: true,
-    showAnalises: true,
-    showOperacao: true,
-    showDashboard: true,
-    showCaixa: true,
-    showFluxoCaixa: true,
-    showOrcamento: true,
-    showIngredientes: true,
-    showReceitas: true,
-    showCustos: true,
-    showSimulador: true,
-    showLucratividade: true,
-    showCustosFixos: true,
-    showPricing: true,
-    showSimulacao: true,
-    showEstoque: true,
-    showRelatorios: true
+    showVisaoGeral: false,
+    showAnalises: false,
+    showOperacao: false,
+    showDashboard: false,
+    showCaixa: false,
+    showFluxoCaixa: false,
+    showOrcamento: false,
+    showIngredientes: false,
+    showReceitas: false,
+    showCustos: false,
+    showSimulador: false,
+    showLucratividade: false,
+    showCustosFixos: false,
+    showPricing: false,
+    showSimulacao: false,
+    showEstoque: false,
+    showRelatorios: false
   })
   const dropdownRef = useRef(null)
   const userChipRef = useRef(null)
@@ -153,52 +153,52 @@ export function MainLayout({ onLogout, user }) {
       try {
         const saved = localStorage.getItem(SIDEBAR_SETTINGS_KEY)
         if (!saved) {
-          setSidebarSettings({
-            showVisaoGeral: true,
-            showAnalises: true,
-            showOperacao: true
-          })
+        setSidebarSettings({
+          showVisaoGeral: false,
+          showAnalises: false,
+          showOperacao: false
+        })
           return
         }
         const parsed = JSON.parse(saved)
         setSidebarSettings({
-          showVisaoGeral: typeof parsed?.showVisaoGeral === 'boolean' ? parsed.showVisaoGeral : true,
-          showAnalises: typeof parsed?.showAnalises === 'boolean' ? parsed.showAnalises : true,
-          showOperacao: typeof parsed?.showOperacao === 'boolean' ? parsed.showOperacao : true,
-          showDashboard: typeof parsed?.showDashboard === 'boolean' ? parsed.showDashboard : true,
-          showCaixa: typeof parsed?.showCaixa === 'boolean' ? parsed.showCaixa : true,
-          showFluxoCaixa: typeof parsed?.showFluxoCaixa === 'boolean' ? parsed.showFluxoCaixa : true,
-          showOrcamento: typeof parsed?.showOrcamento === 'boolean' ? parsed.showOrcamento : true,
-          showIngredientes: typeof parsed?.showIngredientes === 'boolean' ? parsed.showIngredientes : true,
-          showReceitas: typeof parsed?.showReceitas === 'boolean' ? parsed.showReceitas : true,
-          showCustos: typeof parsed?.showCustos === 'boolean' ? parsed.showCustos : true,
-          showSimulador: typeof parsed?.showSimulador === 'boolean' ? parsed.showSimulador : true,
-          showLucratividade: typeof parsed?.showLucratividade === 'boolean' ? parsed.showLucratividade : true,
-          showCustosFixos: typeof parsed?.showCustosFixos === 'boolean' ? parsed.showCustosFixos : true,
-          showPricing: typeof parsed?.showPricing === 'boolean' ? parsed.showPricing : true,
-          showSimulacao: typeof parsed?.showSimulacao === 'boolean' ? parsed.showSimulacao : true,
-          showEstoque: typeof parsed?.showEstoque === 'boolean' ? parsed.showEstoque : true,
-          showRelatorios: typeof parsed?.showRelatorios === 'boolean' ? parsed.showRelatorios : true
+          showVisaoGeral: typeof parsed?.showVisaoGeral === 'boolean' ? parsed.showVisaoGeral : false,
+          showAnalises: typeof parsed?.showAnalises === 'boolean' ? parsed.showAnalises : false,
+          showOperacao: typeof parsed?.showOperacao === 'boolean' ? parsed.showOperacao : false,
+          showDashboard: typeof parsed?.showDashboard === 'boolean' ? parsed.showDashboard : false,
+          showCaixa: typeof parsed?.showCaixa === 'boolean' ? parsed.showCaixa : false,
+          showFluxoCaixa: typeof parsed?.showFluxoCaixa === 'boolean' ? parsed.showFluxoCaixa : false,
+          showOrcamento: typeof parsed?.showOrcamento === 'boolean' ? parsed.showOrcamento : false,
+          showIngredientes: typeof parsed?.showIngredientes === 'boolean' ? parsed.showIngredientes : false,
+          showReceitas: typeof parsed?.showReceitas === 'boolean' ? parsed.showReceitas : false,
+          showCustos: typeof parsed?.showCustos === 'boolean' ? parsed.showCustos : false,
+          showSimulador: typeof parsed?.showSimulador === 'boolean' ? parsed.showSimulador : false,
+          showLucratividade: typeof parsed?.showLucratividade === 'boolean' ? parsed.showLucratividade : false,
+          showCustosFixos: typeof parsed?.showCustosFixos === 'boolean' ? parsed.showCustosFixos : false,
+          showPricing: typeof parsed?.showPricing === 'boolean' ? parsed.showPricing : false,
+          showSimulacao: typeof parsed?.showSimulacao === 'boolean' ? parsed.showSimulacao : false,
+          showEstoque: typeof parsed?.showEstoque === 'boolean' ? parsed.showEstoque : false,
+          showRelatorios: typeof parsed?.showRelatorios === 'boolean' ? parsed.showRelatorios : false
         })
       } catch {
         setSidebarSettings({
-          showVisaoGeral: true,
-          showAnalises: true,
-          showOperacao: true,
-          showDashboard: true,
-          showCaixa: true,
-          showFluxoCaixa: true,
-          showOrcamento: true,
-          showIngredientes: true,
-          showReceitas: true,
-          showCustos: true,
-          showSimulador: true,
-          showLucratividade: true,
-          showCustosFixos: true,
-          showPricing: true,
-          showSimulacao: true,
-          showEstoque: true,
-          showRelatorios: true
+          showVisaoGeral: false,
+          showAnalises: false,
+          showOperacao: false,
+          showDashboard: false,
+          showCaixa: false,
+          showFluxoCaixa: false,
+          showOrcamento: false,
+          showIngredientes: false,
+          showReceitas: false,
+          showCustos: false,
+          showSimulador: false,
+          showLucratividade: false,
+          showCustosFixos: false,
+          showPricing: false,
+          showSimulacao: false,
+          showEstoque: false,
+          showRelatorios: false
         })
       }
     }
@@ -207,23 +207,23 @@ export function MainLayout({ onLogout, user }) {
       const next = event?.detail
       if (next && typeof next === 'object') {
         setSidebarSettings({
-          showVisaoGeral: typeof next.showVisaoGeral === 'boolean' ? next.showVisaoGeral : true,
-          showAnalises: typeof next.showAnalises === 'boolean' ? next.showAnalises : true,
-          showOperacao: typeof next.showOperacao === 'boolean' ? next.showOperacao : true,
-          showDashboard: typeof next.showDashboard === 'boolean' ? next.showDashboard : true,
-          showCaixa: typeof next.showCaixa === 'boolean' ? next.showCaixa : true,
-          showFluxoCaixa: typeof next.showFluxoCaixa === 'boolean' ? next.showFluxoCaixa : true,
-          showOrcamento: typeof next.showOrcamento === 'boolean' ? next.showOrcamento : true,
-          showIngredientes: typeof next.showIngredientes === 'boolean' ? next.showIngredientes : true,
-          showReceitas: typeof next.showReceitas === 'boolean' ? next.showReceitas : true,
-          showCustos: typeof next.showCustos === 'boolean' ? next.showCustos : true,
-          showSimulador: typeof next.showSimulador === 'boolean' ? next.showSimulador : true,
-          showLucratividade: typeof next.showLucratividade === 'boolean' ? next.showLucratividade : true,
-          showCustosFixos: typeof next.showCustosFixos === 'boolean' ? next.showCustosFixos : true,
-          showPricing: typeof next.showPricing === 'boolean' ? next.showPricing : true,
-          showSimulacao: typeof next.showSimulacao === 'boolean' ? next.showSimulacao : true,
-          showEstoque: typeof next.showEstoque === 'boolean' ? next.showEstoque : true,
-          showRelatorios: typeof next.showRelatorios === 'boolean' ? next.showRelatorios : true
+          showVisaoGeral: typeof next.showVisaoGeral === 'boolean' ? next.showVisaoGeral : false,
+          showAnalises: typeof next.showAnalises === 'boolean' ? next.showAnalises : false,
+          showOperacao: typeof next.showOperacao === 'boolean' ? next.showOperacao : false,
+          showDashboard: typeof next.showDashboard === 'boolean' ? next.showDashboard : false,
+          showCaixa: typeof next.showCaixa === 'boolean' ? next.showCaixa : false,
+          showFluxoCaixa: typeof next.showFluxoCaixa === 'boolean' ? next.showFluxoCaixa : false,
+          showOrcamento: typeof next.showOrcamento === 'boolean' ? next.showOrcamento : false,
+          showIngredientes: typeof next.showIngredientes === 'boolean' ? next.showIngredientes : false,
+          showReceitas: typeof next.showReceitas === 'boolean' ? next.showReceitas : false,
+          showCustos: typeof next.showCustos === 'boolean' ? next.showCustos : false,
+          showSimulador: typeof next.showSimulador === 'boolean' ? next.showSimulador : false,
+          showLucratividade: typeof next.showLucratividade === 'boolean' ? next.showLucratividade : false,
+          showCustosFixos: typeof next.showCustosFixos === 'boolean' ? next.showCustosFixos : false,
+          showPricing: typeof next.showPricing === 'boolean' ? next.showPricing : false,
+          showSimulacao: typeof next.showSimulacao === 'boolean' ? next.showSimulacao : false,
+          showEstoque: typeof next.showEstoque === 'boolean' ? next.showEstoque : false,
+          showRelatorios: typeof next.showRelatorios === 'boolean' ? next.showRelatorios : false
         })
       } else {
         readSidebarSettings()
@@ -309,9 +309,9 @@ export function MainLayout({ onLogout, user }) {
         <nav>
           {navigation
             .filter((group) => {
-              if (group.section === 'Visão Geral') return sidebarSettings.showVisaoGeral
-              if (group.section === 'Análises') return sidebarSettings.showAnalises
-              if (group.section === 'Operação') return sidebarSettings.showOperacao
+              if (group.section === 'Visão Geral') return !sidebarSettings.showVisaoGeral
+              if (group.section === 'Análises') return !sidebarSettings.showAnalises
+              if (group.section === 'Operação') return !sidebarSettings.showOperacao
               return true
             })
             .map((group) => {
@@ -334,10 +334,11 @@ export function MainLayout({ onLogout, user }) {
               }
 
               // Filtrar itens baseado nas configurações (Configurações sempre visível)
+              // Quando marcado (true), o item fica oculto, então exibimos quando é false ou undefined
               const filteredItems = group.items.filter((item) => {
                 if (item.path === '/config') return true // Sempre mostrar Configurações
                 const setting = pathToSettingMap[item.path]
-                return setting !== false && setting !== undefined
+                return setting !== true
               })
 
               // Não mostrar a seção se não tiver itens visíveis
@@ -559,9 +560,9 @@ export function MainLayout({ onLogout, user }) {
             <nav className="mobile-menu-nav">
               {navigation
                 .filter((group) => {
-                  if (group.section === 'Visão Geral') return sidebarSettings.showVisaoGeral
-                  if (group.section === 'Análises') return sidebarSettings.showAnalises
-                  if (group.section === 'Operação') return sidebarSettings.showOperacao
+                  if (group.section === 'Visão Geral') return !sidebarSettings.showVisaoGeral
+                  if (group.section === 'Análises') return !sidebarSettings.showAnalises
+                  if (group.section === 'Operação') return !sidebarSettings.showOperacao
                   return true
                 })
                 .map((group) => {
@@ -584,9 +585,10 @@ export function MainLayout({ onLogout, user }) {
                   }
 
                   // Filtrar itens baseado nas configurações (Configurações sempre visível)
+                  // Quando marcado (true), o item fica oculto, então exibimos quando é false ou undefined
                   const filteredItems = group.items.filter((item) => {
                     if (item.path === '/config') return true // Sempre mostrar Configurações
-                    return pathToSettingMap[item.path] !== false
+                    return pathToSettingMap[item.path] !== true
                   })
 
                   // Não mostrar a seção se não tiver itens visíveis
