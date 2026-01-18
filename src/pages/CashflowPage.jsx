@@ -628,8 +628,6 @@ export function CashflowPage() {
                   </div>
                 </div>
               )}
-            </div>
-          )}
 
               {currentBudget && (
                 <div className="cashflow-details-budget">
