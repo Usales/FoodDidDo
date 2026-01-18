@@ -650,6 +650,7 @@ fastify.delete('/api/warehouses/:warehouseId/items/:itemId', async (request, rep
 })
 
 // Rota de backup/export
+// Inclui: budgets, ingredients, recipes, fixedCosts, cashflow, stockMovements, warehouses, pricing, customers, orders
 fastify.get('/api/export', async (request, reply) => {
   try {
     const fetchCashflowSafe = async () => {
