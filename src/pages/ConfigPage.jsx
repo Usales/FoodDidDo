@@ -15,10 +15,10 @@ const SIDEBAR_SETTINGS_KEY = 'sidebarSettings'
 const defaultDashboardSettings = {
   // Quando true, oculta todos os cabeçalhos do layout/Home
   showHeader: false,
-  showStatusPanel: true,
-  showBusinessInsights: true,
-  showMealSection: true,
-  showOrdersInPreparation: true
+  showStatusPanel: false,
+  showBusinessInsights: false,
+  showMealSection: false,
+  showOrdersInPreparation: false
 }
 
 const defaultCashflowPageSettings = {
@@ -845,7 +845,7 @@ export function ConfigPage() {
                     const newSettings = { ...dashboardSettings, showStatusPanel: !dashboardSettings.showStatusPanel }
                     saveDashboardSettings(newSettings)
                   }}
-                  label={dashboardSettings.showStatusPanel ? 'Exibindo' : 'Oculto'}
+                  label={dashboardSettings.showStatusPanel ? 'Oculto' : 'Exibindo'}
                 />
               </div>
 
@@ -867,7 +867,7 @@ export function ConfigPage() {
                     const newSettings = { ...dashboardSettings, showBusinessInsights: !dashboardSettings.showBusinessInsights }
                     saveDashboardSettings(newSettings)
                   }}
-                  label={dashboardSettings.showBusinessInsights ? 'Exibindo' : 'Oculto'}
+                  label={dashboardSettings.showBusinessInsights ? 'Oculto' : 'Exibindo'}
                 />
               </div>
 
@@ -889,7 +889,7 @@ export function ConfigPage() {
                     const newSettings = { ...dashboardSettings, showMealSection: !dashboardSettings.showMealSection }
                     saveDashboardSettings(newSettings)
                   }}
-                  label={dashboardSettings.showMealSection ? 'Exibindo' : 'Oculto'}
+                  label={dashboardSettings.showMealSection ? 'Oculto' : 'Exibindo'}
                 />
               </div>
 
@@ -911,7 +911,7 @@ export function ConfigPage() {
                     const newSettings = { ...dashboardSettings, showOrdersInPreparation: !dashboardSettings.showOrdersInPreparation }
                     saveDashboardSettings(newSettings)
                   }}
-                  label={dashboardSettings.showOrdersInPreparation ? 'Exibindo' : 'Oculto'}
+                  label={dashboardSettings.showOrdersInPreparation ? 'Oculto' : 'Exibindo'}
                 />
               </div>
             </div>

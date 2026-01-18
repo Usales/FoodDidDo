@@ -11,10 +11,10 @@ const DASHBOARD_SETTINGS_KEY = 'dashboardSettings'
 const defaultDashboardSettings = {
   // Quando true, oculta todos os cabeçalhos do layout/Home
   showHeader: false,
-  showStatusPanel: true,
-  showBusinessInsights: true,
-  showMealSection: true,
-  showOrdersInPreparation: true
+  showStatusPanel: false,
+  showBusinessInsights: false,
+  showMealSection: false,
+  showOrdersInPreparation: false
 }
 
 const defaultMeals = [
@@ -1831,7 +1831,7 @@ export function DashboardPage() {
         </div>
       )}
       {/* Painel de Status Diário */}
-      {dashboardSettings.showStatusPanel && (
+      {!dashboardSettings.showStatusPanel && (
       <section className="dashboard-status-panel">
         <div className="status-panel-header">
           <h2>Hoje</h2>
@@ -1852,7 +1852,7 @@ export function DashboardPage() {
       </section>
       )}
 
-      {dashboardSettings.showBusinessInsights && businessInsights && (
+      {!dashboardSettings.showBusinessInsights && businessInsights && (
         <section className="page-stack business-insights">
           <div className="insights-content">
             <h2>💡 Oportunidade de Negócio</h2>
@@ -1869,7 +1869,7 @@ export function DashboardPage() {
         </section>
       )}
 
-      {dashboardSettings.showMealSection && (
+      {!dashboardSettings.showMealSection && (
       <section className="page-stack meal-section">
         <header className="meal-section-header">
           <div>
@@ -2262,7 +2262,7 @@ export function DashboardPage() {
       </section>
       )}
 
-      {dashboardSettings.showOrdersInPreparation && (
+      {!dashboardSettings.showOrdersInPreparation && (
       <>
       <section 
         className={`page-stack meal-section ${dragOverSection === 'prontos' ? 'drag-over' : ''}`}
@@ -2847,7 +2847,7 @@ export function DashboardPage() {
               <FiPlus size={20} />
               <span>Nova refeição</span>
             </button>
-            {dashboardSettings.showOrdersInPreparation && (
+            {!dashboardSettings.showOrdersInPreparation && (
               <button
                 type="button"
                 className="fab-menu-item"
