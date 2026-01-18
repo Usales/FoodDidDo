@@ -12,6 +12,7 @@ const createInitialState = () => ({
   cashflow: [],
   stockMovements: [],
   warehouses: [],
+  orders: [],
   isLoading: false,
   error: null
 })
@@ -23,7 +24,7 @@ export const useAppStore = create(devtools((set, get) => ({
   loadData: async () => {
     set({ isLoading: true, error: null })
     try {
-      const [budgets, ingredients, recipes, fixedCosts, cashflow, stockMovements, warehouses, pricing] = await Promise.all([
+      const [budgets, ingredients, recipes, fixedCosts, cashflow, stockMovements, warehouses, pricing, orders] = await Promise.all([
         api.getBudgets(),
         api.getIngredients(),
         api.getRecipes(),
@@ -31,7 +32,8 @@ export const useAppStore = create(devtools((set, get) => ({
         api.getCashflow(),
         api.getStockMovements(),
         api.getWarehouses(),
-        api.getPricing()
+        api.getPricing(),
+        api.getOrders().catch(() => []) // Se não houver orders ainda, retornar array vazio
       ])
       
       set({
@@ -43,6 +45,7 @@ export const useAppStore = create(devtools((set, get) => ({
         cashflow,
         stockMovements,
         warehouses,
+        orders: orders || [],
         isLoading: false
       })
     } catch (error) {
@@ -380,6 +383,41 @@ export const useAppStore = create(devtools((set, get) => ({
     const totalAmount = budgets.reduce((acc, budget) => acc + budget.amount, 0)
     const totalSpent = budgets.reduce((acc, budget) => acc + (budget.spent || 0), 0)
     return totalAmount - totalSpent
+  },
+  
+  // Pedidos/Vendas (Orders)
+  addOrder: async (orderData) => {
+    try {
+      const newOrder = await api.createOrder(orderData)
+      set((state) => ({ orders: [newOrder, ...state.orders] }))
+      return newOrder
+    } catch (error) {
+      console.error('Erro ao criar pedido:', error)
+      throw error
+    }
+  },
+  
+  getOrder: async (id) => {
+    try {
+      const order = await api.getOrder(id)
+      return order
+    } catch (error) {
+      console.error('Erro ao buscar pedido:', error)
+      throw error
+    }
+  },
+  
+  updateOrder: async (id, updates) => {
+    try {
+      const updated = await api.updateOrder(id, updates)
+      set((state) => ({
+        orders: state.orders.map((order) => (order.id === id ? updated : order))
+      }))
+      return updated
+    } catch (error) {
+      console.error('Erro ao atualizar pedido:', error)
+      throw error
+    }
   },
   
   // Métodos para backup e restauração
