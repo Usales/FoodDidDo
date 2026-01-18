@@ -53,6 +53,20 @@ Atualmente o projeto está sendo conduzido por uma **empresa unipessoal**, com *
 - **Exportação**: Backup JSON com todos os dados
 - **Restauração**: Importa backup e recria as entidades no banco
 
+### 📊 Sistema de Relatórios
+- **8 Tipos de Relatórios Disponíveis**:
+  - **Custos e Lucros por Receita**: Consolidação de fichas técnicas com custos, preços sugeridos e lucratividade
+  - **Desempenho Mensal**: Resumo consolidado de receitas, gastos, lucro e orçamentos por mês
+  - **Análise de Sensibilidade**: Comparativo de cenários de variação de preços e impacto nas margens
+  - **Produção vs Orçamento**: Comparação entre planejamento orçamentário e execução real
+  - **Relatório de Vendas**: Análise detalhada de vendas, pedidos, receita, lucro e ticket médio
+  - **Estoque e Movimentações**: Situação atual do estoque, movimentações e alertas de estoque baixo
+  - **Fluxo de Caixa Detalhado**: Todas as movimentações financeiras com entradas, saídas, custos e lucros
+  - **Ingredientes e Custos**: Inventário completo de ingredientes, custos unitários e valor total em estoque
+- **Exportação em PDF e Excel (CSV)**: Todos os relatórios podem ser exportados em ambos os formatos
+- **Filtros por Categoria**: Organização por categorias (Financeiro, Análise, Operacional, Vendas, Estoque)
+- **Interface Moderna**: Cards visuais com ícones, categorias e descrições detalhadas
+
 ### 📖 Visualização Detalhada de Receitas
 - **Modal Completo**: Visualização detalhada com todos os ingredientes e instruções
 - **Passo a Passo**: Instruções de preparo organizadas e numeradas
