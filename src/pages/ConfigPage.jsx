@@ -50,6 +50,7 @@ const defaultSidebarSettings = {
   // Operação - itens individuais
   showEstoque: false,
   showVendas: false,
+  showUsuarios: false,
   showRelatorios: false,
   showConfig: false
 }
@@ -791,6 +792,25 @@ export function ConfigPage() {
                     saveSidebarSettings(newSettings)
                   }}
                   label={(sidebarSettings.showVendas ?? false) ? 'Oculto' : 'Exibindo'}
+                />
+                  </div>
+
+                  <div className="config-dashboard-item" style={{ marginLeft: '2rem', paddingLeft: '1rem', borderLeft: '2px solid var(--border-color)' }}>
+                    <div className="config-dashboard-item-content">
+                      <div className="config-dashboard-item-header">
+                        <h4 style={{ fontSize: '0.95rem', fontWeight: 600 }}>Usuários</h4>
+                      </div>
+                      <p className="config-dashboard-item-description" style={{ fontSize: '0.85rem' }}>
+                        Link para cadastro e gerenciamento de usuários
+                      </p>
+                    </div>
+                <ToggleSwitch
+                  checked={sidebarSettings.showUsuarios ?? false}
+                  onChange={() => {
+                    const newSettings = { ...sidebarSettings, showUsuarios: !(sidebarSettings.showUsuarios ?? false) }
+                    saveSidebarSettings(newSettings)
+                  }}
+                  label={(sidebarSettings.showUsuarios ?? false) ? 'Oculto' : 'Exibindo'}
                 />
                   </div>
 
