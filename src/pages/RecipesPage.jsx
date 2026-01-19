@@ -61,6 +61,13 @@ export function RecipesPage() {
     return map[key] || raw
   }
 
+  const normalizeText = (value) => {
+    const raw = String(value ?? '').trim().toLowerCase()
+    if (!raw) return ''
+    // remove acentos/diacríticos (ex: pimentão -> pimentao)
+    return raw.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+  }
+
   useEffect(() => {
     let isMounted = true
     const loadRecipes = async () => {
@@ -124,14 +131,15 @@ export function RecipesPage() {
 
     if (selectedIngredients.length) {
       base = base.filter((recipe) => {
-        const recipeTitle = (recipe.title || '').toLowerCase()
-        const recipeIngredients = (recipe.ingredientsList || '').toLowerCase()
+        const recipeTitle = normalizeText(recipe.title || '')
+        const recipeIngredients = normalizeText(recipe.ingredientsList || '')
         return selectedIngredients.some((ingredient) => {
-          const searchIngredient = ingredient.toLowerCase().trim()
+          const searchIngredient = normalizeText(ingredient)
+          if (!searchIngredient) return false
           const inTitle = recipeTitle.includes(searchIngredient)
-          const inDescription = recipeIngredients.includes(searchIngredient)
-          // O ingrediente deve estar TANTO no título QUANTO na descrição
-          return inTitle && inDescription
+          const inIngredients = recipeIngredients.includes(searchIngredient)
+          // Aceitar ingrediente no título OU na lista de ingredientes (título nem sempre contém o ingrediente)
+          return inIngredients || inTitle
         })
       })
     }
