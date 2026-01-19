@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { FormModal } from '../components/ui/FormModal'
 import { FiEdit2, FiEye, FiFilter, FiPlus, FiTrash2, FiX } from 'react-icons/fi'
+import { api } from '../lib/api'
 import './PageCommon.css'
 import './UsersPage.css'
 
@@ -112,6 +113,7 @@ export function UsersPage() {
   const [modalOpen, setModalOpen] = useState(false)
   const [modalMode, setModalMode] = useState('create') // create | edit | view
   const [draft, setDraft] = useState(createEmptyUser)
+  const [cnpjLookup, setCnpjLookup] = useState({ status: 'idle', message: '' }) // idle|loading|ok|error
 
   useEffect(() => {
     try {
@@ -149,24 +151,75 @@ export function UsersPage() {
   const openCreate = () => {
     setModalMode('create')
     setDraft(createEmptyUser())
+    setCnpjLookup({ status: 'idle', message: '' })
     setModalOpen(true)
   }
 
   const openView = (u) => {
     setModalMode('view')
     setDraft({ ...u })
+    setCnpjLookup({ status: 'idle', message: '' })
     setModalOpen(true)
   }
 
   const openEdit = (u) => {
     setModalMode('edit')
     setDraft({ ...u })
+    setCnpjLookup({ status: 'idle', message: '' })
     setModalOpen(true)
   }
 
   const closeModal = () => {
     setModalOpen(false)
     setDraft(createEmptyUser())
+    setCnpjLookup({ status: 'idle', message: '' })
+  }
+
+  const autofillFromCnpj = async (docRaw) => {
+    const cnpj = digitsOnly(docRaw)
+    if (!isValidCNPJ(cnpj)) return
+
+    setCnpjLookup({ status: 'loading', message: 'Buscando dados do CNPJ…' })
+    try {
+      const data = await api.lookupCnpj(cnpj)
+
+      setDraft((prev) => {
+        // Preencher apenas se o usuário ainda não digitou (para não sobrescrever)
+        const next = { ...prev }
+
+        if (prev.type === 'supplier') {
+          if (!String(prev.name || '').trim() && data?.razaoSocial) next.name = data.razaoSocial
+          if (!String(prev.companyName || '').trim() && data?.nomeFantasia) next.companyName = data.nomeFantasia
+        } else {
+          // Para outros tipos, podemos preencher name se vazio
+          if (!String(prev.name || '').trim() && data?.razaoSocial) next.name = data.razaoSocial
+        }
+
+        if (!String(prev.phone || '').trim() && data?.telefone) next.phone = data.telefone
+        if (!String(prev.email || '').trim() && data?.email) next.email = data.email
+
+        // Colocar endereço nas observações se estiver vazio
+        if (!String(prev.notes || '').trim() && data?.endereco) {
+          const e = data.endereco
+          const parts = [
+            e.logradouro,
+            e.numero ? `nº ${e.numero}` : null,
+            e.complemento,
+            e.bairro,
+            e.municipio ? `${e.municipio}/${e.uf || ''}` : null,
+            e.cep ? `CEP ${e.cep}` : null
+          ].filter(Boolean)
+          if (parts.length) next.notes = `Endereço (CNPJ): ${parts.join(', ')}`
+        }
+
+        return next
+      })
+
+      setCnpjLookup({ status: 'ok', message: 'Dados preenchidos a partir do CNPJ.' })
+    } catch (error) {
+      console.error('Erro ao consultar CNPJ:', error)
+      setCnpjLookup({ status: 'error', message: error.message || 'Não foi possível consultar o CNPJ.' })
+    }
   }
 
   const validate = (u) => {
@@ -396,6 +449,13 @@ export function UsersPage() {
                 onChange={(e) => setDraft((p) => ({ ...p, document: e.target.value }))}
                 placeholder={draft.type === 'supplier' ? '00.000.000/0000-00' : '000.000.000-00 ou 00.000.000/0000-00'}
                 disabled={readonly}
+                onBlur={() => {
+                  // Autofill apenas para CNPJ (fornecedor) quando válido
+                  const doc = digitsOnly(draft.document)
+                  if (!readonly && draft.type === 'supplier' && isValidCNPJ(doc)) {
+                    autofillFromCnpj(doc)
+                  }
+                }}
               />
               <small className="users-hint">
                 {digitsOnly(draft.document).length === 0
@@ -404,6 +464,19 @@ export function UsersPage() {
                     ? 'Documento válido'
                     : 'Documento inválido'}
               </small>
+              {draft.type === 'supplier' && isValidCNPJ(digitsOnly(draft.document)) && !readonly ? (
+                <div className={`users-lookup users-lookup--${cnpjLookup.status}`}>
+                  <button
+                    type="button"
+                    className="users-lookup-btn"
+                    onClick={() => autofillFromCnpj(digitsOnly(draft.document))}
+                    disabled={cnpjLookup.status === 'loading'}
+                  >
+                    {cnpjLookup.status === 'loading' ? 'Buscando…' : 'Buscar dados do CNPJ'}
+                  </button>
+                  {cnpjLookup.message ? <span className="users-lookup-msg">{cnpjLookup.message}</span> : null}
+                </div>
+              ) : null}
             </div>
 
             <div className="users-field">

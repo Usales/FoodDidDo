@@ -111,6 +111,9 @@ export const api = {
   createOrder: (data) => request('/api/orders', { method: 'POST', body: data }),
   updateOrder: (id, data) => request(`/api/orders/${id}`, { method: 'PATCH', body: data }),
 
+  // Lookup (autofill)
+  lookupCnpj: (cnpj) => request(`/api/lookup/cnpj/${cnpj}`),
+
   // Caixa (Abertura/Fechamento/Suprimento/Sangria)
   getCashboxSession: () => request('/api/cashbox/session'),
   openCashbox: (data) => request('/api/cashbox/open', { method: 'POST', body: data }),

@@ -25,6 +25,8 @@ const fastify = Fastify({
   logger: true
 })
 
+const digitsOnly = (value) => String(value ?? '').replace(/\D/g, '')
+
 // Registrar CORS
 await fastify.register(cors, {
   origin: true,
@@ -814,6 +816,75 @@ fastify.post('/api/pricing', async (request, reply) => {
     data: request.body
   })
   return pricing
+})
+
+// ============================================
+// LOOKUP: Dados públicos de CNPJ (autofill)
+// ============================================
+fastify.get('/api/lookup/cnpj/:cnpj', async (request, reply) => {
+  try {
+    const { cnpj } = request.params
+    const clean = digitsOnly(cnpj)
+    if (!clean || clean.length !== 14) {
+      return reply.status(400).send({ error: 'CNPJ inválido', message: 'Informe um CNPJ com 14 dígitos.' })
+    }
+
+    // Fonte pública (cnpj.ws) — mais estável para requisições server-side
+    const url = `https://publica.cnpj.ws/cnpj/${clean}`
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 8000)
+
+    const res = await fetch(url, {
+      signal: controller.signal,
+      headers: {
+        Accept: 'application/json',
+        'User-Agent': 'FoodDidDo/1.0 (+https://github.com/Usales/FoodDidDo)'
+      }
+    })
+    clearTimeout(timeout)
+
+    if (!res.ok) {
+      const text = await res.text().catch(() => '')
+      return reply.status(res.status).send({
+        error: 'Falha ao consultar CNPJ',
+        message: text || `HTTP ${res.status}`
+      })
+    }
+
+    const data = await res.json()
+
+    // Padronizar payload para o frontend
+    const est = data?.estabelecimento || {}
+    const ddd = String(est?.ddd1 || '').replace(/\D/g, '')
+    const tel = String(est?.telefone1 || '').replace(/\D/g, '')
+    const phone = ddd && tel ? `${ddd}${tel}` : null
+
+    return {
+      cnpj: clean,
+      razaoSocial: data?.razao_social || null,
+      nomeFantasia: est?.nome_fantasia || null,
+      situacao: est?.situacao_cadastral || null,
+      abertura: est?.data_inicio_atividade || null,
+      telefone: phone,
+      email: est?.email || null,
+      endereco: {
+        logradouro: est?.logradouro || null,
+        numero: est?.numero || null,
+        complemento: est?.complemento || null,
+        bairro: est?.bairro || null,
+        municipio: est?.cidade?.nome || est?.municipio || null,
+        uf: est?.estado?.sigla || est?.uf || null,
+        cep: est?.cep || null
+      }
+    }
+  } catch (error) {
+    fastify.log.error('Erro no lookup de CNPJ:', error)
+    const isAbort = error?.name === 'AbortError'
+    return reply.status(isAbort ? 504 : 500).send({
+      error: 'Erro ao consultar CNPJ',
+      message: isAbort ? 'Timeout ao consultar o serviço de CNPJ.' : (error?.message || 'Erro desconhecido')
+    })
+  }
 })
 
 // Rotas de Movimentações de Estoque

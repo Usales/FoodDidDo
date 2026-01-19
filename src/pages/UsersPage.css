@@ -225,6 +225,50 @@
   font-size: 0.75rem;
 }
 
+.users-lookup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-top: 0.5rem;
+}
+
+.users-lookup-btn {
+  align-self: flex-start;
+  padding: 0.5rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid var(--border-primary);
+  background: transparent;
+  color: var(--text-primary);
+  cursor: pointer;
+  font-weight: 800;
+  transition: all 0.2s ease;
+}
+
+.users-lookup-btn:hover:not(:disabled) {
+  border-color: rgba(220, 38, 38, 0.9);
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.35), 0 0 14px rgba(220, 38, 38, 0.18);
+}
+
+.users-lookup-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.users-lookup-msg {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.users-lookup--error .users-lookup-msg {
+  color: var(--error, #ef4444);
+  font-weight: 700;
+}
+
+.users-lookup--ok .users-lookup-msg {
+  color: #10b981;
+  font-weight: 700;
+}
+
 @media (max-width: 920px) {
   .users-filter-group--wide {
     grid-column: span 1;
