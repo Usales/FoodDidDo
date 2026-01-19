@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useAppStore } from '../stores/appStore'
 import { FormModal } from '../components/ui/FormModal'
 import { FiEdit2, FiEye, FiFilter, FiPlus, FiXCircle } from 'react-icons/fi'
+import { findUserById, formatUserDisplay, getUsersDirectory, groupUsersByType } from '../utils/usersDirectory'
 import './PageCommon.css'
 import './OrdersPage.css'
 
@@ -58,6 +59,9 @@ export function OrdersPage() {
   const addOrder = useAppStore((state) => state.addOrder)
   const updateOrder = useAppStore((state) => state.updateOrder)
 
+  const usersDirectory = useMemo(() => getUsersDirectory(), [])
+  const usersByType = useMemo(() => groupUsersByType(usersDirectory), [usersDirectory])
+
   const [showFilters, setShowFilters] = useState(true)
   const [filters, setFilters] = useState({
     search: '',
@@ -69,6 +73,7 @@ export function OrdersPage() {
 
   const [detailsOpen, setDetailsOpen] = useState(false)
   const [selectedOrderId, setSelectedOrderId] = useState(null)
+  const [detailsLinkedUserId, setDetailsLinkedUserId] = useState('')
 
   const [cancelModalOpen, setCancelModalOpen] = useState(false)
   const [cancelReason, setCancelReason] = useState('')
@@ -80,6 +85,7 @@ export function OrdersPage() {
     customerName: '',
     customerPhone: '',
     customerCpf: '',
+    linkedUserId: '',
     notes: '',
     paymentMethod: 'cash',
     paymentStatus: 'paid',
@@ -131,12 +137,27 @@ export function OrdersPage() {
 
   const getOrderMeta = (order) => safeJsonParse(order?.notes) || {}
 
+  const getOrderLinkedUser = (order) => {
+    const meta = getOrderMeta(order)
+    const linked = meta?.linkedUser
+    if (!linked) return null
+    // Resolver pelo diretório atual se possível (pode ter sido editado)
+    const resolved = linked?.id ? findUserById(usersDirectory, linked.id) : null
+    return resolved || linked
+  }
+
   const getOrderCustomer = (order) => {
     const meta = getOrderMeta(order)
-    const name = order?.customer?.name || meta.customerName || 'Venda avulsa'
-    const phone = order?.customer?.phone || meta.customerPhone || ''
-    const cpf = order?.customer?.cpfCnpj || meta.customerCpf || ''
-    return { name, phone, cpf }
+    const linkedUser = getOrderLinkedUser(order)
+    let name = order?.customer?.name || meta.customerName || 'Venda avulsa'
+    let phone = order?.customer?.phone || meta.customerPhone || ''
+    let cpf = order?.customer?.cpfCnpj || meta.customerCpf || ''
+
+    // Se veio do Caixa (sem customerName), usar o vínculo como “cliente”
+    if (name === 'Venda avulsa' && linkedUser?.name) name = linkedUser.name
+    if (!phone && linkedUser?.phone) phone = linkedUser.phone
+    if (!cpf && (linkedUser?.cpfCnpj || linkedUser?.document)) cpf = linkedUser.cpfCnpj || linkedUser.document
+    return { name, phone, cpf, linkedUser }
   }
 
   const getOrderType = (order) => {
@@ -223,7 +244,56 @@ export function OrdersPage() {
 
   const openDetails = (orderId) => {
     setSelectedOrderId(orderId)
+    try {
+      const order = (orders || []).find((o) => o.id === orderId)
+      const meta = order ? getOrderMeta(order) : {}
+      setDetailsLinkedUserId(meta?.linkedUser?.id || '')
+    } catch {
+      setDetailsLinkedUserId('')
+    }
     setDetailsOpen(true)
+  }
+
+  const handleSaveLinkedUser = async () => {
+    if (!selectedOrder) return
+    try {
+      const meta = getOrderMeta(selectedOrder)
+      const nextMeta = { ...(meta || {}) }
+      const history = Array.isArray(nextMeta.history) ? nextMeta.history : []
+
+      if (detailsLinkedUserId) {
+        const u = findUserById(usersDirectory, detailsLinkedUserId)
+        if (u) {
+          nextMeta.linkedUser = {
+            id: u.id,
+            type: u.type,
+            name: u.name,
+            phone: u.phone,
+            document: u.document
+          }
+          // Se não houver dados do cliente, preencher de forma não destrutiva
+          if (!nextMeta.customerName) nextMeta.customerName = u.name
+          if (!nextMeta.customerPhone) nextMeta.customerPhone = u.phone
+          if (!nextMeta.customerCpf) nextMeta.customerCpf = u.document
+        } else {
+          nextMeta.linkedUser = { id: detailsLinkedUserId }
+        }
+      } else {
+        delete nextMeta.linkedUser
+      }
+
+      nextMeta.history = [
+        { at: new Date().toISOString(), type: 'link', userId: detailsLinkedUserId || null },
+        ...history
+      ].slice(0, 50)
+
+      await updateOrder(selectedOrder.id, { notes: JSON.stringify(nextMeta) })
+      await loadData()
+      alert('Vínculo atualizado.')
+    } catch (error) {
+      console.error('Erro ao atualizar vínculo:', error)
+      alert(`Erro ao atualizar vínculo: ${error.message || 'Tente novamente.'}`)
+    }
   }
 
   const openCancelModal = (orderId) => {
@@ -308,6 +378,18 @@ export function OrdersPage() {
       customerName: newOrder.customerName?.trim() || undefined,
       customerPhone: newOrder.customerPhone?.trim() || undefined,
       customerCpf: newOrder.customerCpf?.trim() || undefined,
+      linkedUser: (() => {
+        if (!newOrder.linkedUserId) return undefined
+        const u = findUserById(usersDirectory, newOrder.linkedUserId)
+        if (!u) return undefined
+        return {
+          id: u.id,
+          type: u.type,
+          name: u.name,
+          phone: u.phone,
+          document: u.document
+        }
+      })(),
       noteText: newOrder.notes?.trim() || undefined,
       history: [{ at: new Date().toISOString(), type: 'create' }]
     }
@@ -360,6 +442,7 @@ export function OrdersPage() {
         customerName: '',
         customerPhone: '',
         customerCpf: '',
+        linkedUserId: '',
         notes: '',
         paymentMethod: 'cash',
         paymentStatus: 'paid',
@@ -483,7 +566,7 @@ export function OrdersPage() {
                       <td>
                         <div className="orders-customer">
                           <strong>{customer.name}</strong>
-                          {customer.phone ? <span>{customer.phone}</span> : null}
+                          {customer.linkedUser ? <span>{formatUserDisplay(customer.linkedUser)}</span> : customer.phone ? <span>{customer.phone}</span> : null}
                         </div>
                       </td>
                       <td>
@@ -596,6 +679,7 @@ export function OrdersPage() {
         onClose={() => {
           setDetailsOpen(false)
           setSelectedOrderId(null)
+          setDetailsLinkedUserId('')
         }}
         title="Detalhes do Pedido"
         description={selectedOrder ? `Pedido ${selectedOrder.orderNumber || selectedOrder.id.slice(0, 8).toUpperCase()}` : ''}
@@ -619,6 +703,65 @@ export function OrdersPage() {
                     <div className="orders-details-row"><span>Nome</span><strong>{customer.name}</strong></div>
                     <div className="orders-details-row"><span>Telefone</span><strong>{customer.phone || '—'}</strong></div>
                     <div className="orders-details-row"><span>CPF</span><strong>{customer.cpf || '—'}</strong></div>
+                    <div className="orders-details-row"><span>Vínculo</span><strong>{customer.linkedUser ? formatUserDisplay(customer.linkedUser) : '—'}</strong></div>
+                    <div className="orders-details-row">
+                      <span>Alterar vínculo</span>
+                      <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', justifyContent: 'flex-end' }}>
+                        <select
+                          className="orders-status-select"
+                          value={detailsLinkedUserId}
+                          onChange={(e) => setDetailsLinkedUserId(e.target.value)}
+                          title="Vincular a um usuário"
+                        >
+                          <option value="">Sem vínculo</option>
+                          {usersByType.customer.length > 0 && (
+                            <optgroup label="Clientes">
+                              {usersByType.customer.map((u) => (
+                                <option key={u.id} value={u.id}>
+                                  {u.name}
+                                </option>
+                              ))}
+                            </optgroup>
+                          )}
+                          {usersByType.supplier.length > 0 && (
+                            <optgroup label="Fornecedores">
+                              {usersByType.supplier.map((u) => (
+                                <option key={u.id} value={u.id}>
+                                  {u.name}
+                                </option>
+                              ))}
+                            </optgroup>
+                          )}
+                          {usersByType.employee.length > 0 && (
+                            <optgroup label="Funcionários">
+                              {usersByType.employee.map((u) => (
+                                <option key={u.id} value={u.id}>
+                                  {u.name}
+                                </option>
+                              ))}
+                            </optgroup>
+                          )}
+                          {usersByType.other.length > 0 && (
+                            <optgroup label="Outros">
+                              {usersByType.other.map((u) => (
+                                <option key={u.id} value={u.id}>
+                                  {u.name}
+                                </option>
+                              ))}
+                            </optgroup>
+                          )}
+                        </select>
+                        <button
+                          type="button"
+                          className="orders-icon-btn"
+                          onClick={handleSaveLinkedUser}
+                          title="Salvar vínculo"
+                          disabled={(customer.linkedUser?.id || '') === detailsLinkedUserId}
+                        >
+                          Salvar
+                        </button>
+                      </div>
+                    </div>
                     <div className="orders-details-row"><span>Tipo</span><strong>{ORDER_TYPE_LABELS[type]}</strong></div>
                     <div className="orders-details-row"><span>Entrega</span><strong>{type === 'preorder' ? formatDateOnly(deliveryAt) : '—'}</strong></div>
                   </div>
@@ -749,6 +892,61 @@ export function OrdersPage() {
             <div className="orders-field">
               <label>Cliente</label>
               <input value={newOrder.customerName} onChange={(e) => setNewOrder((p) => ({ ...p, customerName: e.target.value }))} placeholder="Nome do cliente" />
+            </div>
+            <div className="orders-field orders-field--wide">
+              <label>Vincular a usuário (opcional)</label>
+              <select
+                value={newOrder.linkedUserId}
+                onChange={(e) => {
+                  const id = e.target.value
+                  const u = id ? findUserById(usersDirectory, id) : null
+                  setNewOrder((p) => ({
+                    ...p,
+                    linkedUserId: id,
+                    customerName: u?.name ?? p.customerName,
+                    customerPhone: u?.phone ?? p.customerPhone,
+                    customerCpf: u?.document ?? p.customerCpf
+                  }))
+                }}
+              >
+                <option value="">Sem vínculo (avulso)</option>
+                {usersByType.customer.length > 0 && (
+                  <optgroup label="Clientes">
+                    {usersByType.customer.map((u) => (
+                      <option key={u.id} value={u.id}>
+                        {u.name}
+                      </option>
+                    ))}
+                  </optgroup>
+                )}
+                {usersByType.supplier.length > 0 && (
+                  <optgroup label="Fornecedores">
+                    {usersByType.supplier.map((u) => (
+                      <option key={u.id} value={u.id}>
+                        {u.name}
+                      </option>
+                    ))}
+                  </optgroup>
+                )}
+                {usersByType.employee.length > 0 && (
+                  <optgroup label="Funcionários">
+                    {usersByType.employee.map((u) => (
+                      <option key={u.id} value={u.id}>
+                        {u.name}
+                      </option>
+                    ))}
+                  </optgroup>
+                )}
+                {usersByType.other.length > 0 && (
+                  <optgroup label="Outros">
+                    {usersByType.other.map((u) => (
+                      <option key={u.id} value={u.id}>
+                        {u.name}
+                      </option>
+                    ))}
+                  </optgroup>
+                )}
+              </select>
             </div>
             <div className="orders-field">
               <label>Telefone</label>

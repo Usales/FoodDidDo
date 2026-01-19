@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react'
 import { useAppStore } from '../stores/appStore'
 import { CurrencyInput } from '../components/ui/CurrencyInput'
 import { FiShoppingCart, FiPlus, FiMinus, FiTrash2, FiCheck, FiSearch } from 'react-icons/fi'
+import { findUserById, formatUserDisplay, getUsersDirectory, groupUsersByType } from '../utils/usersDirectory'
 import './PageCommon.css'
 import './CashboxPage.css'
 
@@ -26,6 +27,10 @@ export function CashboxPage() {
   const [receivedAmount, setReceivedAmount] = useState('')
   const [discount, setDiscount] = useState('')
   const [isProcessing, setIsProcessing] = useState(false)
+  const [linkedUserId, setLinkedUserId] = useState('')
+
+  const usersDirectory = useMemo(() => getUsersDirectory(), [])
+  const usersByType = useMemo(() => groupUsersByType(usersDirectory), [usersDirectory])
 
   const roundMoney = (value) => Math.round((Number(value) || 0) * 100) / 100
 
@@ -145,6 +150,8 @@ export function CashboxPage() {
     setIsProcessing(true)
 
     try {
+      const linkedUser = linkedUserId ? findUserById(usersDirectory, linkedUserId) : null
+
       // Criar descrição da venda
       const itemsDescription = cart.map(item => 
         `${item.quantity}x ${item.name}`
@@ -152,13 +159,25 @@ export function CashboxPage() {
 
       // 1. Criar Order com OrderItems e Payment
       const orderData = {
+        customerId: null,
         status: 'confirmed',
         total: totals.total,
         subtotal: totals.subtotal,
         discount: totals.discount,
         tax: 0,
         deliveryFee: 0,
-        notes: null,
+        notes: linkedUser
+          ? JSON.stringify({
+              source: 'cashbox',
+              linkedUser: {
+                id: linkedUser.id,
+                type: linkedUser.type,
+                name: linkedUser.name,
+                phone: linkedUser.phone,
+                document: linkedUser.document
+              }
+            })
+          : null,
         items: cart.map(item => ({
           recipeId: item.id,
           recipeName: item.name,
@@ -224,10 +243,11 @@ export function CashboxPage() {
       }
 
       // 4. Registrar entrada no fluxo de caixa (vinculado ao pedido)
+      const linkedLabel = linkedUser ? ` (${formatUserDisplay(linkedUser)})` : ''
       await addCashflowEntry({
         id: crypto.randomUUID(),
         type: 'entrada',
-        description: `Venda #${order.orderNumber || order.id.slice(0, 8)}: ${itemsDescription}`,
+        description: `Venda #${order.orderNumber || order.id.slice(0, 8)}: ${itemsDescription}${linkedLabel}`,
         amount: totals.total,
         cost: totals.cost,
         profit: totals.profit,
@@ -244,6 +264,7 @@ export function CashboxPage() {
       setDiscount('')
       setSelectedPaymentMethod('dinheiro')
       setSearchQuery('')
+      setLinkedUserId('')
 
       alert(
         `✅ Venda finalizada com sucesso!\n\n` +
@@ -412,6 +433,53 @@ export function CashboxPage() {
           {/* Resumo e Pagamento */}
           {cart.length > 0 && (
             <div className="cashbox-payment-section">
+              <div className="cashbox-payment-methods">
+                <label className="cashbox-payment-label">Vincular venda a</label>
+                <select
+                  className="cashbox-search-input"
+                  value={linkedUserId}
+                  onChange={(e) => setLinkedUserId(e.target.value)}
+                >
+                  <option value="">Venda avulsa (sem vínculo)</option>
+                  {usersByType.customer.length > 0 && (
+                    <optgroup label="Clientes">
+                      {usersByType.customer.map((u) => (
+                        <option key={u.id} value={u.id}>
+                          {u.name}
+                        </option>
+                      ))}
+                    </optgroup>
+                  )}
+                  {usersByType.supplier.length > 0 && (
+                    <optgroup label="Fornecedores">
+                      {usersByType.supplier.map((u) => (
+                        <option key={u.id} value={u.id}>
+                          {u.name}
+                        </option>
+                      ))}
+                    </optgroup>
+                  )}
+                  {usersByType.employee.length > 0 && (
+                    <optgroup label="Funcionários">
+                      {usersByType.employee.map((u) => (
+                        <option key={u.id} value={u.id}>
+                          {u.name}
+                        </option>
+                      ))}
+                    </optgroup>
+                  )}
+                  {usersByType.other.length > 0 && (
+                    <optgroup label="Outros">
+                      {usersByType.other.map((u) => (
+                        <option key={u.id} value={u.id}>
+                          {u.name}
+                        </option>
+                      ))}
+                    </optgroup>
+                  )}
+                </select>
+              </div>
+
               <div className="cashbox-totals">
                 <div className="cashbox-total-row">
                   <span>Subtotal:</span>
