@@ -332,7 +332,9 @@
 }
 
 .page-btn-primary:hover:not(:disabled) {
-  background: #b91c1c;
+  /* remove hover "brilhante" e usa contorno neon vermelho */
+  background: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.55), 0 0 14px rgba(220, 38, 38, 0.25);
 }
 
 .page-btn-primary:disabled {
@@ -347,7 +349,10 @@
 }
 
 .page-btn-secondary:hover {
-  background: var(--bg-card);
+  /* remove hover "brilhante" e usa contorno neon vermelho */
+  background: var(--bg-secondary);
+  border-color: rgba(220, 38, 38, 0.9);
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.45), 0 0 14px rgba(220, 38, 38, 0.25);
 }
 
 /* =========================================================
@@ -729,7 +734,10 @@
 }
 
 .orders-product:hover {
-  background: var(--bg-secondary);
+  /* remove hover "brilhante" e usa contorno neon vermelho */
+  background: var(--bg-card);
+  border-color: rgba(220, 38, 38, 0.9);
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.45), 0 0 14px rgba(220, 38, 38, 0.25);
 }
 
 .orders-product span {
@@ -762,7 +770,7 @@
 
 .orders-products-panel .orders-products {
   margin-top: 0;
-  max-height: 360px;
+  max-height: 370px;
   overflow: auto;
   padding-right: 0.25rem;
 }
