@@ -140,31 +140,68 @@
   gap: 0.5rem;
   align-items: center;
   flex-wrap: wrap;
+  color: var(--text-primary);
 }
 
 .users-icon-btn {
   width: 34px;
   height: 34px;
+  padding: 0;
+  min-width: 34px;
+  min-height: 34px;
   border-radius: 10px;
   border: 1px solid var(--border-primary);
   background: transparent;
-  color: var(--text-primary);
+  background-color: transparent;
+  color: var(--text-primary) !important;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  box-shadow: none;
+  transform: none;
+  line-height: 1;
   transition: all 0.2s ease;
 }
 
+.users-icon-btn svg {
+  display: block;
+  width: 18px;
+  height: 18px;
+  color: var(--text-primary) !important;
+  opacity: 1 !important;
+}
+
+/* Garantir visibilidade dos ícones do react-icons (feather: stroke) */
+.users-icon-btn svg,
+.users-icon-btn svg * {
+  stroke: currentColor !important;
+  fill: none !important;
+  stroke-width: 2.2px !important;
+}
+
 .users-icon-btn:hover {
-  border-color: rgba(220, 38, 38, 0.9);
-  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.35), 0 0 14px rgba(220, 38, 38, 0.18);
+  background: var(--bg-secondary);
+  box-shadow: none;
+  transform: none;
 }
 
 .users-icon-btn.danger:hover {
-  border-color: rgba(239, 68, 68, 0.9);
-  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.35), 0 0 14px rgba(239, 68, 68, 0.18);
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.35);
   color: #ef4444;
+  box-shadow: none;
+  transform: none;
+}
+
+.users-icon-btn:active {
+  transform: none;
+  box-shadow: none;
+}
+
+.users-icon-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.25);
 }
 
 .users-mono {
@@ -176,6 +213,19 @@
   gap: 0.75rem;
   justify-content: flex-end;
   width: 100%;
+}
+
+.users-modal-footer .page-btn-secondary,
+.users-modal-footer .page-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  line-height: 1;
+}
+
+.users-modal-footer .page-btn-secondary svg,
+.users-modal-footer .page-btn-primary svg {
+  display: block;
 }
 
 .users-modal {
