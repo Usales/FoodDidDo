@@ -385,7 +385,7 @@ export function OrdersPage() {
           </button>
           <button type="button" className="primary-btn" onClick={() => setNewModalOpen(true)}>
             <FiPlus size={18} />
-            Novo Pedido
+            Nova Encomenda
           </button>
         </div>
       </div>
@@ -724,8 +724,8 @@ export function OrdersPage() {
       <FormModal
         isOpen={newModalOpen}
         onClose={() => setNewModalOpen(false)}
-        title="Novo Pedido"
-        description="Crie um pedido rápido e acompanhe o status até a entrega."
+        title="Nova Encomenda"
+        description="Crie uma encomenda e acompanhe o status até a entrega."
         isExpanded
       >
         <div className="orders-new">
