@@ -778,10 +778,10 @@ export function ConfigPage() {
                   <div className="config-dashboard-item" style={{ marginLeft: '2rem', paddingLeft: '1rem', borderLeft: '2px solid var(--border-color)' }}>
                     <div className="config-dashboard-item-content">
                       <div className="config-dashboard-item-header">
-                        <h4 style={{ fontSize: '0.95rem', fontWeight: 600 }}>Vendas</h4>
+                        <h4 style={{ fontSize: '0.95rem', fontWeight: 600 }}>Encomendas</h4>
                       </div>
                       <p className="config-dashboard-item-description" style={{ fontSize: '0.85rem' }}>
-                        Link para histórico de vendas
+                        Link para gestão de encomendas/pedidos
                       </p>
                     </div>
                 <ToggleSwitch
