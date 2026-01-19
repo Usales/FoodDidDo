@@ -14,4 +14,5 @@ export { CashflowPage } from './CashflowPage'
 export { ReportsPage } from './ReportsPage'
 export { ConfigPage } from './ConfigPage'
 export { OrdersPage } from './OrdersPage'
+export { UsersPage } from './UsersPage'
 
