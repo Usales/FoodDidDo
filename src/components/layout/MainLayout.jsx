@@ -17,7 +17,7 @@ import {
   AiOutlineRise,
   AiOutlineWallet
 } from 'react-icons/ai'
-import { FiLogOut, FiSearch, FiChevronDown, FiMenu, FiX, FiShoppingBag } from 'react-icons/fi'
+import { FiLogOut, FiSearch, FiChevronDown, FiMenu, FiX, FiShoppingBag, FiUsers } from 'react-icons/fi'
 import { HiMoon, HiSun } from 'react-icons/hi'
 import { useState, useEffect, useRef } from 'react'
 import { useTheme } from '../../contexts/ThemeContext'
@@ -54,6 +54,7 @@ const navigation = [
     items: [
       { path: '/estoque', label: 'Estoque', icon: <AiOutlineInbox /> },
       { path: '/vendas', label: 'Encomendas', icon: <FiShoppingBag /> },
+      { path: '/usuarios', label: 'Usuários', icon: <FiUsers /> },
       { path: '/relatorios', label: 'Relatórios', icon: <AiOutlineFileText /> },
       { path: '/config', label: 'Configurações', icon: <AiOutlineSetting /> }
     ]
@@ -85,6 +86,7 @@ export function MainLayout({ onLogout, user }) {
     showSimulacao: false,
     showEstoque: false,
     showVendas: false,
+    showUsuarios: false,
     showRelatorios: false,
     showConfig: false
   })
@@ -201,6 +203,7 @@ export function MainLayout({ onLogout, user }) {
           showSimulacao: false,
           showEstoque: false,
           showVendas: false,
+          showUsuarios: false,
           showRelatorios: false,
           showConfig: false
         }
@@ -261,6 +264,7 @@ export function MainLayout({ onLogout, user }) {
           showSimulacao: false,
           showEstoque: false,
           showVendas: false,
+          showUsuarios: false,
           showRelatorios: false,
           showConfig: false
         }
@@ -304,6 +308,7 @@ export function MainLayout({ onLogout, user }) {
             showSimulacao: false,
             showEstoque: false,
             showVendas: false,
+            showUsuarios: false,
             showRelatorios: false,
             showConfig: false
           }
@@ -419,6 +424,7 @@ export function MainLayout({ onLogout, user }) {
                 '/simulacao': sidebarSettings.showSimulacao,
                 '/estoque': sidebarSettings.showEstoque,
                 '/vendas': sidebarSettings.showVendas,
+                '/usuarios': sidebarSettings.showUsuarios,
                 '/relatorios': sidebarSettings.showRelatorios,
                 '/config': sidebarSettings.showConfig
               }
