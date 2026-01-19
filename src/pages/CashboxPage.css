@@ -674,6 +674,138 @@
   cursor: not-allowed;
 }
 
+.cashbox-coupon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.85rem;
+  background: transparent;
+  border: 1px dashed var(--border-primary);
+  border-radius: 10px;
+  color: var(--text-primary);
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cashbox-coupon-btn:hover:not(:disabled) {
+  border-color: var(--primary-color);
+  background: var(--bg-secondary);
+}
+
+.cashbox-coupon-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cashbox-coupon-preview {
+  display: flex;
+  justify-content: center;
+}
+
+.coupon-paper {
+  width: min(420px, 100%);
+  background: #ffffff;
+  color: #111111;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  padding: 1rem;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.12);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+  font-size: 12px;
+  line-height: 1.25;
+}
+
+.coupon-center {
+  text-align: center;
+}
+
+.coupon-title {
+  font-weight: 900;
+  font-size: 14px;
+}
+
+.coupon-muted {
+  color: #444444;
+}
+
+.coupon-strong {
+  font-weight: 800;
+  color: #111111;
+}
+
+.coupon-mono {
+  font-variant-numeric: tabular-nums;
+}
+
+.coupon-break {
+  word-break: break-all;
+}
+
+.coupon-sep {
+  border-top: 1px dashed #333333;
+  margin: 0.65rem 0;
+}
+
+.coupon-badge {
+  display: inline-flex;
+  margin-top: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid #111111;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.coupon-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+
+.coupon-table th {
+  text-align: left;
+  color: #444444;
+  font-weight: 700;
+  padding: 0.2rem 0;
+}
+
+.coupon-table td {
+  padding: 0.25rem 0;
+  vertical-align: top;
+}
+
+.coupon-right {
+  text-align: right;
+}
+
+.coupon-totals {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.coupon-totals td {
+  padding: 0.2rem 0;
+}
+
+.coupon-qr {
+  margin: 0.75rem auto 0;
+  width: 140px;
+  height: 140px;
+  border: 2px solid #111111;
+  display: grid;
+  place-items: center;
+  font-size: 10px;
+  text-align: center;
+}
+
+.coupon-footer-msg {
+  margin-top: 0.75rem;
+  font-weight: 700;
+}
+
 .cashbox-empty-state {
   text-align: center;
   padding: 3rem 1rem;

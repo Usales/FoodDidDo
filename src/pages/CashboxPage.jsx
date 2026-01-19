@@ -1,7 +1,8 @@
-import { useState, useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useAppStore } from '../stores/appStore'
 import { CurrencyInput } from '../components/ui/CurrencyInput'
-import { FiShoppingCart, FiPlus, FiMinus, FiTrash2, FiCheck, FiSearch } from 'react-icons/fi'
+import { FormModal } from '../components/ui/FormModal'
+import { FiCheck, FiFileText, FiMinus, FiPlus, FiSearch, FiShoppingCart, FiTrash2 } from 'react-icons/fi'
 import { findUserById, formatUserDisplay, getUsersDirectory, groupUsersByType } from '../utils/usersDirectory'
 import './PageCommon.css'
 import './CashboxPage.css'
@@ -28,11 +29,264 @@ export function CashboxPage() {
   const [discount, setDiscount] = useState('')
   const [isProcessing, setIsProcessing] = useState(false)
   const [linkedUserId, setLinkedUserId] = useState('')
+  const [couponModalOpen, setCouponModalOpen] = useState(false)
+  const [couponSnapshot, setCouponSnapshot] = useState(null)
 
   const usersDirectory = useMemo(() => getUsersDirectory(), [])
   const usersByType = useMemo(() => groupUsersByType(usersDirectory), [usersDirectory])
 
   const roundMoney = (value) => Math.round((Number(value) || 0) * 100) / 100
+
+  const formatCurrency = (value) => {
+    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(value) || 0)
+  }
+
+  const paymentMethodToLabel = (method) => {
+    const map = {
+      dinheiro: 'Dinheiro',
+      cartao_credito: 'Cartão de Crédito',
+      cartao_debito: 'Cartão de Débito',
+      pix: 'PIX'
+    }
+    return map[method] || 'Outros'
+  }
+
+  const generateAccessKey = () => {
+    // Chave fictícia de 44 dígitos (NFC-e)
+    const bytes = new Uint8Array(44)
+    crypto.getRandomValues(bytes)
+    return Array.from(bytes, (b) => String(b % 10)).join('')
+  }
+
+  const buildCouponSnapshot = () => {
+    const issuedAt = new Date()
+    const cupomNumber = String(issuedAt.getTime()).slice(-9)
+    const serie = '001'
+    const accessKey = generateAccessKey()
+    const linkedUser = linkedUserId ? findUserById(usersDirectory, linkedUserId) : null
+
+    const subtotal = roundMoney(totals.subtotal)
+    const discountValue = roundMoney(totals.discount || 0)
+    const base = Math.max(0, subtotal - discountValue)
+    const icmsPercent = 18
+    const icmsValue = roundMoney((base * icmsPercent) / 100)
+    const total = roundMoney(totals.total)
+
+    const paymentValue =
+      selectedPaymentMethod === 'dinheiro'
+        ? roundMoney(totals.received || 0) || total
+        : total
+
+    return {
+      establishment: {
+        // Mock realista (teste)
+        tradeName: 'FoodDidDo Restaurante',
+        legalName: 'FoodDidDo Comércio de Alimentos LTDA',
+        cnpj: '04.252.011/0001-10',
+        address: 'Av. Paulista, 1000 - Bela Vista, São Paulo/SP - CEP 01310-100'
+      },
+      document: {
+        number: cupomNumber,
+        serie,
+        issuedAtISO: issuedAt.toISOString(),
+        issuedAtLabel: issuedAt.toLocaleString('pt-BR'),
+        type: 'NFC-e – modo teste (homologação)',
+        accessKey
+      },
+      customer: linkedUser
+        ? {
+            name: linkedUser.name,
+            document: linkedUser.document || '',
+            phone: linkedUser.phone || '',
+            type: linkedUser.type
+          }
+        : null,
+      items: cart.map((item, idx) => {
+        const quantity = Number(item.quantity) || 0
+        const unit = roundMoney(item.price)
+        const totalItem = roundMoney(unit * quantity)
+        return {
+          line: idx + 1,
+          description: item.name,
+          quantity,
+          unitPrice: unit,
+          total: totalItem
+        }
+      }),
+      totals: {
+        subtotal,
+        discount: discountValue,
+        icms: { percent: icmsPercent, value: icmsValue },
+        total
+      },
+      payment: {
+        method: paymentMethodToLabel(selectedPaymentMethod),
+        value: paymentValue
+      },
+      additional: {
+        homologationMessage: 'Documento emitido em ambiente de teste, sem validade fiscal.',
+        qrPlaceholderText: 'QR CODE (TESTE)'
+      }
+    }
+  }
+
+  const openCouponModal = () => {
+    if (cart.length === 0) {
+      alert('Adicione pelo menos um produto ao carrinho para emitir o cupom (teste).')
+      return
+    }
+    setCouponSnapshot(buildCouponSnapshot())
+    setCouponModalOpen(true)
+  }
+
+  const printCoupon = () => {
+    if (!couponSnapshot) return
+
+    const s = couponSnapshot
+    const itemsHtml = s.items
+      .map(
+        (i) => `
+          <tr>
+            <td class="mono">${String(i.line).padStart(3, '0')}</td>
+            <td>${i.description}</td>
+            <td class="right mono">${i.quantity}</td>
+            <td class="right mono">${formatCurrency(i.unitPrice)}</td>
+            <td class="right mono">${formatCurrency(i.total)}</td>
+          </tr>`
+      )
+      .join('')
+
+    const html = `<!doctype html>
+      <html>
+        <head>
+          <meta charset="utf-8" />
+          <title>Cupom Fiscal (Teste)</title>
+          <style>
+            body { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; margin: 0; padding: 16px; color: #111; }
+            .paper { width: 76mm; max-width: 100%; margin: 0 auto; }
+            h1,h2,h3,p { margin: 0; }
+            .center { text-align: center; }
+            .muted { color: #444; }
+            .sep { border-top: 1px dashed #333; margin: 10px 0; }
+            table { width: 100%; border-collapse: collapse; font-size: 11px; }
+            td { padding: 4px 0; vertical-align: top; }
+            .right { text-align: right; }
+            .mono { font-variant-numeric: tabular-nums; }
+            .qr { margin: 10px auto 0; width: 140px; height: 140px; border: 2px solid #111; display: grid; place-items: center; font-size: 10px; text-align: center; }
+            .badge { display:inline-block; padding: 3px 6px; border: 1px solid #111; border-radius: 8px; font-size: 10px; margin-top: 6px; }
+            @media print { body { padding: 0; } .paper { width: 76mm; } }
+          </style>
+        </head>
+        <body>
+          <div class="paper">
+            <div class="center">
+              <h2>${s.establishment.tradeName}</h2>
+              <p class="muted">${s.establishment.legalName}</p>
+              <p class="muted">CNPJ: ${s.establishment.cnpj}</p>
+              <p class="muted">${s.establishment.address}</p>
+              <div class="badge">AMBIENTE DE TESTE (HOMOLOGAÇÃO)</div>
+            </div>
+
+            <div class="sep"></div>
+
+            <p><strong>${s.document.type}</strong></p>
+            <p class="muted mono">Nº ${s.document.number}  Série ${s.document.serie}</p>
+            <p class="muted mono">Emissão: ${s.document.issuedAtLabel}</p>
+
+            <div class="sep"></div>
+
+            ${s.customer ? `<p><strong>Consumidor:</strong> ${s.customer.name}</p>
+              ${s.customer.document ? `<p class="muted mono">Doc: ${s.customer.document}</p>` : ''}
+              ${s.customer.phone ? `<p class="muted mono">Fone: ${s.customer.phone}</p>` : ''}
+              <div class="sep"></div>` : ''}
+
+            <table>
+              <thead>
+                <tr class="muted">
+                  <td class="mono">Item</td>
+                  <td>Descrição</td>
+                  <td class="right mono">Qtd</td>
+                  <td class="right mono">Vlr Un</td>
+                  <td class="right mono">Total</td>
+                </tr>
+              </thead>
+              <tbody>${itemsHtml}</tbody>
+            </table>
+
+            <div class="sep"></div>
+
+            <table>
+              <tbody>
+                <tr><td>Subtotal</td><td class="right mono">${formatCurrency(s.totals.subtotal)}</td></tr>
+                <tr><td>Descontos</td><td class="right mono">${formatCurrency(s.totals.discount)}</td></tr>
+                <tr><td>ICMS (${s.totals.icms.percent}%)</td><td class="right mono">${formatCurrency(s.totals.icms.value)}</td></tr>
+                <tr><td><strong>Total</strong></td><td class="right mono"><strong>${formatCurrency(s.totals.total)}</strong></td></tr>
+              </tbody>
+            </table>
+
+            <div class="sep"></div>
+
+            <p><strong>Pagamento</strong></p>
+            <p class="muted mono">${s.payment.method} — ${formatCurrency(s.payment.value)}</p>
+
+            <div class="sep"></div>
+
+            <p class="muted"><strong>Chave de acesso (fictícia)</strong></p>
+            <p class="mono muted" style="word-break: break-all;">${s.document.accessKey}</p>
+            <div class="qr">${s.additional.qrPlaceholderText}</div>
+            <p class="center muted" style="margin-top:10px;">${s.additional.homologationMessage}</p>
+          </div>
+        </body>
+      </html>`
+
+    // PDF “simulável” sem pop-up: renderiza em iframe oculto e chama print()
+    const iframe = document.createElement('iframe')
+    iframe.style.position = 'fixed'
+    iframe.style.right = '0'
+    iframe.style.bottom = '0'
+    iframe.style.width = '0'
+    iframe.style.height = '0'
+    iframe.style.border = '0'
+    iframe.style.opacity = '0'
+    iframe.setAttribute('aria-hidden', 'true')
+
+    document.body.appendChild(iframe)
+
+    const cleanup = () => {
+      try {
+        document.body.removeChild(iframe)
+      } catch {
+        // ignore
+      }
+    }
+
+    const printFromIframe = () => {
+      try {
+        const win = iframe.contentWindow
+        if (!win) return cleanup()
+        win.focus()
+        win.print()
+        // Alguns navegadores não disparam onafterprint no iframe; remover com timeout também.
+        win.onafterprint = cleanup
+        setTimeout(cleanup, 2500)
+      } catch {
+        cleanup()
+      }
+    }
+
+    // Preferir srcdoc (mais simples); fallback para document.write
+    try {
+      iframe.onload = () => printFromIframe()
+      iframe.srcdoc = html
+    } catch {
+      const doc = iframe.contentDocument
+      if (!doc) return cleanup()
+      doc.open()
+      doc.write(html)
+      doc.close()
+      setTimeout(printFromIframe, 50)
+    }
+  }
 
   // Filtrar produtos por busca
   const filteredProducts = useMemo(() => {
@@ -292,13 +546,6 @@ export function CashboxPage() {
     }
   }
 
-  const formatCurrency = (value) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(value)
-  }
-
   return (
     <div className="page cashbox-page">
       <div className="cashbox-container">
@@ -553,10 +800,144 @@ export function CashboxPage() {
                 <FiCheck size={20} />
                 {isProcessing ? 'Processando...' : 'Finalizar Venda'}
               </button>
+
+              <button
+                type="button"
+                className="cashbox-coupon-btn"
+                onClick={openCouponModal}
+                disabled={cart.length === 0}
+                title="Emissão fiscal simulada (sem validade)"
+              >
+                <FiFileText size={18} />
+                Emitir Cupom Fiscal (Teste)
+              </button>
             </div>
           )}
         </section>
       </div>
+
+      <FormModal
+        isOpen={couponModalOpen}
+        onClose={() => {
+          setCouponModalOpen(false)
+        }}
+        title="Cupom Fiscal (Teste)"
+        description="Emissão simulada em ambiente de homologação (sem validade fiscal)."
+        footer={
+          <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end', width: '100%' }}>
+            <button type="button" className="page-btn-secondary" onClick={() => setCouponModalOpen(false)}>
+              Fechar
+            </button>
+            <button type="button" className="page-btn-primary" onClick={printCoupon} disabled={!couponSnapshot}>
+              Imprimir / Salvar PDF
+            </button>
+          </div>
+        }
+      >
+        {!couponSnapshot ? (
+          <div className="cashbox-coupon-empty">Gere um carrinho para simular a emissão.</div>
+        ) : (
+          <div className="cashbox-coupon-preview">
+            <div className="coupon-paper" aria-label="Prévia do cupom fiscal (teste)">
+              <div className="coupon-center">
+                <div className="coupon-title">{couponSnapshot.establishment.tradeName}</div>
+                <div className="coupon-muted">{couponSnapshot.establishment.legalName}</div>
+                <div className="coupon-muted">CNPJ: {couponSnapshot.establishment.cnpj}</div>
+                <div className="coupon-muted">{couponSnapshot.establishment.address}</div>
+                <div className="coupon-badge">AMBIENTE DE TESTE (HOMOLOGAÇÃO)</div>
+              </div>
+
+              <div className="coupon-sep" />
+
+              <div className="coupon-block">
+                <div className="coupon-strong">{couponSnapshot.document.type}</div>
+                <div className="coupon-muted coupon-mono">
+                  Nº {couponSnapshot.document.number} • Série {couponSnapshot.document.serie}
+                </div>
+                <div className="coupon-muted coupon-mono">Emissão: {couponSnapshot.document.issuedAtLabel}</div>
+              </div>
+
+              {couponSnapshot.customer ? (
+                <>
+                  <div className="coupon-sep" />
+                  <div className="coupon-block">
+                    <div className="coupon-strong">Consumidor</div>
+                    <div className="coupon-mono">{couponSnapshot.customer.name}</div>
+                    {couponSnapshot.customer.document ? <div className="coupon-muted coupon-mono">Doc: {couponSnapshot.customer.document}</div> : null}
+                    {couponSnapshot.customer.phone ? <div className="coupon-muted coupon-mono">Fone: {couponSnapshot.customer.phone}</div> : null}
+                  </div>
+                </>
+              ) : null}
+
+              <div className="coupon-sep" />
+
+              <table className="coupon-table">
+                <thead>
+                  <tr>
+                    <th className="coupon-mono">Item</th>
+                    <th>Descrição</th>
+                    <th className="coupon-right coupon-mono">Qtd</th>
+                    <th className="coupon-right coupon-mono">Vlr Un</th>
+                    <th className="coupon-right coupon-mono">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {couponSnapshot.items.map((i) => (
+                    <tr key={i.line}>
+                      <td className="coupon-mono">{String(i.line).padStart(3, '0')}</td>
+                      <td>{i.description}</td>
+                      <td className="coupon-right coupon-mono">{i.quantity}</td>
+                      <td className="coupon-right coupon-mono">{formatCurrency(i.unitPrice)}</td>
+                      <td className="coupon-right coupon-mono">{formatCurrency(i.total)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              <div className="coupon-sep" />
+
+              <table className="coupon-totals">
+                <tbody>
+                  <tr>
+                    <td>Subtotal</td>
+                    <td className="coupon-right coupon-mono">{formatCurrency(couponSnapshot.totals.subtotal)}</td>
+                  </tr>
+                  <tr>
+                    <td>Descontos</td>
+                    <td className="coupon-right coupon-mono">{formatCurrency(couponSnapshot.totals.discount)}</td>
+                  </tr>
+                  <tr>
+                    <td>ICMS ({couponSnapshot.totals.icms.percent}%)</td>
+                    <td className="coupon-right coupon-mono">{formatCurrency(couponSnapshot.totals.icms.value)}</td>
+                  </tr>
+                  <tr>
+                    <td className="coupon-strong">Total</td>
+                    <td className="coupon-right coupon-mono coupon-strong">{formatCurrency(couponSnapshot.totals.total)}</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <div className="coupon-sep" />
+
+              <div className="coupon-block">
+                <div className="coupon-strong">Pagamento</div>
+                <div className="coupon-muted coupon-mono">
+                  {couponSnapshot.payment.method} — {formatCurrency(couponSnapshot.payment.value)}
+                </div>
+              </div>
+
+              <div className="coupon-sep" />
+
+              <div className="coupon-block">
+                <div className="coupon-muted coupon-strong">Chave de acesso (fictícia)</div>
+                <div className="coupon-muted coupon-mono coupon-break">{couponSnapshot.document.accessKey}</div>
+                <div className="coupon-qr">{couponSnapshot.additional.qrPlaceholderText}</div>
+                <div className="coupon-center coupon-muted coupon-footer-msg">{couponSnapshot.additional.homologationMessage}</div>
+              </div>
+            </div>
+          </div>
+        )}
+      </FormModal>
     </div>
   )
 }
