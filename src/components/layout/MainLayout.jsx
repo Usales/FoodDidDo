@@ -53,7 +53,7 @@ const navigation = [
     section: 'Operação',
     items: [
       { path: '/estoque', label: 'Estoque', icon: <AiOutlineInbox /> },
-      { path: '/vendas', label: 'Vendas', icon: <FiShoppingBag /> },
+      { path: '/vendas', label: 'Encomendas', icon: <FiShoppingBag /> },
       { path: '/relatorios', label: 'Relatórios', icon: <AiOutlineFileText /> },
       { path: '/config', label: 'Configurações', icon: <AiOutlineSetting /> }
     ]
