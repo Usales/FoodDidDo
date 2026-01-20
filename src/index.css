@@ -55,13 +55,19 @@ a:hover {
   color: var(--dark-green);
 }
 
+/* Reset neutro para não “vazar” estilos em botões do app */
 button {
+  font-family: inherit;
+}
+
+/* Estilo padrão LEGADO (apenas quando o button não tem classe) */
+button:not([class]),
+button[class=""] {
   border-radius: 12px;
   border: none;
   padding: 0.75rem 1.5rem;
   font-size: 0.875rem;
   font-weight: 600;
-  font-family: inherit;
   background-color: var(--primary-green);
   color: white;
   cursor: pointer;
@@ -69,13 +75,15 @@ button {
   box-shadow: 0 2px 8px rgba(45, 212, 191, 0.3);
 }
 
-button:hover {
+button:not([class]):hover,
+button[class=""]:hover {
   background-color: var(--dark-green);
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(45, 212, 191, 0.4);
 }
 
-button:active {
+button:not([class]):active,
+button[class=""]:active {
   transform: translateY(0);
   box-shadow: 0 2px 8px rgba(45, 212, 191, 0.3);
 }
