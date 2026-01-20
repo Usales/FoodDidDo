@@ -1349,8 +1349,8 @@ export function DashboardPage() {
 
   const handleEdit = (meal) => {
     setEditingId(meal.id)
-    // Detectar se é um pedido em preparo (status 'fazer' ou 'finalizado')
-    setIsOrderInPreparation(meal.status === 'fazer' || meal.status === 'finalizado')
+    // Pedido "em preparo" é apenas status 'fazer' (pedido finalizado não entra em edição)
+    setIsOrderInPreparation(meal.status === 'fazer')
     // Extrair valor, unidade, quantidade e medida de calorias (ex: "250 Cal 100 KG" -> "250", "Cal", "100", "KG")
     const caloriesStr = meal.calories || ''
     // Primeiro tenta encontrar padrão com quantidade e medida: "250 Cal 100 KG"
@@ -2357,7 +2357,8 @@ export function DashboardPage() {
                 onClick={(e) => {
                   if (!isDragging) {
                     e.stopPropagation()
-                    handleEdit(meal)
+                    // Pedidos prontos/finalizados não podem ser editados
+                    return
                   }
                 }}
               >
