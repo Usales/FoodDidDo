@@ -7,6 +7,10 @@ import { findUserById, formatUserDisplay, getUsersDirectory, groupUsersByType } 
 import './PageCommon.css'
 import './CashboxPage.css'
 
+const USERS_DIRECTORY_KEY = 'usersDirectory'
+const ADD_USER_CUSTOMER_VALUE = '__add_customer__'
+const ADD_USER_SUPPLIER_VALUE = '__add_supplier__'
+
 const PAYMENT_METHODS = [
   { value: 'dinheiro', label: 'Dinheiro', icon: '💵' },
   { value: 'cartao_credito', label: 'Cartão de Crédito', icon: '💳' },
@@ -32,8 +36,12 @@ export function CashboxPage() {
   const [couponModalOpen, setCouponModalOpen] = useState(false)
   const [couponSnapshot, setCouponSnapshot] = useState(null)
 
-  const usersDirectory = useMemo(() => getUsersDirectory(), [])
+  const [usersDirectory, setUsersDirectory] = useState(() => getUsersDirectory())
   const usersByType = useMemo(() => groupUsersByType(usersDirectory), [usersDirectory])
+
+  const [addUserModalOpen, setAddUserModalOpen] = useState(false)
+  const [newUserType, setNewUserType] = useState('customer')
+  const [newUserName, setNewUserName] = useState('')
 
   const roundMoney = (value) => Math.round((Number(value) || 0) * 100) / 100
 
@@ -49,6 +57,41 @@ export function CashboxPage() {
       pix: 'PIX'
     }
     return map[method] || 'Outros'
+  }
+
+  const persistUsersDirectory = (next) => {
+    setUsersDirectory(next)
+    try {
+      localStorage.setItem(USERS_DIRECTORY_KEY, JSON.stringify(next))
+    } catch {
+      // ignore
+    }
+  }
+
+  const openAddUserModal = (type) => {
+    setNewUserType(type)
+    setNewUserName('')
+    setAddUserModalOpen(true)
+  }
+
+  const handleCreateUser = () => {
+    const name = String(newUserName || '').trim()
+    if (!name) return
+
+    const nextUser = {
+      id: crypto.randomUUID(),
+      type: newUserType,
+      status: 'active',
+      name,
+      document: '',
+      phone: '',
+      email: '',
+      notes: ''
+    }
+    const next = [nextUser, ...(Array.isArray(usersDirectory) ? usersDirectory : [])]
+    persistUsersDirectory(next)
+    setLinkedUserId(nextUser.id)
+    setAddUserModalOpen(false)
   }
 
   const generateAccessKey = () => {
@@ -678,8 +721,19 @@ export function CashboxPage() {
             <div className="cashbox-payment-section cashbox-receipt">
               <div className="cashbox-receipt-row">
                 <span className="cashbox-receipt-label">Cliente</span>
-                <select className="cashbox-search-input cashbox-receipt-select" value={linkedUserId} onChange={(e) => setLinkedUserId(e.target.value)}>
+                <select
+                  className="cashbox-search-input cashbox-receipt-select"
+                  value={linkedUserId}
+                  onChange={(e) => {
+                    const value = e.target.value
+                    if (value === ADD_USER_CUSTOMER_VALUE) return openAddUserModal('customer')
+                    if (value === ADD_USER_SUPPLIER_VALUE) return openAddUserModal('supplier')
+                    setLinkedUserId(value)
+                  }}
+                >
                   <option value="">Venda avulsa</option>
+                  <option value={ADD_USER_CUSTOMER_VALUE}>+ Adicionar cliente</option>
+                  <option value={ADD_USER_SUPPLIER_VALUE}>+ Adicionar fornecedor</option>
                   {usersByType.customer.length > 0 && (
                     <optgroup label="Clientes">
                       {usersByType.customer.map((u) => (
@@ -803,6 +857,43 @@ export function CashboxPage() {
           )}
         </section>
       </div>
+
+      <FormModal
+        isOpen={addUserModalOpen}
+        onClose={() => setAddUserModalOpen(false)}
+        title={newUserType === 'supplier' ? 'Adicionar fornecedor' : 'Adicionar cliente'}
+        description="Cadastro rápido (nome apenas). Você pode completar os dados depois na tela de Usuários."
+        footer={
+          <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end', width: '100%' }}>
+            <button type="button" className="page-btn-secondary" onClick={() => setAddUserModalOpen(false)}>
+              Cancelar
+            </button>
+            <button type="button" className="page-btn-primary" onClick={handleCreateUser} disabled={!String(newUserName || '').trim()}>
+              Salvar
+            </button>
+          </div>
+        }
+      >
+        <div style={{ display: 'grid', gap: '0.85rem' }}>
+          <label className="input-control">
+            <span>Tipo</span>
+            <select value={newUserType} onChange={(e) => setNewUserType(e.target.value)}>
+              <option value="customer">Cliente</option>
+              <option value="supplier">Fornecedor</option>
+            </select>
+          </label>
+          <label className="input-control">
+            <span>Nome</span>
+            <input
+              type="text"
+              value={newUserName}
+              onChange={(e) => setNewUserName(e.target.value)}
+              placeholder={newUserType === 'supplier' ? 'Ex.: Distribuidora XYZ' : 'Ex.: João Silva'}
+              autoFocus
+            />
+          </label>
+        </div>
+      </FormModal>
 
       <FormModal
         isOpen={couponModalOpen}
