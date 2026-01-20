@@ -108,6 +108,10 @@
   margin-bottom: 0.3rem;
 }
 
+.main-shell.sidebar-collapsed .sidebar-section-label {
+  display: none;
+}
+
 .sidebar-link {
   display: flex;
   align-items: center;
@@ -117,6 +121,27 @@
   border-radius: 0.9rem;
   font-weight: 500;
   transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.sidebar-link-label {
+  display: inline-flex;
+}
+
+.main-shell.sidebar-collapsed .sidebar-link {
+  justify-content: center;
+  padding: 0.75rem;
+}
+
+.main-shell.sidebar-collapsed .sidebar-link:hover {
+  transform: none;
+}
+
+.main-shell.sidebar-collapsed .sidebar-link-label {
+  display: none;
+}
+
+.main-shell.sidebar-collapsed .sidebar-link-icon {
+  font-size: 1.25rem;
 }
 
 .sidebar-link:hover {
@@ -155,6 +180,14 @@
   align-items: center;
   justify-content: center;
   gap: 0.6rem;
+}
+
+.main-shell.sidebar-collapsed .logout-btn {
+  padding: 0.75rem;
+}
+
+.main-shell.sidebar-collapsed .logout-btn-label {
+  display: none;
 }
 
 .logout-btn:hover {
