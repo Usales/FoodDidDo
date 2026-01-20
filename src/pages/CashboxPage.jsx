@@ -4,6 +4,8 @@ import { CurrencyInput } from '../components/ui/CurrencyInput'
 import { FormModal } from '../components/ui/FormModal'
 import { FiCheck, FiFileText, FiMinus, FiPlus, FiSearch, FiShoppingCart, FiTrash2 } from 'react-icons/fi'
 import { findUserById, formatUserDisplay, getUsersDirectory, groupUsersByType } from '../utils/usersDirectory'
+import marketProductsEn from '../../catalogo-mercado/products.en.json'
+import marketProductsPt from '../../catalogo-mercado/products.pt.json'
 import './PageCommon.css'
 import './CashboxPage.css'
 
@@ -17,6 +19,15 @@ const PAYMENT_METHODS = [
   { value: 'cartao_debito', label: 'Cartão de Débito', icon: '💳' },
   { value: 'pix', label: 'PIX', icon: '📱' }
 ]
+
+const typePtByTypeEn = {
+  dairy: 'Laticínios',
+  fruit: 'Frutas',
+  vegetable: 'Vegetais',
+  bakery: 'Padaria',
+  meat: 'Carnes',
+  vegan: 'Vegano'
+}
 
 export function CashboxPage() {
   const recipes = useAppStore((state) => state.recipes)
@@ -44,6 +55,10 @@ export function CashboxPage() {
   const [newUserName, setNewUserName] = useState('')
 
   const roundMoney = (value) => Math.round((Number(value) || 0) * 100) / 100
+  const toNumber = (v) => {
+    const n = typeof v === 'number' ? v : Number(String(v ?? '').replace(',', '.'))
+    return Number.isFinite(n) ? n : 0
+  }
 
   const formatCurrency = (value) => {
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(value) || 0)
@@ -58,6 +73,38 @@ export function CashboxPage() {
     }
     return map[method] || 'Outros'
   }
+
+  const marketProducts = useMemo(() => {
+    const list = Array.isArray(marketProductsEn) ? marketProductsEn : []
+    const locale = 'pt'
+
+    return list.map((p, idx) => {
+      const filename = p.filename ? String(p.filename) : null
+      const pt = filename ? marketProductsPt?.[filename] : null
+
+      const nameEn = p.title || `Produto ${idx + 1}`
+      const descriptionEn = p.description || ''
+      const typeEn = String(p.type || 'Geral')
+
+      const namePt = pt?.title || null
+      const descriptionPt = pt?.description || null
+      const typePt = typePtByTypeEn[typeEn] || typeEn
+
+      return {
+        id: `catalogo:${filename || idx}`,
+        source: 'catalogo',
+        name: locale === 'pt' ? (namePt || nameEn) : nameEn,
+        category: locale === 'pt' ? typePt : typeEn,
+        description: locale === 'pt' ? (descriptionPt || descriptionEn) : descriptionEn,
+        // Campos guardados (EN) para i18n/busca futura
+        nameEn,
+        categoryEn: typeEn,
+        descriptionEn,
+        price: roundMoney(toNumber(p.price)),
+        unitCost: 0
+      }
+    })
+  }, [])
 
   const persistUsersDirectory = (next) => {
     setUsersDirectory(next)
@@ -333,12 +380,25 @@ export function CashboxPage() {
 
   // Filtrar produtos por busca
   const filteredProducts = useMemo(() => {
-    if (!searchQuery.trim()) return recipes
+    const recipeList = Array.isArray(recipes) ? recipes : []
+    const merged = [
+      ...marketProducts,
+      ...recipeList.map((r) => ({ ...r, source: 'recipe' }))
+    ]
+
+    if (!searchQuery.trim()) return merged
+
     const query = searchQuery.toLowerCase()
-    return recipes.filter(recipe =>
-      recipe.name.toLowerCase().includes(query)
-    )
-  }, [recipes, searchQuery])
+    return merged.filter((p) => {
+      const name = String(p.name || '').toLowerCase()
+      const category = String(p.category || p.type || '').toLowerCase()
+      const desc = String(p.description || '').toLowerCase()
+      const nameEn = String(p.nameEn || '').toLowerCase()
+      const catEn = String(p.categoryEn || '').toLowerCase()
+      const descEn = String(p.descriptionEn || '').toLowerCase()
+      return `${name} ${category} ${desc} ${nameEn} ${catEn} ${descEn}`.includes(query)
+    })
+  }, [recipes, searchQuery, marketProducts])
 
   // Calcular totais
   const totals = useMemo(() => {
@@ -362,6 +422,8 @@ export function CashboxPage() {
   }, [cart, discount, receivedAmount])
 
   const getDefaultPriceForRecipe = (recipe) => {
+    // Produtos do catálogo já vêm com preço definido
+    if (recipe?.source === 'catalogo') return roundMoney(recipe.price)
     const priced = pricing?.find((p) => p.recipeId === recipe.id)
     if (priced && typeof priced.price === 'number') return roundMoney(priced.price)
     if (recipe.unitCost) return roundMoney(recipe.unitCost * 1.5)
@@ -386,6 +448,7 @@ export function CashboxPage() {
         name: recipe.name,
         price: price,
         unitCost: recipe.unitCost || 0,
+        source: recipe.source || 'recipe',
         quantity: 1
       }])
     }
@@ -476,8 +539,9 @@ export function CashboxPage() {
             })
           : null,
         items: cart.map(item => ({
-          recipeId: item.id,
-          recipeName: item.name,
+          // Itens do catálogo (mercado) não possuem receita cadastrada
+          recipeId: item.source === 'recipe' ? item.id : null,
+          recipeName: item.source === 'recipe' ? item.name : null,
           name: item.name,
           quantity: item.quantity,
           unitPrice: item.price,
