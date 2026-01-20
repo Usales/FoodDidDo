@@ -364,7 +364,6 @@ export function CashboxPage() {
             <td class="mono">${String(i.line).padStart(3, '0')}</td>
             <td>${i.description}</td>
             <td class="right mono">${i.quantity}</td>
-            <td class="right mono">${formatCurrency(i.unitPrice)}</td>
             <td class="right mono">${formatCurrency(i.total)}</td>
           </tr>`
       )
@@ -421,7 +420,6 @@ export function CashboxPage() {
                   <td class="mono">Item</td>
                   <td>Descrição</td>
                   <td class="right mono">Qtd</td>
-                  <td class="right mono">Vlr Un</td>
                   <td class="right mono">Total</td>
                 </tr>
               </thead>
@@ -1289,7 +1287,6 @@ export function CashboxPage() {
                     <th className="coupon-mono">Item</th>
                     <th>Descrição</th>
                     <th className="coupon-right coupon-mono">Qtd</th>
-                    <th className="coupon-right coupon-mono">Vlr Un</th>
                     <th className="coupon-right coupon-mono">Total</th>
                   </tr>
                 </thead>
@@ -1299,7 +1296,6 @@ export function CashboxPage() {
                       <td className="coupon-mono">{String(i.line).padStart(3, '0')}</td>
                       <td>{i.description}</td>
                       <td className="coupon-right coupon-mono">{i.quantity}</td>
-                      <td className="coupon-right coupon-mono">{formatCurrency(i.unitPrice)}</td>
                       <td className="coupon-right coupon-mono">{formatCurrency(i.total)}</td>
                     </tr>
                   ))}

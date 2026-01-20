@@ -865,13 +865,21 @@
   width: 100%;
   border-collapse: collapse;
   font-size: 11px;
+  table-layout: fixed; /* garante alinhamento consistente entre header e linhas */
 }
 
 .coupon-table th {
   text-align: left;
   color: #444444;
   font-weight: 700;
-  padding: 0.2rem 0;
+  padding: 0.25rem 0;
+}
+
+.coupon-table th.coupon-right,
+.coupon-table td.coupon-right {
+  /* garante que header e linha encostem no canto direito */
+  text-align: right;
+  padding-right: 0;
 }
 
 .coupon-table td {
@@ -881,6 +889,22 @@
 
 .coupon-right {
   text-align: right;
+}
+
+/* Colunas do cupom (Item | Descrição | Qtd | Total) */
+.coupon-table th:nth-child(1),
+.coupon-table td:nth-child(1) {
+  width: 44px;
+}
+
+.coupon-table th:nth-child(3),
+.coupon-table td:nth-child(3) {
+  width: 24px; /* Qtd */
+}
+
+.coupon-table th:nth-child(4),
+.coupon-table td:nth-child(4) {
+  width: 92px; /* Total */
 }
 
 .coupon-totals {
