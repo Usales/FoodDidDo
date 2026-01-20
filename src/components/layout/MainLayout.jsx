@@ -25,6 +25,7 @@ import './MainLayout.css'
 
 const DASHBOARD_SETTINGS_KEY = 'dashboardSettings'
 const SIDEBAR_SETTINGS_KEY = 'sidebarSettings'
+const SIDEBAR_COLLAPSED_KEY = 'sidebarCollapsed'
 
 const navigation = [
   {
@@ -67,6 +68,13 @@ export function MainLayout({ onLogout, user }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, transform: 'translate(-50%, -50%)' })
   const [isMobile, setIsMobile] = useState(false)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    try {
+      return localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === '1'
+    } catch {
+      return false
+    }
+  })
   const [dashboardSettings, setDashboardSettings] = useState({ showHeader: false })
   const [sidebarSettings, setSidebarSettings] = useState({
     showVisaoGeral: false,
@@ -338,6 +346,20 @@ export function MainLayout({ onLogout, user }) {
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
+  // Persistir estado de colapso da sidebar (desktop)
+  useEffect(() => {
+    try {
+      localStorage.setItem(SIDEBAR_COLLAPSED_KEY, sidebarCollapsed ? '1' : '0')
+    } catch {
+      // ignore
+    }
+  }, [sidebarCollapsed])
+
+  // No mobile, a sidebar fixa já não aparece — garantir estado expandido
+  useEffect(() => {
+    if (isMobile && sidebarCollapsed) setSidebarCollapsed(false)
+  }, [isMobile, sidebarCollapsed])
+
   // Fechar dropdown ao clicar fora
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -394,10 +416,19 @@ export function MainLayout({ onLogout, user }) {
   }
 
   return (
-    <div className="main-shell">
+    <div className={`main-shell${sidebarCollapsed ? ' sidebar-collapsed' : ''}`}>
       <aside className="main-shell-sidebar">
         <div className="sidebar-brand">
           <img src="/images_/2.png" alt="FoodIDDO" />
+          <button
+            type="button"
+            className="sidebar-collapse-btn"
+            aria-label={sidebarCollapsed ? 'Abrir barra lateral' : 'Recolher barra lateral'}
+            aria-pressed={sidebarCollapsed}
+            onClick={() => setSidebarCollapsed((prev) => !prev)}
+          >
+            {sidebarCollapsed ? '>' : '<'}
+          </button>
         </div>
         <nav>
           {navigation
@@ -447,7 +478,7 @@ export function MainLayout({ onLogout, user }) {
                       <span aria-hidden="true" className="sidebar-link-icon">
                         {item.icon}
                       </span>
-                      {item.label}
+                      <span className="sidebar-link-label">{item.label}</span>
                     </NavLink>
                   ))}
                 </div>
@@ -457,7 +488,7 @@ export function MainLayout({ onLogout, user }) {
         <div className="sidebar-footer">
           <button type="button" className="logout-btn" onClick={onLogout}>
             <FiLogOut size={18} />
-            Sair
+            <span className="logout-btn-label">Sair</span>
           </button>
         </div>
       </aside>
