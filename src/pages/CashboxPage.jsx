@@ -293,11 +293,15 @@ export function CashboxPage() {
 
     return {
       establishment: {
-        // Mock realista (teste)
-        tradeName: 'FoodDidDo Restaurante',
-        legalName: 'FoodDidDo Comércio de Alimentos LTDA',
-        cnpj: '04.252.011/0001-10',
-        address: 'Av. Paulista, 1000 - Bela Vista, São Paulo/SP - CEP 01310-100'
+        tradeName: 'Armazem Sales',
+        legalName: 'Armazem Sales',
+        // Se não houver CNPJ, deixamos vazio e ocultamos no layout
+        cnpj: '',
+        address: 'Avenida Hilário Sebastião de Figueiredo, SN - Quadra 2; lote 15 - Santo Hilário - Goiânia/GO',
+        neighborhood: 'Santo Hilário',
+        city: 'Goiânia',
+        state: 'GO',
+        phone: '(62) 8464-8151'
       },
       document: {
         number: cupomNumber,
@@ -396,8 +400,9 @@ export function CashboxPage() {
             <div class="center">
               <h2>${s.establishment.tradeName}</h2>
               <p class="muted">${s.establishment.legalName}</p>
-              <p class="muted">CNPJ: ${s.establishment.cnpj}</p>
+              ${s.establishment.cnpj ? `<p class="muted">CNPJ: ${s.establishment.cnpj}</p>` : ''}
               <p class="muted">${s.establishment.address}</p>
+              ${s.establishment.phone ? `<p class="muted">Telefone: ${s.establishment.phone}</p>` : ''}
               <div class="badge">AMBIENTE DE TESTE (HOMOLOGAÇÃO)</div>
             </div>
 
@@ -1243,8 +1248,18 @@ export function CashboxPage() {
               <div className="coupon-center">
                 <div className="coupon-title">{couponSnapshot.establishment.tradeName}</div>
                 <div className="coupon-muted">{couponSnapshot.establishment.legalName}</div>
-                <div className="coupon-muted">CNPJ: {couponSnapshot.establishment.cnpj}</div>
+                {couponSnapshot.establishment.cnpj ? (
+                  <div className="coupon-muted">CNPJ: {couponSnapshot.establishment.cnpj}</div>
+                ) : null}
                 <div className="coupon-muted">{couponSnapshot.establishment.address}</div>
+                {couponSnapshot.establishment.phone ? (
+                  <div className="coupon-muted">
+                    Telefone:{' '}
+                    <a href={`tel:${couponSnapshot.establishment.phone}`} style={{ color: 'inherit', textDecoration: 'underline' }}>
+                      {couponSnapshot.establishment.phone}
+                    </a>
+                  </div>
+                ) : null}
                 <div className="coupon-badge">AMBIENTE DE TESTE (HOMOLOGAÇÃO)</div>
               </div>
 
