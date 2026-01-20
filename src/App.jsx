@@ -11,6 +11,7 @@ import {
   BudgetPage,
   IngredientsPage,
   RecipesPage,
+  ProductsPage,
   CostPage,
   ProductionSimulatorPage,
   ProfitabilityPage,
@@ -49,6 +50,7 @@ function AppRoutes() {
           <Route path="/geladeira" element={<Navigate to="/ingredientes" replace />} />
           <Route path="/orcamento" element={<BudgetPage />} />
           <Route path="/receitas" element={<RecipesPage />} />
+          <Route path="/produtos" element={<ProductsPage />} />
           <Route path="/custos" element={<CostPage />} />
           <Route path="/simulador" element={<ProductionSimulatorPage />} />
           <Route path="/lucratividade" element={<ProfitabilityPage />} />
