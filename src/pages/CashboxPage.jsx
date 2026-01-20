@@ -2,12 +2,14 @@ import { useMemo, useState } from 'react'
 import { useAppStore } from '../stores/appStore'
 import { CurrencyInput } from '../components/ui/CurrencyInput'
 import { FormModal } from '../components/ui/FormModal'
-import { FiCheck, FiFileText, FiMinus, FiPlus, FiSearch, FiShoppingCart, FiTrash2 } from 'react-icons/fi'
+import { FiCheck, FiFileText, FiMinus, FiPlus, FiSearch, FiShoppingCart, FiTrash2, FiX } from 'react-icons/fi'
+import { api } from '../lib/api'
 import { findUserById, formatUserDisplay, getUsersDirectory, groupUsersByType } from '../utils/usersDirectory'
 import marketProductsEn from '../../catalogo-mercado/products.en.json'
 import marketProductsPt from '../../catalogo-mercado/products.pt.json'
 import './PageCommon.css'
 import './CashboxPage.css'
+import './UsersPage.css'
 
 const USERS_DIRECTORY_KEY = 'usersDirectory'
 const ADD_USER_CUSTOMER_VALUE = '__add_customer__'
@@ -28,6 +30,65 @@ const typePtByTypeEn = {
   meat: 'Carnes',
   vegan: 'Vegano'
 }
+
+const digitsOnly = (value) => String(value ?? '').replace(/\D/g, '')
+
+// Validação básica (mas correta) de CPF
+const isValidCPF = (cpf) => {
+  const v = digitsOnly(cpf)
+  if (v.length !== 11) return false
+  if (/^(\d)\1+$/.test(v)) return false
+  const calc = (base) => {
+    let sum = 0
+    for (let i = 0; i < base.length; i++) {
+      sum += Number(base[i]) * (base.length + 1 - i)
+    }
+    const mod = sum % 11
+    return mod < 2 ? 0 : 11 - mod
+  }
+  const d1 = calc(v.slice(0, 9))
+  const d2 = calc(v.slice(0, 9) + String(d1))
+  return v === v.slice(0, 9) + String(d1) + String(d2)
+}
+
+// Validação básica (mas correta) de CNPJ
+const isValidCNPJ = (cnpj) => {
+  const v = digitsOnly(cnpj)
+  if (v.length !== 14) return false
+  if (/^(\d)\1+$/.test(v)) return false
+  const weights1 = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
+  const weights2 = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
+  const calc = (base, weights) => {
+    let sum = 0
+    for (let i = 0; i < weights.length; i++) sum += Number(base[i]) * weights[i]
+    const mod = sum % 11
+    return mod < 2 ? 0 : 11 - mod
+  }
+  const d1 = calc(v, weights1)
+  const d2 = calc(v.slice(0, 12) + String(d1), weights2)
+  return v === v.slice(0, 12) + String(d1) + String(d2)
+}
+
+const getDocumentLabel = (type) => (type === 'supplier' ? 'CNPJ' : 'CPF/CNPJ')
+
+const createEmptyUser = () => ({
+  id: crypto.randomUUID(),
+  type: 'customer',
+  status: 'active',
+  name: '',
+  document: '',
+  phone: '',
+  email: '',
+  notes: '',
+  // Cliente
+  birthDate: '',
+  // Fornecedor
+  companyName: '',
+  // Funcionário
+  role: '',
+  admissionDate: '',
+  accessLevel: 'operador'
+})
 
 export function CashboxPage() {
   const recipes = useAppStore((state) => state.recipes)
@@ -51,8 +112,8 @@ export function CashboxPage() {
   const usersByType = useMemo(() => groupUsersByType(usersDirectory), [usersDirectory])
 
   const [addUserModalOpen, setAddUserModalOpen] = useState(false)
-  const [newUserType, setNewUserType] = useState('customer')
-  const [newUserName, setNewUserName] = useState('')
+  const [userDraft, setUserDraft] = useState(() => createEmptyUser())
+  const [cnpjLookup, setCnpjLookup] = useState({ status: 'idle', message: '' }) // idle|loading|ok|error
 
   const roundMoney = (value) => Math.round((Number(value) || 0) * 100) / 100
   const toNumber = (v) => {
@@ -116,29 +177,92 @@ export function CashboxPage() {
   }
 
   const openAddUserModal = (type) => {
-    setNewUserType(type)
-    setNewUserName('')
+    const initial = createEmptyUser()
+    setUserDraft({ ...initial, type: type || 'customer' })
+    setCnpjLookup({ status: 'idle', message: '' })
     setAddUserModalOpen(true)
   }
 
-  const handleCreateUser = () => {
-    const name = String(newUserName || '').trim()
-    if (!name) return
-
-    const nextUser = {
-      id: crypto.randomUUID(),
-      type: newUserType,
-      status: 'active',
-      name,
-      document: '',
-      phone: '',
-      email: '',
-      notes: ''
-    }
-    const next = [nextUser, ...(Array.isArray(usersDirectory) ? usersDirectory : [])]
-    persistUsersDirectory(next)
-    setLinkedUserId(nextUser.id)
+  const closeAddUserModal = () => {
     setAddUserModalOpen(false)
+    setUserDraft(createEmptyUser())
+    setCnpjLookup({ status: 'idle', message: '' })
+  }
+
+  const autofillFromCnpj = async (docRaw) => {
+    const cnpj = digitsOnly(docRaw)
+    if (!isValidCNPJ(cnpj)) return
+
+    setCnpjLookup({ status: 'loading', message: 'Buscando dados do CNPJ…' })
+    try {
+      const data = await api.lookupCnpj(cnpj)
+
+      setUserDraft((prev) => {
+        const next = { ...prev }
+
+        if (prev.type === 'supplier') {
+          if (!String(prev.name || '').trim() && data?.razaoSocial) next.name = data.razaoSocial
+          if (!String(prev.companyName || '').trim() && data?.nomeFantasia) next.companyName = data.nomeFantasia
+        } else {
+          if (!String(prev.name || '').trim() && data?.razaoSocial) next.name = data.razaoSocial
+        }
+
+        if (!String(prev.phone || '').trim() && data?.telefone) next.phone = data.telefone
+        if (!String(prev.email || '').trim() && data?.email) next.email = data.email
+
+        if (!String(prev.notes || '').trim() && data?.endereco) {
+          const e = data.endereco
+          const parts = [
+            e.logradouro,
+            e.numero ? `nº ${e.numero}` : null,
+            e.complemento,
+            e.bairro,
+            e.municipio ? `${e.municipio}/${e.uf || ''}` : null,
+            e.cep ? `CEP ${e.cep}` : null
+          ].filter(Boolean)
+          if (parts.length) next.notes = `Endereço (CNPJ): ${parts.join(', ')}`
+        }
+
+        return next
+      })
+
+      setCnpjLookup({ status: 'ok', message: 'Dados preenchidos a partir do CNPJ.' })
+    } catch (error) {
+      console.error('Erro ao consultar CNPJ:', error)
+      setCnpjLookup({ status: 'error', message: error.message || 'Não foi possível consultar o CNPJ.' })
+    }
+  }
+
+  const validateUser = (u) => {
+    const errors = []
+    const nameOk = String(u.name || '').trim().length >= 2
+    if (!nameOk) errors.push('Informe o nome completo / razão social.')
+    if (!u.type) errors.push('Selecione o tipo de usuário.')
+
+    const doc = digitsOnly(u.document)
+    if (u.type === 'supplier') {
+      if (!u.companyName?.trim()) errors.push('Informe o nome da empresa.')
+      if (!isValidCNPJ(doc)) errors.push('CNPJ inválido.')
+    } else {
+      if (doc.length > 0 && !(isValidCPF(doc) || isValidCNPJ(doc))) {
+        errors.push('Documento inválido (CPF/CNPJ).')
+      }
+    }
+
+    return errors
+  }
+
+  const handleSaveUser = () => {
+    const errors = validateUser(userDraft)
+    if (errors.length) {
+      alert(errors.join('\n'))
+      return
+    }
+
+    const next = [userDraft, ...(Array.isArray(usersDirectory) ? usersDirectory : [])]
+    persistUsersDirectory(next)
+    setLinkedUserId(userDraft.id)
+    closeAddUserModal()
   }
 
   const generateAccessKey = () => {
@@ -924,38 +1048,172 @@ export function CashboxPage() {
 
       <FormModal
         isOpen={addUserModalOpen}
-        onClose={() => setAddUserModalOpen(false)}
-        title={newUserType === 'supplier' ? 'Adicionar fornecedor' : 'Adicionar cliente'}
-        description="Cadastro rápido (nome apenas). Você pode completar os dados depois na tela de Usuários."
+        onClose={closeAddUserModal}
+        title="Novo Usuário"
+        description="Cadastre e gerencie clientes, fornecedores e funcionários."
+        isExpanded
         footer={
-          <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end', width: '100%' }}>
-            <button type="button" className="page-btn-secondary" onClick={() => setAddUserModalOpen(false)}>
+          <div className="users-modal-footer">
+            <button type="button" className="page-btn-secondary" onClick={closeAddUserModal}>
+              <FiX size={16} />
               Cancelar
             </button>
-            <button type="button" className="page-btn-primary" onClick={handleCreateUser} disabled={!String(newUserName || '').trim()}>
+            <button type="button" className="page-btn-primary" onClick={handleSaveUser}>
               Salvar
             </button>
           </div>
         }
       >
-        <div style={{ display: 'grid', gap: '0.85rem' }}>
-          <label className="input-control">
-            <span>Tipo</span>
-            <select value={newUserType} onChange={(e) => setNewUserType(e.target.value)}>
-              <option value="customer">Cliente</option>
-              <option value="supplier">Fornecedor</option>
-            </select>
-          </label>
-          <label className="input-control">
-            <span>Nome</span>
-            <input
-              type="text"
-              value={newUserName}
-              onChange={(e) => setNewUserName(e.target.value)}
-              placeholder={newUserType === 'supplier' ? 'Ex.: Distribuidora XYZ' : 'Ex.: João Silva'}
-              autoFocus
-            />
-          </label>
+        <div className="users-modal">
+          <div className="users-form-grid">
+            <div className="users-field">
+              <label>Tipo de usuário</label>
+              <select
+                value={userDraft.type}
+                onChange={(e) => {
+                  const nextType = e.target.value
+                  setUserDraft((p) => ({ ...p, type: nextType }))
+                  setCnpjLookup({ status: 'idle', message: '' })
+                }}
+              >
+                <option value="customer">Cliente</option>
+                <option value="supplier">Fornecedor</option>
+                <option value="employee">Funcionário</option>
+              </select>
+            </div>
+
+            <div className="users-field">
+              <label>Status</label>
+              <select value={userDraft.status} onChange={(e) => setUserDraft((p) => ({ ...p, status: e.target.value }))}>
+                <option value="active">Ativo</option>
+                <option value="inactive">Inativo</option>
+              </select>
+            </div>
+
+            {userDraft.type === 'supplier' ? (
+              <div className="users-field users-field--wide">
+                <label>Nome da empresa</label>
+                <input
+                  value={userDraft.companyName}
+                  onChange={(e) => setUserDraft((p) => ({ ...p, companyName: e.target.value }))}
+                  placeholder="Ex: Padaria Exemplo LTDA"
+                  autoFocus
+                />
+              </div>
+            ) : null}
+
+            <div className="users-field users-field--wide">
+              <label>Nome completo / Razão social</label>
+              <input
+                value={userDraft.name}
+                onChange={(e) => setUserDraft((p) => ({ ...p, name: e.target.value }))}
+                placeholder={userDraft.type === 'supplier' ? 'Razão social do fornecedor' : 'Nome completo'}
+                autoFocus={userDraft.type !== 'supplier'}
+              />
+            </div>
+
+            <div className="users-field">
+              <label>{getDocumentLabel(userDraft.type)}</label>
+              <input
+                value={userDraft.document}
+                onChange={(e) => setUserDraft((p) => ({ ...p, document: e.target.value }))}
+                placeholder={userDraft.type === 'supplier' ? '00.000.000/0000-00' : '000.000.000-00 ou 00.000.000/0000-00'}
+                onBlur={() => {
+                  const doc = digitsOnly(userDraft.document)
+                  if (userDraft.type === 'supplier' && isValidCNPJ(doc)) autofillFromCnpj(doc)
+                }}
+              />
+              <small className="users-hint">
+                {digitsOnly(userDraft.document).length === 0
+                  ? 'Opcional (exceto fornecedor)'
+                  : isValidCPF(digitsOnly(userDraft.document)) || isValidCNPJ(digitsOnly(userDraft.document))
+                    ? 'Documento válido'
+                    : 'Documento inválido'}
+              </small>
+
+              {userDraft.type === 'supplier' && isValidCNPJ(digitsOnly(userDraft.document)) ? (
+                <div className={`users-lookup users-lookup--${cnpjLookup.status}`}>
+                  <button
+                    type="button"
+                    className="users-lookup-btn"
+                    onClick={() => autofillFromCnpj(digitsOnly(userDraft.document))}
+                    disabled={cnpjLookup.status === 'loading'}
+                  >
+                    {cnpjLookup.status === 'loading' ? 'Buscando…' : 'Buscar dados do CNPJ'}
+                  </button>
+                  {cnpjLookup.message ? <span className="users-lookup-msg">{cnpjLookup.message}</span> : null}
+                </div>
+              ) : null}
+            </div>
+
+            <div className="users-field">
+              <label>Telefone</label>
+              <input
+                value={userDraft.phone}
+                onChange={(e) => setUserDraft((p) => ({ ...p, phone: e.target.value }))}
+                placeholder="(11) 99999-9999"
+              />
+            </div>
+
+            <div className="users-field users-field--wide">
+              <label>E-mail (opcional)</label>
+              <input
+                value={userDraft.email}
+                onChange={(e) => setUserDraft((p) => ({ ...p, email: e.target.value }))}
+                placeholder="email@exemplo.com"
+              />
+            </div>
+
+            {userDraft.type === 'customer' ? (
+              <div className="users-field">
+                <label>Data de nascimento (opcional)</label>
+                <input
+                  type="date"
+                  value={userDraft.birthDate}
+                  onChange={(e) => setUserDraft((p) => ({ ...p, birthDate: e.target.value }))}
+                />
+              </div>
+            ) : null}
+
+            {userDraft.type === 'employee' ? (
+              <>
+                <div className="users-field">
+                  <label>Cargo</label>
+                  <input
+                    value={userDraft.role}
+                    onChange={(e) => setUserDraft((p) => ({ ...p, role: e.target.value }))}
+                    placeholder="Ex: Atendente"
+                  />
+                </div>
+                <div className="users-field">
+                  <label>Data de admissão</label>
+                  <input
+                    type="date"
+                    value={userDraft.admissionDate}
+                    onChange={(e) => setUserDraft((p) => ({ ...p, admissionDate: e.target.value }))}
+                  />
+                </div>
+                <div className="users-field users-field--wide">
+                  <label>Permissão / Nível de acesso</label>
+                  <select value={userDraft.accessLevel} onChange={(e) => setUserDraft((p) => ({ ...p, accessLevel: e.target.value }))}>
+                    <option value="operador">Operador</option>
+                    <option value="gerente">Gerente</option>
+                    <option value="admin">Admin</option>
+                  </select>
+                </div>
+              </>
+            ) : null}
+
+            <div className="users-field users-field--wide">
+              <label>Observações</label>
+              <textarea
+                value={userDraft.notes}
+                onChange={(e) => setUserDraft((p) => ({ ...p, notes: e.target.value }))}
+                placeholder="Informações adicionais..."
+                rows={4}
+              />
+            </div>
+          </div>
         </div>
       </FormModal>
 
