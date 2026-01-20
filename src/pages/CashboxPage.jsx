@@ -281,9 +281,6 @@ export function CashboxPage() {
 
     const subtotal = roundMoney(totals.subtotal)
     const discountValue = roundMoney(totals.discount || 0)
-    const base = Math.max(0, subtotal - discountValue)
-    const icmsPercent = 18
-    const icmsValue = roundMoney((base * icmsPercent) / 100)
     const total = roundMoney(totals.total)
 
     const paymentValue =
@@ -334,7 +331,6 @@ export function CashboxPage() {
       totals: {
         subtotal,
         discount: discountValue,
-        icms: { percent: icmsPercent, value: icmsValue },
         total
       },
       payment: {
@@ -438,7 +434,6 @@ export function CashboxPage() {
               <tbody>
                 <tr><td>Subtotal</td><td class="right mono">${formatCurrency(s.totals.subtotal)}</td></tr>
                 <tr><td>Descontos</td><td class="right mono">${formatCurrency(s.totals.discount)}</td></tr>
-                <tr><td>ICMS (${s.totals.icms.percent}%)</td><td class="right mono">${formatCurrency(s.totals.icms.value)}</td></tr>
                 <tr><td><strong>Total</strong></td><td class="right mono"><strong>${formatCurrency(s.totals.total)}</strong></td></tr>
               </tbody>
             </table>
@@ -1321,10 +1316,6 @@ export function CashboxPage() {
                   <tr>
                     <td>Descontos</td>
                     <td className="coupon-right coupon-mono">{formatCurrency(couponSnapshot.totals.discount)}</td>
-                  </tr>
-                  <tr>
-                    <td>ICMS ({couponSnapshot.totals.icms.percent}%)</td>
-                    <td className="coupon-right coupon-mono">{formatCurrency(couponSnapshot.totals.icms.value)}</td>
                   </tr>
                   <tr>
                     <td className="coupon-strong">Total</td>
