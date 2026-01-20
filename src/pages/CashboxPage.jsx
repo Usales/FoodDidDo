@@ -527,9 +527,10 @@ export function CashboxPage() {
   // Calcular totais
   const totals = useMemo(() => {
     const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)
-    const discountValue = Number(discount) || 0
+    // CurrencyInput retorna string (ex: "10,00") -> Number() falha; usar parser que aceita vírgula
+    const discountValue = roundMoney(toNumber(discount))
     const total = Math.max(0, subtotal - discountValue)
-    const received = Number(receivedAmount) || 0
+    const received = roundMoney(toNumber(receivedAmount))
     const change = received - total
     const cost = cart.reduce((sum, item) => sum + ((item.unitCost || 0) * item.quantity), 0)
     const profit = total - cost
