@@ -675,15 +675,11 @@ export function CashboxPage() {
 
           {/* Resumo e Pagamento */}
           {cart.length > 0 && (
-            <div className="cashbox-payment-section">
-              <div className="cashbox-payment-methods">
-                <label className="cashbox-payment-label">Vincular venda a</label>
-                <select
-                  className="cashbox-search-input"
-                  value={linkedUserId}
-                  onChange={(e) => setLinkedUserId(e.target.value)}
-                >
-                  <option value="">Venda avulsa (sem vínculo)</option>
+            <div className="cashbox-payment-section cashbox-receipt">
+              <div className="cashbox-receipt-row">
+                <span className="cashbox-receipt-label">Cliente</span>
+                <select className="cashbox-search-input cashbox-receipt-select" value={linkedUserId} onChange={(e) => setLinkedUserId(e.target.value)}>
+                  <option value="">Venda avulsa</option>
                   {usersByType.customer.length > 0 && (
                     <optgroup label="Clientes">
                       {usersByType.customer.map((u) => (
@@ -723,30 +719,30 @@ export function CashboxPage() {
                 </select>
               </div>
 
-              <div className="cashbox-totals">
-                <div className="cashbox-total-row">
-                  <span>Desconto:</span>
-                  <CurrencyInput
-                    value={discount}
-                    onChange={setDiscount}
-                    placeholder="0,00"
-                    style={{ width: '120px', textAlign: 'right' }}
-                  />
+              <div className="cashbox-receipt-totals">
+                <div className="cashbox-receipt-row">
+                  <span className="cashbox-receipt-label">Desc.</span>
+                  <div className="cashbox-receipt-input">
+                    <CurrencyInput value={discount} onChange={setDiscount} placeholder="0,00" />
+                  </div>
                 </div>
-                <div className="cashbox-total-row total">
-                  <span>Total:</span>
-                  <strong>{formatCurrency(totals.total)}</strong>
+                <div className="cashbox-receipt-row cashbox-receipt-row-total">
+                  <span className="cashbox-receipt-label">Total</span>
+                  <strong className="cashbox-receipt-total">{formatCurrency(totals.total)}</strong>
                 </div>
               </div>
 
-              <div className="cashbox-payment-methods">
-                <label className="cashbox-payment-label">Forma de Pagamento</label>
-                <div className="cashbox-payment-options">
+              <div className="cashbox-receipt-paymethods">
+                <div className="cashbox-receipt-row">
+                  <span className="cashbox-receipt-label">Pgto</span>
+                  <span className="cashbox-receipt-muted">{PAYMENT_METHODS.find((m) => m.value === selectedPaymentMethod)?.label || ''}</span>
+                </div>
+                <div className="cashbox-payment-options cashbox-payment-options--compact">
                   {PAYMENT_METHODS.map((method) => (
                     <button
                       key={method.value}
                       type="button"
-                      className={`cashbox-payment-option ${selectedPaymentMethod === method.value ? 'active' : ''}`}
+                      className={`cashbox-payment-option cashbox-payment-option--compact ${selectedPaymentMethod === method.value ? 'active' : ''}`}
                       onClick={() => {
                         setSelectedPaymentMethod(method.value)
                         if (method.value !== 'dinheiro') {
@@ -755,54 +751,54 @@ export function CashboxPage() {
                           setReceivedAmount('')
                         }
                       }}
+                      title={method.label}
                     >
                       <span className="cashbox-payment-icon">{method.icon}</span>
-                      <span>{method.label}</span>
+                      <span className="cashbox-payment-text">{method.label}</span>
                     </button>
                   ))}
                 </div>
               </div>
 
               {selectedPaymentMethod === 'dinheiro' && (
-                <div className="cashbox-received-section">
-                  <label className="cashbox-received-label">Valor Recebido</label>
-                  <div className="cashbox-received-input">
-                    <CurrencyInput
-                      value={receivedAmount}
-                      onChange={setReceivedAmount}
-                      placeholder="0,00"
-                    />
+                <div className="cashbox-receipt-cash">
+                  <div className="cashbox-receipt-row">
+                    <span className="cashbox-receipt-label">Receb.</span>
+                    <div className="cashbox-receipt-input">
+                      <CurrencyInput value={receivedAmount} onChange={setReceivedAmount} placeholder="0,00" />
+                    </div>
                   </div>
-
                   {String(receivedAmount).trim() !== '' && (
-                    <div className={`cashbox-change ${(totals.received - totals.total) >= 0 ? 'ok' : 'warn'}`}>
-                      <span>{(totals.received - totals.total) >= 0 ? 'Troco:' : 'Faltam:'}</span>
+                    <div className={`cashbox-change cashbox-change--compact ${(totals.received - totals.total) >= 0 ? 'ok' : 'warn'}`}>
+                      <span>{(totals.received - totals.total) >= 0 ? 'Troco' : 'Faltam'}</span>
                       <strong>{formatCurrency(Math.abs(totals.received - totals.total))}</strong>
                     </div>
                   )}
                 </div>
               )}
 
-              <button
-                type="button"
-                className="cashbox-complete-btn"
-                onClick={handleCompleteSale}
-                disabled={isProcessing || totals.total <= 0 || (selectedPaymentMethod === 'dinheiro' && totals.received < totals.total)}
-              >
-                <FiCheck size={20} />
-                {isProcessing ? 'Processando...' : 'Finalizar Venda'}
-              </button>
+              <div className="cashbox-receipt-actions">
+                <button
+                  type="button"
+                  className="cashbox-complete-btn cashbox-complete-btn--compact"
+                  onClick={handleCompleteSale}
+                  disabled={isProcessing || totals.total <= 0 || (selectedPaymentMethod === 'dinheiro' && totals.received < totals.total)}
+                >
+                  <FiCheck size={18} />
+                  {isProcessing ? 'Processando...' : 'Finalizar'}
+                </button>
 
-              <button
-                type="button"
-                className="cashbox-coupon-btn"
-                onClick={openCouponModal}
-                disabled={cart.length === 0}
-                title="Emissão fiscal simulada (sem validade)"
-              >
-                <FiFileText size={18} />
-                Emitir Cupom Fiscal (Teste)
-              </button>
+                <button
+                  type="button"
+                  className="cashbox-coupon-btn cashbox-coupon-btn--compact"
+                  onClick={openCouponModal}
+                  disabled={cart.length === 0}
+                  title="Emissão fiscal simulada (sem validade)"
+                >
+                  <FiFileText size={16} />
+                  Cupom (teste)
+                </button>
+              </div>
             </div>
           )}
         </section>

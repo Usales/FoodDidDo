@@ -462,6 +462,148 @@
   gap: 1.5rem;
 }
 
+.cashbox-payment-section.cashbox-receipt {
+  padding-top: 1rem;
+  gap: 0.85rem;
+}
+
+.cashbox-receipt-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.cashbox-receipt-label {
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  flex: 0 0 auto;
+}
+
+.cashbox-receipt-muted {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: right;
+}
+
+.cashbox-receipt-select {
+  width: min(420px, 100%);
+  padding: 0.55rem 0.75rem;
+  font-size: 0.9rem;
+}
+
+.cashbox-receipt-totals {
+  border-top: 1px dashed rgba(255, 255, 255, 0.12);
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.12);
+  padding: 0.65rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.cashbox-receipt-input {
+  width: 140px;
+}
+
+.cashbox-receipt-input .input-control {
+  margin: 0;
+  gap: 0;
+}
+
+.cashbox-receipt-input .input-control span {
+  display: none;
+}
+
+.cashbox-receipt-input .input-control input {
+  padding: 0.55rem 0.75rem;
+  font-size: 0.95rem;
+  font-weight: 800;
+  text-align: right;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.cashbox-receipt-row-total {
+  align-items: baseline;
+}
+
+.cashbox-receipt-total {
+  font-variant-numeric: tabular-nums;
+  font-weight: 900;
+  font-size: 1.25rem;
+  color: var(--success);
+  white-space: nowrap;
+}
+
+.cashbox-payment-options--compact {
+  gap: 0.4rem;
+}
+
+.cashbox-payment-option--compact {
+  min-height: 44px;
+  padding: 0.55rem 0.6rem;
+  border-width: 1px;
+  font-size: 0.82rem;
+}
+
+.cashbox-payment-option--compact .cashbox-payment-icon {
+  font-size: 1.15rem;
+}
+
+.cashbox-payment-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cashbox-receipt-cash {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.cashbox-change--compact {
+  padding: 0.55rem 0.75rem;
+  border-radius: 10px;
+}
+
+.cashbox-change--compact span {
+  font-size: 0.85rem;
+}
+
+.cashbox-change--compact strong {
+  font-size: 0.95rem;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+}
+
+.cashbox-receipt-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+}
+
+.cashbox-complete-btn--compact {
+  padding: 0.8rem;
+  font-size: 0.95rem;
+  border-radius: 10px;
+}
+
+.cashbox-coupon-btn--compact {
+  padding: 0.8rem;
+  border-radius: 10px;
+  font-size: 0.9rem;
+}
+
 .cashbox-totals {
   display: flex;
   flex-direction: column;
