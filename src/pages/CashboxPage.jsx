@@ -609,60 +609,56 @@ export function CashboxPage() {
             )}
           </div>
 
-          {/* Resumo rápido: Produto e Qtd (mesma cor do "Subtotal:") */}
+          {/* Itens do carrinho (notinha) */}
           {cart.length > 0 && (
-            <div className="cashbox-cart-brief-list">
+            <div className="cashbox-cart-items" aria-label="Itens do carrinho">
               {cart.map((item) => (
-                <div key={item.id} className="cashbox-cart-brief-item">
-                  <div className="cashbox-cart-brief-row">
-                    <span className="cashbox-cart-brief-name">{item.name}</span>
-                    <div className="cashbox-cart-brief-right">
-                      <div className="cashbox-cart-brief-qty">
+                <div key={item.id} className="cashbox-cart-line">
+                  <div className="cashbox-cart-line-main">
+                    <div className="cashbox-cart-line-left">
+                      <div className="cashbox-cart-line-qty">
                         <button
                           type="button"
-                          className="cashbox-cart-brief-qty-btn"
+                          className="cashbox-cart-line-qty-btn"
                           onClick={() => handleUpdateQuantity(item.id, -1)}
                           aria-label="Diminuir quantidade"
+                          disabled={Number(item.quantity) <= 1}
                         >
-                          <FiMinus size={12} />
+                          <FiMinus size={14} />
                         </button>
-                        <input
-                          type="number"
-                          className="cashbox-cart-brief-qty-input"
-                          value={item.quantity}
-                          onChange={(e) => handleUpdateQuantityManual(item.id, e.target.value)}
-                          min="1"
-                          aria-label="Quantidade"
-                        />
+                        <span className="cashbox-cart-line-qty-value">{Number(item.quantity) || 1}x</span>
                         <button
                           type="button"
-                          className="cashbox-cart-brief-qty-btn"
+                          className="cashbox-cart-line-qty-btn"
                           onClick={() => handleUpdateQuantity(item.id, 1)}
                           aria-label="Aumentar quantidade"
                         >
-                          <FiPlus size={12} />
+                          <FiPlus size={14} />
                         </button>
                       </div>
+                      <span className="cashbox-cart-line-name">{item.name}</span>
+                    </div>
 
-                      <div className="cashbox-cart-brief-price">
-                        <CurrencyInput
-                          label=""
-                          value={roundMoney(item.price).toFixed(2)}
-                          onChange={(value) => handleUpdatePrice(item.id, value)}
-                          placeholder="0,00"
-                        />
-                      </div>
-
+                    <div className="cashbox-cart-line-right">
+                      <span className="cashbox-cart-line-total">
+                        {formatCurrency((Number(item.price) || 0) * (Number(item.quantity) || 0))}
+                      </span>
                       <button
                         type="button"
-                        className="cashbox-cart-brief-remove-btn"
+                        className="cashbox-cart-line-remove"
                         onClick={() => handleRemoveItem(item.id)}
                         aria-label="Remover item"
                         title="Remover"
                       >
-                        <FiTrash2 size={16} />
+                        <FiTrash2 size={14} />
                       </button>
                     </div>
+                  </div>
+
+                  <div className="cashbox-cart-line-sub">
+                    <span className="cashbox-cart-line-unit">
+                      Unit.: {formatCurrency(Number(item.price) || 0)}
+                    </span>
                   </div>
                 </div>
               ))}
@@ -728,10 +724,6 @@ export function CashboxPage() {
               </div>
 
               <div className="cashbox-totals">
-                <div className="cashbox-total-row">
-                  <span>Subtotal:</span>
-                  <strong>{formatCurrency(totals.subtotal)}</strong>
-                </div>
                 <div className="cashbox-total-row">
                   <span>Desconto:</span>
                   <CurrencyInput
