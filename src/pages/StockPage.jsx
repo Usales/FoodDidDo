@@ -3,8 +3,19 @@ import { FormModal } from '../components/ui/FormModal'
 import { useAppStore } from '../stores/appStore'
 import { FiSearch, FiChevronDown, FiChevronUp } from 'react-icons/fi'
 import './PageCommon.css'
+import supermarketProductsRaw from '../../catalogo-mercado/products.en.json'
+import supermarketProductsPt from '../../catalogo-mercado/products.pt.json'
 
 const PRODUCT_NOTES_PREFIX = '__product__:'
+const ITEM_NOTES_PREFIX = '__item__:'
+const ITEM_ICON_FILE_INPUT_ID = 'stock-item-icon-file'
+
+const toNumber = (v) => {
+  const n = typeof v === 'number' ? v : Number(String(v ?? '').replace(',', '.'))
+  return Number.isFinite(n) ? n : 0
+}
+
+const normalizeText = (value) => String(value ?? '').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
 
 const safeJsonParse = (value) => {
   try {
@@ -14,12 +25,53 @@ const safeJsonParse = (value) => {
   }
 }
 
+const encodeProductMeta = (meta) => `${PRODUCT_NOTES_PREFIX}${JSON.stringify(meta)}`
+
 const decodeProductMeta = (notes) => {
   const raw = String(notes ?? '').trim()
   if (!raw) return null
   if (raw.startsWith(PRODUCT_NOTES_PREFIX)) return safeJsonParse(raw.slice(PRODUCT_NOTES_PREFIX.length))
   if (raw.startsWith('{') && raw.endsWith('}')) return safeJsonParse(raw)
   return null
+}
+
+const encodeItemMeta = (meta) => `${ITEM_NOTES_PREFIX}${JSON.stringify(meta)}`
+
+const decodeItemMeta = (notes) => {
+  const raw = String(notes ?? '').trim()
+  if (!raw) return null
+  if (raw.startsWith(ITEM_NOTES_PREFIX)) return safeJsonParse(raw.slice(ITEM_NOTES_PREFIX.length))
+  // fallback: se alguém salvou direto JSON
+  if (raw.startsWith('{') && raw.endsWith('}')) return safeJsonParse(raw)
+  return null
+}
+
+const typePtByTypeEn = {
+  dairy: 'Laticínios',
+  fruit: 'Frutas',
+  vegetable: 'Vegetais',
+  bakery: 'Padaria',
+  meat: 'Carnes',
+  vegan: 'Vegano'
+}
+
+const buildCatalogProducts = () => {
+  const list = Array.isArray(supermarketProductsRaw) ? supermarketProductsRaw : []
+  return list.map((p, idx) => {
+    const filename = p?.filename ? String(p.filename) : null
+    const pt = filename ? supermarketProductsPt?.[filename] : null
+    const typeEn = String(p?.type || 'Geral')
+    const category = typePtByTypeEn[typeEn] || typeEn
+    const name = pt?.title || p?.title || `Produto ${idx + 1}`
+    const image = filename ? `/catalogo-mercado/images/${filename}` : null
+    return {
+      catalogId: filename || String(idx),
+      name,
+      category,
+      price: toNumber(p?.price),
+      image
+    }
+  })
 }
 
 // Função para formatar moeda brasileira
@@ -45,15 +97,6 @@ const getItemStatus = (quantity, minIdeal) => {
   if (quantity < minIdeal) return { label: 'Baixo', color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.15)' }
   return { label: 'OK', color: '#10b981', bg: 'rgba(16, 185, 129, 0.15)' }
 }
-
-// Emojis comuns para picker
-const commonEmojis = [
-  '🍞', '🥚', '🧂', '🧈', '🫙', '🍅', '🥛', '🧀', '🥩', '🐟',
-  '🥬', '🥕', '🧅', '🧄', '🌶️', '🥔', '🍄', '🥑', '🍋', '🍊',
-  '🍌', '🍎', '🍇', '🍓', '🫐', '🥝', '🍉', '🍑', '🥭', '🍍',
-  '🌽', '🥒', '🥦', '🥨', '🥯', '🥐', '🧇', '🥞', '🧈', '🍯',
-  '🥜', '🌰', '🥛', '☕', '🍵', '🧃', '🥤', '🧊', '🍶', '🍺'
-]
 
 // Categorias disponíveis
 const categories = [
@@ -84,6 +127,7 @@ export function StockPage() {
 
   const [searchQuery, setSearchQuery] = useState('')
   const [expandedWarehouses, setExpandedWarehouses] = useState(new Set())
+  const [importingWarehouseIds, setImportingWarehouseIds] = useState([])
   const [isWarehouseModalOpen, setIsWarehouseModalOpen] = useState(false)
   const [isItemModalOpen, setIsItemModalOpen] = useState(false)
   const [isMovementModalOpen, setIsMovementModalOpen] = useState(false)
@@ -99,6 +143,9 @@ export function StockPage() {
 
   const [itemForm, setItemForm] = useState({
     emoji: '📦',
+    iconUrl: '',
+    iconData: '',
+    iconFileName: '',
     name: '',
     quantity: '',
     unit: 'g',
@@ -233,6 +280,38 @@ export function StockPage() {
   const handleAddItem = () => {
     if (!itemForm.name.trim() || !selectedWarehouseId) return
 
+    const iconValue = String(itemForm.iconData || itemForm.iconUrl || '').trim()
+    const notesText = String(itemForm.notes || '').trim()
+    const isEditingProductMeta = Boolean(decodeProductMeta(editingItem?.notes)?.kind === 'produto')
+    const isEditingItemMeta = Boolean(decodeItemMeta(editingItem?.notes)?.kind === 'item')
+
+    const computeNotesToSave = () => {
+      // 1) Se o item atual é um "produto" (metadados __product__), preservar e só atualizar o campo notes dentro do meta.
+      if (isEditingProductMeta) {
+        const meta = decodeProductMeta(editingItem?.notes) || { kind: 'produto' }
+        const nextMeta = { ...meta, notes: notesText }
+        return encodeProductMeta(nextMeta)
+      }
+
+      // 2) Se temos ícone, salvar como meta de item (ou atualizar meta existente).
+      if (iconValue) {
+        const prev = decodeItemMeta(editingItem?.notes)
+        const nextMeta = {
+          ...(prev && prev.kind === 'item' ? prev : null),
+          kind: 'item',
+          icon: iconValue,
+          notes: notesText
+        }
+        return encodeItemMeta(nextMeta)
+      }
+
+      // 3) Se já era meta de item mas o usuário removeu o ícone, volta para texto simples.
+      if (isEditingItemMeta) return notesText || undefined
+
+      // 4) Caso padrão: texto simples
+      return notesText || undefined
+    }
+
     const itemData = {
       emoji: itemForm.emoji,
       name: itemForm.name,
@@ -241,7 +320,7 @@ export function StockPage() {
       minIdeal: Number(itemForm.minIdeal) || 0,
       unitCost: Number(itemForm.unitCost) || 0,
       category: itemForm.category || undefined,
-      notes: itemForm.notes || undefined
+      notes: computeNotesToSave()
     }
 
     if (editingItem) {
@@ -252,6 +331,9 @@ export function StockPage() {
 
     setItemForm({
       emoji: '📦',
+      iconUrl: '',
+      iconData: '',
+      iconFileName: '',
       name: '',
       quantity: '',
       unit: 'g',
@@ -268,15 +350,30 @@ export function StockPage() {
   const handleEditItem = (warehouseId, item) => {
     setSelectedWarehouseId(warehouseId)
     setEditingItem(item)
+
+    const productMeta = decodeProductMeta(item?.notes)
+    const itemMeta = !productMeta ? decodeItemMeta(item?.notes) : null
+    const icon =
+      (productMeta?.kind === 'produto' ? String(productMeta.image || '').trim() : '') ||
+      (itemMeta?.kind === 'item' ? String(itemMeta.icon || '').trim() : '')
+    const isData = icon.startsWith('data:')
+    const notesText =
+      (productMeta?.kind === 'produto' ? String(productMeta.notes || '') : '') ||
+      (itemMeta?.kind === 'item' ? String(itemMeta.notes || '') : '') ||
+      String(item?.notes || '')
+
     setItemForm({
       emoji: item.emoji || '📦',
+      iconUrl: icon && !isData ? icon : '',
+      iconData: icon && isData ? icon : '',
+      iconFileName: '',
       name: item.name,
       quantity: String(item.quantity ?? 0),
       unit: item.unit || 'g',
       minIdeal: String(item.minIdeal ?? 0),
       unitCost: String(item.unitCost ?? 0),
       category: item.category ?? '',
-      notes: item.notes ?? ''
+      notes: notesText
     })
     setIsItemModalOpen(true)
   }
@@ -292,6 +389,9 @@ export function StockPage() {
     setEditingItem(null)
     setItemForm({
       emoji: '📦',
+      iconUrl: '',
+      iconData: '',
+      iconFileName: '',
       name: '',
       quantity: '',
       unit: 'g',
@@ -301,6 +401,70 @@ export function StockPage() {
       notes: ''
     })
     setIsItemModalOpen(true)
+  }
+
+  const findCatalogItemInWarehouse = (warehouse, catalogProduct) => {
+    const items = Array.isArray(warehouse?.items) ? warehouse.items : []
+    const expectedId = String(catalogProduct?.catalogId || '')
+    const expectedNameKey = normalizeText(catalogProduct?.name)
+    return (
+      items.find((it) => {
+        const meta = decodeProductMeta(it?.notes)
+        if (meta?.kind === 'produto' && meta?.source === 'catalogo-mercado') {
+          return String(meta.catalogId || '') === expectedId
+        }
+        return false
+      }) ||
+      items.find((it) => normalizeText(it?.name) === expectedNameKey) ||
+      null
+    )
+  }
+
+  const importCatalogToWarehouse = async (warehouse) => {
+    if (!warehouse?.id) return
+    if (importingWarehouseIds.includes(warehouse.id)) return
+
+    setImportingWarehouseIds((prev) => [...prev, warehouse.id])
+    try {
+      const catalog = buildCatalogProducts()
+      const missing = catalog.filter((p) => !findCatalogItemInWarehouse(warehouse, p))
+      if (missing.length === 0) {
+        alert('Este armazém já contém todos os produtos do catálogo.')
+        return
+      }
+
+      // Criar apenas os itens faltantes (sem duplicar)
+      // OBS: como depende de API, fazemos em sequência para evitar sobrecarga.
+      for (const p of missing) {
+        const meta = {
+          kind: 'produto',
+          source: 'catalogo-mercado',
+          catalogId: String(p.catalogId),
+          brand: '',
+          notes: '',
+          image: p.image || null,
+          price: toNumber(p.price)
+        }
+
+        await addWarehouseItem(warehouse.id, {
+          emoji: '🛍️',
+          name: p.name,
+          quantity: 0,
+          unit: 'un',
+          minIdeal: 0,
+          unitCost: 0,
+          category: p.category || 'Geral',
+          notes: encodeProductMeta(meta)
+        })
+      }
+
+      alert(`Importação concluída: ${missing.length} produto(s) adicionados ao armazém "${warehouse.name}".`)
+    } catch (error) {
+      console.error('Erro ao importar catálogo:', error)
+      alert(`Erro ao importar catálogo: ${error.message || 'Erro desconhecido'}`)
+    } finally {
+      setImportingWarehouseIds((prev) => prev.filter((id) => id !== warehouse.id))
+    }
   }
 
   const handleSaveMovement = () => {
@@ -501,15 +665,25 @@ export function StockPage() {
                 {/* Itens do armazém */}
                 {isExpanded && (
                   <div style={{ marginTop: '1.5rem' }}>
-                    <div
-                      style={{
-                        fontSize: '0.9rem',
-                        fontWeight: 600,
-                        color: 'var(--text-muted)',
-                        marginBottom: '1rem'
-                      }}
-                    >
-                      🔽 ITENS DO ARMAZÉM
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', marginBottom: '1rem' }}>
+                      <div
+                        style={{
+                          fontSize: '0.9rem',
+                          fontWeight: 600,
+                          color: 'var(--text-muted)'
+                        }}
+                      >
+                        🔽 ITENS DO ARMAZÉM
+                      </div>
+                      <button
+                        type="button"
+                        className="secondary-btn"
+                        onClick={() => importCatalogToWarehouse(warehouse)}
+                        disabled={importingWarehouseIds.includes(warehouse.id)}
+                        title="Adiciona ao armazém todos os produtos do catálogo que estiverem faltando"
+                      >
+                        {importingWarehouseIds.includes(warehouse.id) ? 'Importando…' : 'Importar catálogo'}
+                      </button>
                     </div>
 
                     {(!warehouse.items || warehouse.items.length === 0) ? (
@@ -572,8 +746,11 @@ export function StockPage() {
                             >
                               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1 }}>
                                 {(() => {
-                                  const meta = decodeProductMeta(item?.notes)
-                                  const img = meta?.kind === 'produto' ? String(meta.image || '').trim() : ''
+                                  const productMeta = decodeProductMeta(item?.notes)
+                                  const itemMeta = productMeta ? null : decodeItemMeta(item?.notes)
+                                  const img =
+                                    (productMeta?.kind === 'produto' ? String(productMeta.image || '').trim() : '') ||
+                                    (itemMeta?.kind === 'item' ? String(itemMeta.icon || '').trim() : '')
                                   if (img) {
                                     return (
                                       <img
@@ -757,6 +934,9 @@ export function StockPage() {
           setEditingItem(null)
           setItemForm({
             emoji: '📦',
+            iconUrl: '',
+            iconData: '',
+            iconFileName: '',
             name: '',
             quantity: '',
             unit: 'g',
@@ -786,41 +966,94 @@ export function StockPage() {
         }
       >
         <label className="input-control">
-          <span>Emoji (opcional)</span>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(10, 1fr)',
-              gap: '0.5rem',
-              padding: '1rem',
-              background: 'var(--bg-secondary)',
-              borderRadius: '8px',
-              maxHeight: '200px',
-              overflowY: 'auto'
-            }}
-          >
-            {commonEmojis.map((emoji) => (
-              <button
-                key={emoji}
-                type="button"
-                onClick={() => setItemForm((prev) => ({ ...prev, emoji }))}
+          <span>Ícone (opcional)</span>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '0.75rem' }}>
+            <input
+              id={ITEM_ICON_FILE_INPUT_ID}
+              type="file"
+              accept="image/*"
+              style={{ display: 'none' }}
+              onChange={(e) => {
+                const file = e.target.files?.[0] || null
+                if (!file) return
+                if (file.size > 800 * 1024) {
+                  alert('Imagem muito grande. Tente uma imagem menor (até ~800KB).')
+                  e.target.value = ''
+                  return
+                }
+                const reader = new FileReader()
+                reader.onload = () => {
+                  const dataUrl = String(reader.result || '')
+                  setItemForm((prev) => ({
+                    ...prev,
+                    iconData: dataUrl,
+                    iconUrl: '',
+                    iconFileName: file.name || 'imagem'
+                  }))
+                }
+                reader.readAsDataURL(file)
+              }}
+            />
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+              <label
+                htmlFor={ITEM_ICON_FILE_INPUT_ID}
+                className="secondary-btn"
                 style={{
-                  fontSize: '1.5rem',
-                  padding: '0.5rem',
-                  background: itemForm.emoji === emoji ? 'var(--primary-color)' : 'transparent',
-                  border: `2px solid ${itemForm.emoji === emoji ? 'var(--primary-color)' : 'var(--border-primary)'}`,
-                  borderRadius: '8px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.5rem',
+                  padding: '0.65rem 0.9rem',
+                  borderRadius: '12px',
                   cursor: 'pointer',
-                  transition: 'all 0.2s ease'
+                  userSelect: 'none',
+                  width: 'fit-content'
                 }}
+                title="Selecionar imagem do computador"
               >
-                {emoji}
-              </button>
-            ))}
+                Escolher imagem
+              </label>
+              <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                {itemForm.iconFileName
+                  ? itemForm.iconFileName
+                  : (itemForm.iconUrl ? 'Usando URL do ícone' : 'Nenhum arquivo selecionado')}
+              </span>
+            </div>
+
+            <input
+              type="url"
+              placeholder="ou cole uma URL do ícone (https://...)"
+              value={itemForm.iconUrl}
+              onChange={(e) =>
+                setItemForm((prev) => ({
+                  ...prev,
+                  iconUrl: e.target.value,
+                  iconData: prev.iconData,
+                  iconFileName: prev.iconFileName
+                }))}
+            />
+
+            {(itemForm.iconData || itemForm.iconUrl) && (
+              <div style={{ display: 'grid', gap: '0.5rem' }}>
+                <img
+                  src={itemForm.iconData || itemForm.iconUrl}
+                  alt="Prévia do ícone"
+                  style={{ width: 96, height: 96, objectFit: 'cover', borderRadius: 12, border: '1px solid var(--border-primary)' }}
+                />
+                <button
+                  type="button"
+                  className="secondary-btn"
+                  onClick={() => setItemForm((prev) => ({ ...prev, iconUrl: '', iconData: '', iconFileName: '' }))}
+                >
+                  Remover ícone
+                </button>
+              </div>
+            )}
           </div>
-          <div style={{ marginTop: '0.5rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-            Emoji selecionado: <span style={{ fontSize: '1.2rem' }}>{itemForm.emoji}</span>
-          </div>
+          <small style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+            Se não escolher ícone, será usado o emoji padrão do item.
+          </small>
         </label>
 
         <label className="input-control">

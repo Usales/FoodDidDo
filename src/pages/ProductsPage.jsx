@@ -87,6 +87,10 @@ export function ProductsPage() {
     notes: ''
   })
 
+  const [quickViewOpen, setQuickViewOpen] = useState(false)
+  const [quickViewProduct, setQuickViewProduct] = useState(null)
+  const [quickViewMainImage, setQuickViewMainImage] = useState('')
+
   const getStockItemByRef = (warehouseId, itemId) => {
     const warehouse = (warehouses || []).find((w) => w?.id === warehouseId) || null
     const items = Array.isArray(warehouse?.items) ? warehouse.items : []
@@ -354,6 +358,49 @@ export function ProductsPage() {
     setStockModalOpen(true)
   }
 
+  const getQuickViewStockItem = (p) => {
+    if (!p) return { item: null, meta: null }
+
+    // 1) Produto manual já vem com referência direta do item
+    if (p?.source === 'manual' && p?.warehouseId && p?.itemId) {
+      const { item } = getStockItemByRef(p.warehouseId, p.itemId)
+      const meta = decodeProductMeta(item?.notes)
+      return { item, meta }
+    }
+
+    // 2) Para catálogo/receita, procurar no armazém "Produtos"
+    const warehouse = findProductsWarehouse()
+    if (!warehouse) return { item: null, meta: null }
+    const item = findProductItemInWarehouse(warehouse, p)
+    const meta = decodeProductMeta(item?.notes)
+    return { item, meta }
+  }
+
+  const getQuickViewDetails = (p) => {
+    const { item, meta } = getQuickViewStockItem(p)
+    const brand = String(meta?.brand || '').trim()
+    const reference = String(meta?.catalogId || meta?.recipeId || '').trim()
+    const unit = String(item?.unit || 'un')
+    const qty = item ? toNumber(item.quantity) : 0
+    const notes = String(meta?.notes || p?.description || '').trim()
+    const inStock = qty > 0
+    const hasStockRecord = Boolean(item)
+    return { brand, reference, unit, qty, notes, inStock, hasStockRecord }
+  }
+
+  const openQuickView = (p) => {
+    setQuickViewProduct(p)
+    const img = String(p?.image || '').trim()
+    setQuickViewMainImage(img)
+    setQuickViewOpen(true)
+  }
+
+  const closeQuickView = () => {
+    setQuickViewOpen(false)
+    setQuickViewProduct(null)
+    setQuickViewMainImage('')
+  }
+
   const products = useMemo(() => {
     const pricingMap = new Map((pricing || []).map((p) => [p.recipeId, p]))
     const fromRecipes = (recipes || []).map((r) => {
@@ -444,6 +491,18 @@ export function ProductsPage() {
     for (const p of products) set.add(p.category || 'Geral')
     return Array.from(set).sort((a, b) => a.localeCompare(b, 'pt-BR'))
   }, [products])
+
+  const brandOptions = useMemo(() => {
+    const productsWarehouse = findProductsWarehouse()
+    const items = Array.isArray(productsWarehouse?.items) ? productsWarehouse.items : []
+    const set = new Set()
+    for (const it of items) {
+      const meta = decodeProductMeta(it?.notes)
+      const brand = String(meta?.brand || '').trim()
+      if (meta?.kind === 'produto' && brand) set.add(brand)
+    }
+    return Array.from(set).sort((a, b) => a.localeCompare(b, 'pt-BR'))
+  }, [warehouses])
 
   const priceStats = useMemo(() => {
     const prices = products.map((p) => p.price).filter((v) => Number.isFinite(v))
@@ -684,7 +743,13 @@ export function ProductsPage() {
                         {p.image ? <img src={p.image} alt={p.name} loading="lazy" /> : <div className="product-image-placeholder">Sem imagem</div>}
                       </div>
                       <div className="product-quick-actions" aria-label="Ações rápidas">
-                        <button type="button" className="icon-btn" title="Visualização rápida" aria-label="Visualização rápida">
+                        <button
+                          type="button"
+                          className="icon-btn"
+                          title="Visualização rápida"
+                          aria-label="Visualização rápida"
+                          onClick={() => openQuickView(p)}
+                        >
                           <FiEye />
                         </button>
                         <button type="button" className="icon-btn" title="Favoritar" aria-label="Favoritar">
@@ -758,6 +823,89 @@ export function ProductsPage() {
       </div>
 
       <FormModal
+        isOpen={quickViewOpen}
+        title="Visualização rápida"
+        description={null}
+        onClose={closeQuickView}
+        className="form-modal-quickview"
+        isExpanded
+        footer={<button className="ghost-btn" type="button" onClick={closeQuickView}>Fechar</button>}
+      >
+        {(() => {
+          const p = quickViewProduct
+          if (!p) return null
+          const { brand, reference, unit, qty, notes, inStock, hasStockRecord } = getQuickViewDetails(p)
+          const images = [quickViewMainImage || p.image].filter(Boolean)
+
+          return (
+            <div className="quickview-grid">
+              <div className="quickview-gallery">
+                <div className="quickview-main">
+                  {quickViewMainImage ? (
+                    <img src={quickViewMainImage} alt={p.name} />
+                  ) : (
+                    <div className="quickview-main-empty">Sem imagem</div>
+                  )}
+                </div>
+
+                <div className="quickview-thumbs" aria-label="Miniaturas">
+                  {images.map((src, idx) => (
+                    <button
+                      key={`${src}-${idx}`}
+                      type="button"
+                      className={`quickview-thumb ${src === quickViewMainImage ? 'active' : ''}`}
+                      onClick={() => setQuickViewMainImage(src)}
+                      aria-label={`Selecionar imagem ${idx + 1}`}
+                    >
+                      <img src={src} alt="" />
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="quickview-details">
+                <h2 className="quickview-title">{p.name}</h2>
+                <div className="quickview-subline">
+                  {brand ? <span>{brand}</span> : null}
+                  {reference ? <span>• Referência: {reference}</span> : null}
+                </div>
+
+                <div className={`quickview-stock ${inStock ? 'ok' : 'out'}`}>
+                  <span className="quickview-stock-pill">{inStock ? 'Em estoque' : 'Sem estoque'}</span>
+                  <span className="quickview-stock-text">
+                    {hasStockRecord ? (
+                      <>
+                        Qtd: <strong>{qty.toLocaleString('pt-BR')}</strong> {unit}
+                      </>
+                    ) : (
+                      <>Não cadastrado no estoque (Armazém: {PRODUCTS_WAREHOUSE_NAME}).</>
+                    )}
+                  </span>
+                </div>
+
+                <dl className="quickview-specs" aria-label="Características do produto">
+                  <div className="quickview-spec">
+                    <dt>Categoria</dt>
+                    <dd>{p.category || '—'}</dd>
+                  </div>
+                  <div className="quickview-spec">
+                    <dt>Fonte</dt>
+                    <dd>{p.source === 'catalogo-mercado' ? 'Catálogo' : p.source === 'receita' ? 'Receita' : 'Manual'}</dd>
+                  </div>
+                  {notes ? (
+                    <div className="quickview-spec quickview-spec--full">
+                      <dt>Observações</dt>
+                      <dd>{notes}</dd>
+                    </div>
+                  ) : null}
+                </dl>
+              </div>
+            </div>
+          )
+        })()}
+      </FormModal>
+
+      <FormModal
         isOpen={stockModalOpen}
         title={stockModalMode === 'create' ? 'Novo produto' : 'Editar produto no estoque'}
         description={stockModalMode === 'create'
@@ -796,11 +944,31 @@ export function ProductsPage() {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
           <label className="input-control">
             <span>Categoria</span>
-            <input value={stockForm.category} onChange={(e) => setStockForm((prev) => ({ ...prev, category: e.target.value }))} placeholder="Ex.: Laticínios" />
+            <input
+              list="product-category-options"
+              value={stockForm.category}
+              onChange={(e) => setStockForm((prev) => ({ ...prev, category: e.target.value }))}
+              placeholder="Ex.: Laticínios"
+            />
+            <datalist id="product-category-options">
+              {categories.map((cat) => (
+                <option key={cat} value={cat} />
+              ))}
+            </datalist>
           </label>
           <label className="input-control">
             <span>Marca</span>
-            <input value={stockForm.brand} onChange={(e) => setStockForm((prev) => ({ ...prev, brand: e.target.value }))} placeholder="Ex.: Nestlé" />
+            <input
+              list="product-brand-options"
+              value={stockForm.brand}
+              onChange={(e) => setStockForm((prev) => ({ ...prev, brand: e.target.value }))}
+              placeholder="Ex.: Nestlé"
+            />
+            <datalist id="product-brand-options">
+              {brandOptions.map((b) => (
+                <option key={b} value={b} />
+              ))}
+            </datalist>
           </label>
         </div>
 
@@ -825,7 +993,7 @@ export function ProductsPage() {
 
         <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1rem' }}>
           <label className="input-control">
-            <span>Quantidade</span>
+            <span>Quantidade em estoque</span>
             <input
               type="number"
               min="0"

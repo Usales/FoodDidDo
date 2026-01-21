@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom'
 import PropTypes from 'prop-types'
 import './FormModal.css'
 
-export function FormModal({ isOpen, title, description, onClose, children, footer, isExpanded = false }) {
+export function FormModal({ isOpen, title, description, onClose, children, footer, isExpanded = false, className = '' }) {
   // Impede scroll da página atrás quando o modal estiver aberto
   useEffect(() => {
     if (!isOpen) return undefined
@@ -50,7 +50,7 @@ export function FormModal({ isOpen, title, description, onClose, children, foote
       }}
     >
       <div
-        className={`form-modal ${isExpanded ? 'form-modal-expanded' : ''}`}
+        className={`form-modal ${isExpanded ? 'form-modal-expanded' : ''} ${className}`.trim()}
         role="dialog"
         aria-modal="true"
         aria-labelledby="form-modal-title"
@@ -82,12 +82,14 @@ FormModal.propTypes = {
   onClose: PropTypes.func.isRequired,
   children: PropTypes.node.isRequired,
   footer: PropTypes.node,
-  isExpanded: PropTypes.bool
+  isExpanded: PropTypes.bool,
+  className: PropTypes.string
 }
 
 FormModal.defaultProps = {
   description: null,
   footer: null,
-  isExpanded: false
+  isExpanded: false,
+  className: ''
 }
 

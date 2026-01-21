@@ -37,6 +37,34 @@
   width: min(1280px, 95%);
 }
 
+.form-modal.form-modal-quickview {
+  /* ~70–75% da tela no desktop */
+  width: min(1200px, 75vw);
+  background: rgba(12, 12, 14, 0.98);
+  border-color: rgba(255, 255, 255, 0.10);
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.55);
+  color: #ffffff;
+}
+
+.form-modal.form-modal-quickview .form-modal-body {
+  gap: 1.5rem;
+}
+
+.form-modal.form-modal-quickview .form-modal-header h2 {
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: #ffffff;
+}
+
+.form-modal.form-modal-quickview .form-modal-header p {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.form-modal.form-modal-quickview .form-modal-footer {
+  justify-content: flex-end;
+}
+
 .form-modal-header {
   display: flex;
   align-items: flex-start;
