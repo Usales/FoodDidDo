@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
-import { FiBarChart2, FiEye, FiFilter, FiGrid, FiHeart, FiList, FiPlus, FiSearch } from 'react-icons/fi'
+import { FiBarChart2, FiEye, FiFilter, FiGrid, FiHeart, FiList, FiPlus, FiSearch, FiTrash2 } from 'react-icons/fi'
 import { useAppStore } from '../stores/appStore'
+import { FormModal } from '../components/ui/FormModal'
 import './PageCommon.css'
 import './ProductsPage.css'
 import supermarketProductsRaw from '../../catalogo-mercado/products.en.json'
@@ -17,6 +18,28 @@ const normalizeText = (value) => String(value ?? '').trim().toLowerCase().normal
 
 const clamp = (n, min, max) => Math.min(max, Math.max(min, n))
 
+const PRODUCTS_WAREHOUSE_NAME = 'Produtos'
+const PRODUCT_NOTES_PREFIX = '__product__:'
+
+const safeJsonParse = (value) => {
+  try {
+    return JSON.parse(String(value))
+  } catch {
+    return null
+  }
+}
+
+const encodeProductMeta = (meta) => `${PRODUCT_NOTES_PREFIX}${JSON.stringify(meta)}`
+
+const decodeProductMeta = (notes) => {
+  const raw = String(notes ?? '').trim()
+  if (!raw) return null
+  if (raw.startsWith(PRODUCT_NOTES_PREFIX)) return safeJsonParse(raw.slice(PRODUCT_NOTES_PREFIX.length))
+  // fallback: se alguém salvou direto JSON
+  if (raw.startsWith('{') && raw.endsWith('}')) return safeJsonParse(raw)
+  return null
+}
+
 const typePtByTypeEn = {
   dairy: 'Laticínios',
   fruit: 'Frutas',
@@ -30,6 +53,11 @@ export function ProductsPage() {
   const recipes = useAppStore((s) => s.recipes) || []
   const pricing = useAppStore((s) => s.pricing) || []
   const isLoading = useAppStore((s) => s.isLoading)
+  const warehouses = useAppStore((s) => s.warehouses) || []
+  const addWarehouse = useAppStore((s) => s.addWarehouse)
+  const addWarehouseItem = useAppStore((s) => s.addWarehouseItem)
+  const updateWarehouseItem = useAppStore((s) => s.updateWarehouseItem)
+  const deleteWarehouseItem = useAppStore((s) => s.deleteWarehouseItem)
 
   const [query, setQuery] = useState('')
   const [viewMode, setViewMode] = useState('grid') // grid | list
@@ -43,6 +71,289 @@ export function ProductsPage() {
   const [minPrice, setMinPrice] = useState('')
   const [maxPrice, setMaxPrice] = useState('')
 
+  const [stockModalOpen, setStockModalOpen] = useState(false)
+  const [stockModalLoading, setStockModalLoading] = useState(false)
+  const [stockModalMode, setStockModalMode] = useState('edit') // edit | create
+  const [stockEditingRef, setStockEditingRef] = useState(null) // { warehouseId, itemId }
+  const [stockForm, setStockForm] = useState({
+    name: '',
+    category: '',
+    brand: '',
+    price: '0',
+    quantity: '0',
+    unit: 'un',
+    imageUrl: '',
+    imageData: '',
+    notes: ''
+  })
+
+  const getStockItemByRef = (warehouseId, itemId) => {
+    const warehouse = (warehouses || []).find((w) => w?.id === warehouseId) || null
+    const items = Array.isArray(warehouse?.items) ? warehouse.items : []
+    const item = items.find((it) => it?.id === itemId) || null
+    return { warehouse, item }
+  }
+
+  const openStockItemEditor = (warehouseId, itemId) => {
+    const { item } = getStockItemByRef(warehouseId, itemId)
+    if (!item) {
+      alert('Produto não encontrado no estoque.')
+      return
+    }
+    const meta = decodeProductMeta(item.notes) || { kind: 'produto', source: 'manual', price: 0, brand: '', notes: '', image: null }
+    const img = String(meta.image || '').trim()
+    const isData = img.startsWith('data:')
+    setStockModalMode('edit')
+    setStockEditingRef({ warehouseId, itemId })
+    setStockForm({
+      name: item.name || '',
+      category: item.category || 'Geral',
+      brand: String(meta.brand || ''),
+      price: String(meta.price ?? 0).replace('.', ','), // exibir padrão BR
+      quantity: String(item.quantity ?? 0),
+      unit: item.unit || 'un',
+      imageUrl: img && !isData ? img : '',
+      imageData: img && isData ? img : '',
+      notes: String(meta.notes || '')
+    })
+    setStockModalOpen(true)
+  }
+
+  const findProductsWarehouse = () => {
+    const target = normalizeText(PRODUCTS_WAREHOUSE_NAME)
+    return (warehouses || []).find((w) => normalizeText(w?.name) === target) || null
+  }
+
+  const ensureProductsWarehouse = async () => {
+    const existing = findProductsWarehouse()
+    if (existing) return existing
+    // Criar automaticamente caso não exista
+    return await addWarehouse({ name: PRODUCTS_WAREHOUSE_NAME })
+  }
+
+  const buildProductMeta = (p) => {
+    const isCatalog = String(p?.id || '').startsWith('supermarket:')
+    if (isCatalog) {
+      const catalogId = String(p.id).slice('supermarket:'.length) // normalmente filename (ex: 2.jpg)
+      return {
+        kind: 'produto',
+        source: 'catalogo-mercado',
+        catalogId,
+        brand: '',
+        notes: '',
+        image: p.image || null,
+        price: toNumber(p.price)
+      }
+    }
+    return {
+      kind: 'produto',
+      source: 'receita',
+      recipeId: String(p?.id || ''),
+      brand: '',
+      notes: '',
+      image: p.image || null,
+      price: toNumber(p.price)
+    }
+  }
+
+  const buildManualProductMeta = () => {
+    return {
+      kind: 'produto',
+      source: 'manual',
+      brand: String(stockForm.brand || '').trim(),
+      notes: String(stockForm.notes || '').trim(),
+      image: String(stockForm.imageData || stockForm.imageUrl || '').trim() || null,
+      price: toNumber(stockForm.price)
+    }
+  }
+
+  const findProductItemInWarehouse = (warehouse, p) => {
+    const items = Array.isArray(warehouse?.items) ? warehouse.items : []
+    const expected = buildProductMeta(p)
+    const byMeta = items.find((it) => {
+      const meta = decodeProductMeta(it?.notes)
+      if (!meta || meta.kind !== 'produto') return false
+      if (expected.source !== meta.source) return false
+      if (expected.source === 'catalogo-mercado') return meta.catalogId === expected.catalogId
+      if (expected.source === 'receita') return meta.recipeId === expected.recipeId
+      return false
+    })
+    if (byMeta) return byMeta
+    // fallback: por nome (caso notas tenham sido alteradas manualmente)
+    const nameKey = normalizeText(p?.name)
+    return items.find((it) => normalizeText(it?.name) === nameKey) || null
+  }
+
+  const upsertProductToStock = async (p, { increment = 1, openEditor = false } = {}) => {
+    const warehouse = await ensureProductsWarehouse()
+    const existing = findProductItemInWarehouse(warehouse, p)
+
+    if (existing) {
+      const nextQty = Math.max(0, toNumber(existing.quantity) + toNumber(increment))
+      await updateWarehouseItem(warehouse.id, existing.id, { quantity: nextQty })
+      if (openEditor) {
+        const meta = decodeProductMeta(existing.notes) || buildProductMeta(p)
+        const img = String(meta.image || '').trim()
+        const isData = img.startsWith('data:')
+        setStockModalMode('edit')
+        setStockEditingRef({ warehouseId: warehouse.id, itemId: existing.id })
+        setStockForm({
+          name: existing.name || p.name,
+          category: existing.category || p.category || 'Geral',
+          brand: String(meta.brand || ''),
+          price: String(toNumber(meta.price ?? p.price)),
+          quantity: String(nextQty),
+          unit: existing.unit || 'un',
+          imageUrl: img && !isData ? img : (String(p.image || '').trim() || ''),
+          imageData: img && isData ? img : '',
+          notes: String(meta.notes || '')
+        })
+        setStockModalOpen(true)
+      }
+      return { warehouseId: warehouse.id, itemId: existing.id }
+    }
+
+    const meta = buildProductMeta(p)
+    const newItem = await addWarehouseItem(warehouse.id, {
+      emoji: '🛍️',
+      name: p.name,
+      quantity: Math.max(0, toNumber(increment)),
+      unit: 'un',
+      minIdeal: 0,
+      unitCost: 0,
+      category: p.category || 'Geral',
+      notes: encodeProductMeta(meta)
+    })
+
+    if (openEditor) {
+      setStockModalMode('edit')
+      setStockEditingRef({ warehouseId: warehouse.id, itemId: newItem.id })
+      setStockForm({
+        name: newItem.name || p.name,
+        category: newItem.category || p.category || 'Geral',
+        brand: '',
+        price: String(toNumber(p.price)),
+        quantity: String(newItem.quantity ?? 0),
+        unit: newItem.unit || 'un',
+        imageUrl: String(p.image || '').trim(),
+        imageData: '',
+        notes: ''
+      })
+      setStockModalOpen(true)
+    }
+
+    return { warehouseId: warehouse.id, itemId: newItem.id }
+  }
+
+  const openEditProductInStock = async (p) => {
+    if (p?.source === 'manual' && p?.warehouseId && p?.itemId) {
+      openStockItemEditor(p.warehouseId, p.itemId)
+      return
+    }
+    setStockModalLoading(true)
+    try {
+      await upsertProductToStock(p, { increment: 0, openEditor: true })
+    } catch (e) {
+      console.error(e)
+      alert(`Não foi possível abrir o editor do estoque: ${e.message || 'Erro desconhecido'}`)
+    } finally {
+      setStockModalLoading(false)
+    }
+  }
+
+  const saveStockEdits = async () => {
+    if (!String(stockForm.name || '').trim()) return
+
+    setStockModalLoading(true)
+    try {
+      if (stockModalMode === 'create' || !stockEditingRef?.warehouseId || !stockEditingRef?.itemId) {
+        const warehouse = await ensureProductsWarehouse()
+        const meta = buildManualProductMeta()
+        await addWarehouseItem(warehouse.id, {
+          emoji: '🛍️',
+          name: String(stockForm.name).trim(),
+          quantity: Math.max(0, toNumber(stockForm.quantity)),
+          unit: String(stockForm.unit || 'un'),
+          minIdeal: 0,
+          unitCost: 0,
+          category: String(stockForm.category || 'Geral').trim(),
+          notes: encodeProductMeta(meta)
+        })
+        // Após salvar um "novo produto", limpar campos para um próximo cadastro
+        setStockForm({
+          name: '',
+          category: '',
+          brand: '',
+          price: '0',
+          quantity: '0',
+          unit: 'un',
+          imageUrl: '',
+          imageData: '',
+          notes: ''
+        })
+        setStockModalMode('edit')
+      } else {
+        const warehouse = (warehouses || []).find((w) => w.id === stockEditingRef.warehouseId) || null
+        const item = (Array.isArray(warehouse?.items) ? warehouse.items : []).find((it) => it.id === stockEditingRef.itemId) || null
+
+        const currentMeta = decodeProductMeta(item?.notes) || { kind: 'produto' }
+        const nextMeta = {
+          ...currentMeta,
+          brand: String(stockForm.brand || '').trim(),
+          notes: String(stockForm.notes || '').trim(),
+          price: toNumber(stockForm.price),
+          image: String(stockForm.imageData || stockForm.imageUrl || '').trim() || null
+        }
+
+        await updateWarehouseItem(stockEditingRef.warehouseId, stockEditingRef.itemId, {
+          name: String(stockForm.name).trim(),
+          category: String(stockForm.category || 'Geral').trim(),
+          quantity: Math.max(0, toNumber(stockForm.quantity)),
+          unit: String(stockForm.unit || 'un'),
+          notes: encodeProductMeta(nextMeta)
+        })
+      }
+
+      setStockModalOpen(false)
+      setStockEditingRef(null)
+    } catch (e) {
+      console.error(e)
+      alert(`Não foi possível salvar no estoque: ${e.message || 'Erro desconhecido'}`)
+    } finally {
+      setStockModalLoading(false)
+    }
+  }
+
+  const openCreateProduct = () => {
+    setStockModalMode('create')
+    setStockEditingRef(null)
+    // Se o usuário já começou a preencher e fechou o modal, reabrir mantendo os dados
+    const hasDraft =
+      String(stockForm.name || '').trim() ||
+      String(stockForm.category || '').trim() ||
+      String(stockForm.brand || '').trim() ||
+      String(stockForm.notes || '').trim() ||
+      String(stockForm.imageUrl || '').trim() ||
+      String(stockForm.imageData || '').trim() ||
+      toNumber(stockForm.price) > 0 ||
+      toNumber(stockForm.quantity) > 0
+
+    if (!hasDraft || stockModalMode !== 'create') {
+      setStockForm({
+        name: '',
+        category: '',
+        brand: '',
+        price: '0',
+        quantity: '0',
+        unit: 'un',
+        imageUrl: '',
+        imageData: '',
+        notes: ''
+      })
+    }
+    setStockModalOpen(true)
+  }
+
   const products = useMemo(() => {
     const pricingMap = new Map((pricing || []).map((p) => [p.recipeId, p]))
     const fromRecipes = (recipes || []).map((r) => {
@@ -50,17 +361,14 @@ export function ProductsPage() {
       const price = typeof p?.price === 'number' ? p.price : toNumber(r.unitCost) * 1.5
       const category = String(r.category || r.tag || r.type || 'Geral')
       const image = r.imageUrl || r.image || r.photo || null
-      const ratingValue = r.ratingAvg ?? r.rating ?? null
-      const ratingCount = r.ratingCount ?? r.reviewsCount ?? null
       const createdAt = r.createdAt || r.created_at || null
       return {
         id: r.id,
+        source: 'receita',
         name: r.name,
         category,
         price: Number.isFinite(price) ? price : 0,
         image,
-        ratingValue: typeof ratingValue === 'number' ? ratingValue : null,
-        ratingCount: typeof ratingCount === 'number' ? ratingCount : null,
         inStock: r.inStock ?? true,
         createdAt,
         description: r.description || r.desc || ''
@@ -89,12 +397,11 @@ export function ProductsPage() {
 
       return {
         id: `supermarket:${filename || idx}`,
+        source: 'catalogo-mercado',
         name,
         category,
         price: toNumber(p.price),
         image: filename ? `/catalogo-mercado/images/${filename}` : null,
-        ratingValue: typeof p.rating === 'number' ? p.rating : null,
-        ratingCount: null,
         inStock: true,
         createdAt: null,
         description,
@@ -104,8 +411,33 @@ export function ProductsPage() {
       }
     })
 
-    return [...fromSupermarket, ...fromRecipes]
-  }, [recipes, pricing])
+    // Produtos criados manualmente no Estoque (Armazém: Produtos)
+    const productsWarehouse = findProductsWarehouse()
+    const manualFromStock = (Array.isArray(productsWarehouse?.items) ? productsWarehouse.items : [])
+      .map((it) => {
+        const meta = decodeProductMeta(it?.notes)
+        if (!meta || meta.kind !== 'produto' || meta.source !== 'manual') return null
+        return {
+          id: `stock:${productsWarehouse.id}:${it.id}`,
+          source: 'manual',
+          warehouseId: productsWarehouse.id,
+          itemId: it.id,
+          name: it.name,
+          category: it.category || 'Geral',
+          price: toNumber(meta.price),
+          image: meta.image || null,
+          inStock: toNumber(it.quantity) > 0,
+          createdAt: it.createdAt || null,
+          description: String(meta.notes || ''),
+          nameEn: '',
+          categoryEn: '',
+          descriptionEn: ''
+        }
+      })
+      .filter(Boolean)
+
+    return [...manualFromStock, ...fromSupermarket, ...fromRecipes]
+  }, [recipes, pricing, warehouses])
 
   const categories = useMemo(() => {
     const set = new Set()
@@ -132,6 +464,7 @@ export function ProductsPage() {
       }
       if (selectedCategories.length && !selectedCategories.includes(p.category)) return false
       if (availability === 'in_stock' && !p.inStock) return false
+      if (availability === 'out_of_stock' && p.inStock) return false
       if (minP !== null && p.price < minP) return false
       if (maxP !== null && p.price > maxP) return false
       return true
@@ -157,17 +490,6 @@ export function ProductsPage() {
     return sorted.slice(start, start + pageSize)
   }, [sorted, safePage, pageSize])
 
-  const activeChips = useMemo(() => {
-    const chips = []
-    for (const c of selectedCategories) chips.push({ key: `cat:${c}`, label: c, onRemove: () => setSelectedCategories((prev) => prev.filter((x) => x !== c)) })
-    if (availability === 'in_stock') chips.push({ key: 'avail:in_stock', label: 'Em estoque', onRemove: () => setAvailability('all') })
-    if (minPrice !== '' || maxPrice !== '') {
-      const label = `Preço: ${minPrice !== '' ? formatCurrency(toNumber(minPrice)) : '—'} – ${maxPrice !== '' ? formatCurrency(toNumber(maxPrice)) : '—'}`
-      chips.push({ key: 'price', label, onRemove: () => { setMinPrice(''); setMaxPrice('') } })
-    }
-    return chips
-  }, [selectedCategories, availability, minPrice, maxPrice])
-
   const resetPage = () => setPage(1)
 
   const toggleCategory = (cat) => {
@@ -186,14 +508,36 @@ export function ProductsPage() {
     setPage(1)
   }
 
+  const handleDeleteManualProduct = async (p) => {
+    if (!p?.warehouseId || !p?.itemId) return
+    if (!window.confirm(`Tem certeza que deseja excluir "${p.name}"?`)) return
+
+    setStockModalLoading(true)
+    try {
+      await deleteWarehouseItem(p.warehouseId, p.itemId)
+      if (stockEditingRef?.warehouseId === p.warehouseId && stockEditingRef?.itemId === p.itemId) {
+        setStockModalOpen(false)
+        setStockEditingRef(null)
+      }
+    } catch (e) {
+      console.error(e)
+      alert(`Não foi possível excluir o produto: ${e.message || 'Erro desconhecido'}`)
+    } finally {
+      setStockModalLoading(false)
+    }
+  }
+
   return (
     <div className="page products-page">
-      <header className="products-header">
-        <div className="products-header-left">
-          <h1>Produtos</h1>
-          <p className="products-subtitle">Explore nosso catálogo completo</p>
-        </div>
-        <div className="products-header-right">
+      {/* 1) Contexto (logo abaixo do breadcrumb do MainLayout) */}
+      <header className="products-context">
+        <h1>Produtos</h1>
+        <p className="products-subtitle">Explore nosso catálogo completo</p>
+      </header>
+
+      {/* 2) Barra de ações (linha única) */}
+      <div className="products-actions-bar">
+        <div className="products-actions-left">
           <div className="products-search">
             <FiSearch aria-hidden="true" />
             <input
@@ -204,31 +548,30 @@ export function ProductsPage() {
               aria-label="Buscar produtos"
             />
           </div>
-          <button type="button" className="products-filters-toggle" onClick={() => setFiltersOpen((v) => !v)}>
+        </div>
+        <div className="products-actions-right">
+          <button type="button" className="primary-btn products-action-btn" onClick={openCreateProduct} disabled={stockModalLoading}>
+            <FiPlus aria-hidden="true" />
+            Adicionar produto
+          </button>
+          <button
+            type="button"
+            className="secondary-btn products-action-btn"
+            onClick={() => setFiltersOpen((v) => !v)}
+            aria-pressed={filtersOpen}
+          >
             <FiFilter aria-hidden="true" />
             Filtros
           </button>
         </div>
-      </header>
+      </div>
 
-      <div className="products-toolbar">
-        <div className="products-toolbar-left">
-          <strong>{totalResults}</strong> produto(s) encontrado(s)
-          {activeChips.length > 0 && (
-            <div className="products-chips" aria-label="Filtros ativos">
-              {activeChips.map((chip) => (
-                <button key={chip.key} type="button" className="products-chip" onClick={chip.onRemove} title="Remover filtro">
-                  {chip.label} <span aria-hidden="true">×</span>
-                </button>
-              ))}
-              <button type="button" className="products-chip products-chip--clear" onClick={clearFilters}>
-                Limpar tudo
-              </button>
-            </div>
-          )}
+      {/* 3) Feedback + controles */}
+      <div className="products-controls-bar">
+        <div className="products-controls-left">
+          {totalResults} produto(s) encontrado(s)
         </div>
-
-        <div className="products-toolbar-right">
+        <div className="products-controls-right">
           <label className="products-select">
             <span>Ordenar</span>
             <select value={sort} onChange={(e) => { setSort(e.target.value); resetPage() }}>
@@ -263,7 +606,7 @@ export function ProductsPage() {
           <aside className="products-filters" aria-label="Filtros">
             <div className="filter-block">
               <h3>Categorias</h3>
-              <div className="filter-list">
+              <div className="filter-list filter-list--grid2">
                 {categories.map((cat) => (
                   <label key={cat} className="filter-check">
                     <input type="checkbox" checked={selectedCategories.includes(cat)} onChange={() => toggleCategory(cat)} />
@@ -306,6 +649,7 @@ export function ProductsPage() {
                   <select value={availability} onChange={(e) => { setAvailability(e.target.value); resetPage() }}>
                     <option value="all">Todos</option>
                     <option value="in_stock">Em estoque</option>
+                    <option value="out_of_stock">Indisponível</option>
                   </select>
                 </label>
               </div>
@@ -349,6 +693,18 @@ export function ProductsPage() {
                         <button type="button" className="icon-btn" title="Comparar" aria-label="Comparar">
                           <FiBarChart2 />
                         </button>
+                        {p?.source === 'manual' && p?.warehouseId && p?.itemId && (
+                          <button
+                            type="button"
+                            className="icon-btn icon-btn--danger"
+                            title="Excluir produto"
+                            aria-label={`Excluir ${p.name}`}
+                            onClick={() => handleDeleteManualProduct(p)}
+                            disabled={stockModalLoading}
+                          >
+                            <FiTrash2 />
+                          </button>
+                        )}
                       </div>
                     </div>
                     <div className="product-body">
@@ -363,9 +719,8 @@ export function ProductsPage() {
                         <span className={`product-stock ${p.inStock ? 'ok' : 'out'}`}>{p.inStock ? 'Em estoque' : 'Sob encomenda'}</span>
                       </div>
                       <div className="product-actions">
-                        <button type="button" className="product-btn primary">Ver detalhes</button>
-                        <button type="button" className="product-btn icon" title="Adicionar ao carrinho" aria-label="Adicionar ao carrinho">
-                          <FiPlus aria-hidden="true" />
+                        <button type="button" className="product-btn primary" onClick={() => openEditProductInStock(p)} disabled={stockModalLoading}>
+                          Editar
                         </button>
                       </div>
                     </div>
@@ -401,6 +756,165 @@ export function ProductsPage() {
           )}
         </section>
       </div>
+
+      <FormModal
+        isOpen={stockModalOpen}
+        title={stockModalMode === 'create' ? 'Novo produto' : 'Editar produto no estoque'}
+        description={stockModalMode === 'create'
+          ? `Crie um produto e adicione ao estoque automaticamente (Armazém: ${PRODUCTS_WAREHOUSE_NAME}).`
+          : `Alterações aqui atualizam automaticamente o Estoque (Armazém: ${PRODUCTS_WAREHOUSE_NAME}).`
+        }
+        onClose={() => {
+          if (stockModalLoading) return
+          setStockModalOpen(false)
+          setStockEditingRef(null)
+        }}
+        footer={
+          <>
+            <button
+              className="ghost-btn"
+              type="button"
+              onClick={() => {
+                if (stockModalLoading) return
+                setStockModalOpen(false)
+                setStockEditingRef(null)
+              }}
+            >
+              Cancelar
+            </button>
+            <button className="primary-btn" type="button" onClick={saveStockEdits} disabled={stockModalLoading}>
+              Salvar
+            </button>
+          </>
+        }
+      >
+        <label className="input-control">
+          <span>Nome</span>
+          <input value={stockForm.name} onChange={(e) => setStockForm((prev) => ({ ...prev, name: e.target.value }))} />
+        </label>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+          <label className="input-control">
+            <span>Categoria</span>
+            <input value={stockForm.category} onChange={(e) => setStockForm((prev) => ({ ...prev, category: e.target.value }))} placeholder="Ex.: Laticínios" />
+          </label>
+          <label className="input-control">
+            <span>Marca</span>
+            <input value={stockForm.brand} onChange={(e) => setStockForm((prev) => ({ ...prev, brand: e.target.value }))} placeholder="Ex.: Nestlé" />
+          </label>
+        </div>
+
+        <label className="input-control">
+          <span>Preço (opcional)</span>
+          <input
+            type="text"
+            inputMode="decimal"
+            autoComplete="off"
+            value={stockForm.price}
+            onChange={(e) => setStockForm((prev) => ({ ...prev, price: e.target.value }))}
+            onBlur={(e) => {
+              const raw = String(e.target.value || '').trim()
+              if (!raw) return
+              const n = toNumber(raw)
+              const formatted = n.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+              setStockForm((prev) => ({ ...prev, price: formatted }))
+            }}
+            placeholder="0,00"
+          />
+        </label>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1rem' }}>
+          <label className="input-control">
+            <span>Quantidade</span>
+            <input
+              type="number"
+              min="0"
+              value={stockForm.quantity}
+              onChange={(e) => setStockForm((prev) => ({ ...prev, quantity: e.target.value }))}
+            />
+          </label>
+          <label className="input-control">
+            <span>Unidade</span>
+            <select value={stockForm.unit} onChange={(e) => setStockForm((prev) => ({ ...prev, unit: e.target.value }))}>
+              <option value="un">un</option>
+              <option value="kg">kg</option>
+              <option value="g">g</option>
+              <option value="L">L</option>
+              <option value="ml">ml</option>
+            </select>
+          </label>
+        </div>
+
+        <label className="input-control">
+          <span>Foto do produto (opcional)</span>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '0.75rem' }}>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files?.[0] || null
+                if (!file) return
+                if (file.size > 800 * 1024) {
+                  alert('Imagem muito grande. Tente uma foto menor (até ~800KB).')
+                  e.target.value = ''
+                  return
+                }
+                const reader = new FileReader()
+                reader.onload = () => {
+                  const dataUrl = String(reader.result || '')
+                  setStockForm((prev) => ({ ...prev, imageData: dataUrl, imageUrl: '' }))
+                }
+                reader.readAsDataURL(file)
+              }}
+            />
+
+            <input
+              type="url"
+              placeholder="ou cole uma URL da foto (https://...)"
+              value={stockForm.imageUrl}
+              onChange={(e) => setStockForm((prev) => ({ ...prev, imageUrl: e.target.value, imageData: prev.imageData }))}
+            />
+
+            {(stockForm.imageData || stockForm.imageUrl) && (
+              <div style={{ display: 'grid', gap: '0.5rem' }}>
+                <img
+                  src={stockForm.imageData || stockForm.imageUrl}
+                  alt="Prévia da foto do produto"
+                  style={{ width: '100%', maxHeight: 180, objectFit: 'cover', borderRadius: 12, border: '1px solid var(--border-primary)' }}
+                />
+                <button
+                  type="button"
+                  className="secondary-btn"
+                  onClick={() => setStockForm((prev) => ({ ...prev, imageUrl: '', imageData: '' }))}
+                  disabled={stockModalLoading}
+                >
+                  Remover foto
+                </button>
+              </div>
+            )}
+          </div>
+        </label>
+
+        <label className="input-control">
+          <span>Observações (opcional)</span>
+          <textarea
+            rows="3"
+            value={stockForm.notes}
+            onChange={(e) => setStockForm((prev) => ({ ...prev, notes: e.target.value }))}
+            placeholder="Ex.: lote, validade, fornecedor..."
+            style={{
+              width: '100%',
+              padding: '0.75rem',
+              borderRadius: '8px',
+              border: '1px solid var(--border-primary)',
+              background: 'var(--bg-card)',
+              color: 'var(--text-primary)',
+              fontFamily: 'inherit',
+              resize: 'vertical'
+            }}
+          />
+        </label>
+      </FormModal>
     </div>
   )
 }

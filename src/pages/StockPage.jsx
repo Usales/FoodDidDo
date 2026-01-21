@@ -4,6 +4,24 @@ import { useAppStore } from '../stores/appStore'
 import { FiSearch, FiChevronDown, FiChevronUp } from 'react-icons/fi'
 import './PageCommon.css'
 
+const PRODUCT_NOTES_PREFIX = '__product__:'
+
+const safeJsonParse = (value) => {
+  try {
+    return JSON.parse(String(value))
+  } catch {
+    return null
+  }
+}
+
+const decodeProductMeta = (notes) => {
+  const raw = String(notes ?? '').trim()
+  if (!raw) return null
+  if (raw.startsWith(PRODUCT_NOTES_PREFIX)) return safeJsonParse(raw.slice(PRODUCT_NOTES_PREFIX.length))
+  if (raw.startsWith('{') && raw.endsWith('}')) return safeJsonParse(raw)
+  return null
+}
+
 // Função para formatar moeda brasileira
 const formatCurrency = (value) => {
   return new Intl.NumberFormat('pt-BR', {
@@ -553,7 +571,27 @@ export function StockPage() {
                               }}
                             >
                               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1 }}>
-                                <span style={{ fontSize: '1.8rem' }}>{item.emoji || '📦'}</span>
+                                {(() => {
+                                  const meta = decodeProductMeta(item?.notes)
+                                  const img = meta?.kind === 'produto' ? String(meta.image || '').trim() : ''
+                                  if (img) {
+                                    return (
+                                      <img
+                                        src={img}
+                                        alt={item.name}
+                                        style={{
+                                          width: 44,
+                                          height: 44,
+                                          borderRadius: 10,
+                                          objectFit: 'cover',
+                                          border: '1px solid var(--border-primary)',
+                                          flex: '0 0 auto'
+                                        }}
+                                      />
+                                    )
+                                  }
+                                  return <span style={{ fontSize: '1.8rem' }}>{item.emoji || '📦'}</span>
+                                })()}
                                 <div style={{ flex: 1 }}>
                                   <div
                                     style={{

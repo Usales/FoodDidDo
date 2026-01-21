@@ -289,8 +289,12 @@ export const useAppStore = create(devtools((set, get) => ({
   addWarehouse: async (warehouse) => {
     try {
       const newWarehouse = await api.createWarehouse(warehouse)
-      set((state) => ({ warehouses: [newWarehouse, ...state.warehouses] }))
-      return newWarehouse
+      const safeWarehouse = {
+        ...newWarehouse,
+        items: Array.isArray(newWarehouse?.items) ? newWarehouse.items : []
+      }
+      set((state) => ({ warehouses: [safeWarehouse, ...state.warehouses] }))
+      return safeWarehouse
     } catch (error) {
       console.error('Erro ao criar armazém:', error)
       throw error
@@ -328,7 +332,7 @@ export const useAppStore = create(devtools((set, get) => ({
       set((state) => ({
         warehouses: state.warehouses.map((w) =>
           w.id === warehouseId
-            ? { ...w, items: [...w.items, newItem] }
+            ? { ...w, items: [...(Array.isArray(w.items) ? w.items : []), newItem] }
             : w
         )
       }))
@@ -347,7 +351,7 @@ export const useAppStore = create(devtools((set, get) => ({
           w.id === warehouseId
             ? {
                 ...w,
-                items: w.items.map((item) => (item.id === itemId ? updated : item))
+                items: (Array.isArray(w.items) ? w.items : []).map((item) => (item.id === itemId ? updated : item))
               }
             : w
         )
@@ -367,7 +371,7 @@ export const useAppStore = create(devtools((set, get) => ({
           w.id === warehouseId
             ? {
                 ...w,
-                items: w.items.filter((item) => item.id !== itemId)
+                items: (Array.isArray(w.items) ? w.items : []).filter((item) => item.id !== itemId)
               }
             : w
         )

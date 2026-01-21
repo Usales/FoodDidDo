@@ -28,10 +28,27 @@ export function FormModal({ isOpen, title, description, onClose, children, foote
     }
   }, [isOpen])
 
+  // Fechar com ESC
+  useEffect(() => {
+    if (!isOpen) return undefined
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') onClose()
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [isOpen, onClose])
+
   if (!isOpen) return null
 
   const modalContent = (
-    <div className="form-modal-backdrop" role="presentation" onClick={onClose}>
+    <div
+      className="form-modal-backdrop"
+      role="presentation"
+      onClick={(event) => {
+        // Fecha apenas quando clicar fora do modal (no backdrop)
+        if (event.target === event.currentTarget) onClose()
+      }}
+    >
       <div
         className={`form-modal ${isExpanded ? 'form-modal-expanded' : ''}`}
         role="dialog"
@@ -44,7 +61,7 @@ export function FormModal({ isOpen, title, description, onClose, children, foote
             <h2 id="form-modal-title">{title}</h2>
             {description ? <p>{description}</p> : null}
           </div>
-          <button className="form-modal-close" type="button" onClick={onClose}>
+          <button className="form-modal-close" type="button" onClick={() => onClose()}>
             <span>✕</span>
           </button>
         </header>
