@@ -105,7 +105,7 @@
 
 .config-state-card {
   background: var(--bg-card);
-  border-radius: 10px;
+  border-radius: 18px;
   padding: 1.75rem 1.5rem;
   border: 1px solid var(--border-primary);
   box-shadow: var(--shadow-lg);
@@ -170,7 +170,7 @@
 .config-input-group input {
   width: 100%;
   padding: 0.75rem 1rem;
-  border-radius: 0.75rem;
+  border-radius: 12px;
   border: 1px solid var(--border-primary);
   background: var(--bg-card);
   color: var(--text-primary);
@@ -196,7 +196,7 @@
   background: var(--primary-color);
   color: var(--text-inverse);
   padding: 0.75rem 1.5rem;
-  border-radius: 0.75rem;
+  border-radius: 12px;
   border: none;
   font-weight: 600;
   font-size: 0.95rem;
@@ -215,7 +215,7 @@
   background: var(--bg-card);
   color: var(--text-primary);
   padding: 0.75rem 1.5rem;
-  border-radius: 0.75rem;
+  border-radius: 12px;
   border: 1px solid var(--border-primary);
   font-weight: 600;
   font-size: 0.95rem;
@@ -229,7 +229,7 @@
   content: '';
   position: absolute;
   inset: -2px;
-  border-radius: 0.75rem;
+  border-radius: 12px;
   background: linear-gradient(135deg, rgba(13, 168, 149, 0.3), rgba(59, 130, 246, 0.2));
   opacity: 0;
   transition: opacity 0.3s ease;
@@ -251,7 +251,7 @@
 .config-backup-banner {
   background: linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(13, 168, 149, 0.12));
   border: 1px solid rgba(13, 168, 149, 0.2);
-  border-radius: 12px;
+  border-radius: 18px;
   padding: 2rem;
   display: flex;
   align-items: center;
@@ -359,6 +359,114 @@
   line-height: 1.5;
 }
 
+/* Aparência do Sistema - Color Picker */
+.config-color-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.config-color-input {
+  width: 60px;
+  height: 45px;
+  border: 1px solid var(--border-primary);
+  border-radius: 12px;
+  cursor: pointer;
+  padding: 0;
+  background: transparent;
+}
+
+.config-color-text-input {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  border: 1px solid var(--border-primary);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  font-family: monospace;
+}
+
+.config-color-text-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+.config-color-reset {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  border: 1px solid var(--border-primary);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.config-color-reset:hover {
+  background: var(--bg-tertiary);
+  border-color: var(--primary-color);
+  transform: rotate(90deg);
+}
+
+/* Logo Upload */
+.config-logo-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.config-logo-preview {
+  width: 100%;
+  min-height: 120px;
+  border: 2px dashed var(--border-primary);
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-secondary);
+  padding: 1rem;
+}
+
+.config-logo-preview img {
+  max-width: 100%;
+  max-height: 100px;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.config-logo-preview span {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.config-logo-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.config-logo-actions .config-color-reset {
+  width: auto;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+}
+
+.config-appearance-actions {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-primary);
+  display: flex;
+  gap: 1rem;
+}
+
 /* Responsividade */
 @media (max-width: 768px) {
   .config-page {
@@ -395,6 +503,32 @@
   }
 
   .config-backup-action button {
+    width: 100%;
+  }
+
+  .config-color-input-wrapper {
+    flex-wrap: wrap;
+  }
+
+  .config-color-text-input {
+    min-width: 100%;
+    order: 3;
+  }
+
+  .config-logo-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .config-logo-actions button {
+    width: 100%;
+  }
+
+  .config-appearance-actions {
+    flex-direction: column;
+  }
+
+  .config-appearance-actions button {
     width: 100%;
   }
 }

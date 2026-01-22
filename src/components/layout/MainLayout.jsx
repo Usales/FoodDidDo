@@ -22,6 +22,7 @@ import { FiLogOut, FiSearch, FiChevronDown, FiMenu, FiX, FiShoppingBag, FiUsers 
 import { HiMoon, HiSun } from 'react-icons/hi'
 import { useState, useEffect, useRef } from 'react'
 import { useTheme } from '../../contexts/ThemeContext'
+import { useCustomAppearance } from '../../hooks/useCustomAppearance'
 import './MainLayout.css'
 
 const DASHBOARD_SETTINGS_KEY = 'dashboardSettings'
@@ -106,6 +107,8 @@ export function MainLayout({ onLogout, user }) {
   const location = useLocation()
   const navigate = useNavigate()
   const { theme, toggleTheme, isDarkMode } = useTheme()
+  const { appearance } = useCustomAppearance()
+  const [customLogo, setCustomLogo] = useState('/images_/2.png')
 
   const getBreadcrumb = () => {
     const rawPath = location?.pathname || ''
@@ -362,6 +365,116 @@ export function MainLayout({ onLogout, user }) {
     if (isMobile && sidebarCollapsed) setSidebarCollapsed(false)
   }, [isMobile, sidebarCollapsed])
 
+  // Aplicar cores customizadas e logo
+  useEffect(() => {
+    const applyColors = () => {
+      const sidebar = document.querySelector('.main-shell-sidebar')
+      const topbar = document.querySelector('.topbar')
+      const root = document.documentElement
+
+      if (appearance.sidebarColor && sidebar) {
+        sidebar.style.backgroundColor = appearance.sidebarColor
+      } else if (sidebar) {
+        sidebar.style.backgroundColor = ''
+      }
+
+      if (appearance.topbarColor && topbar) {
+        topbar.style.backgroundColor = appearance.topbarColor
+      } else if (topbar) {
+        topbar.style.backgroundColor = ''
+      }
+
+      if (appearance.backgroundColor) {
+        root.style.setProperty('--bg-primary', appearance.backgroundColor)
+        document.body.style.backgroundColor = appearance.backgroundColor
+      } else {
+        root.style.removeProperty('--bg-primary')
+        document.body.style.backgroundColor = ''
+      }
+
+      if (appearance.lightColors) {
+        root.style.setProperty('--bg-secondary', appearance.lightColors)
+      } else {
+        root.style.removeProperty('--bg-secondary')
+      }
+
+      if (appearance.mediumColors) {
+        root.style.setProperty('--bg-tertiary', appearance.mediumColors)
+      } else {
+        root.style.removeProperty('--bg-tertiary')
+      }
+
+      if (appearance.logoUrl) {
+        setCustomLogo(appearance.logoUrl)
+      } else {
+        setCustomLogo('/images_/2.png')
+      }
+    }
+
+    // Aplicar imediatamente
+    applyColors()
+
+    // Aplicar novamente após um pequeno delay para garantir que os elementos existam
+    const timeout = setTimeout(applyColors, 100)
+    return () => clearTimeout(timeout)
+  }, [appearance])
+
+  // Escutar mudanças de aparência de outros componentes
+  useEffect(() => {
+    const handleAppearanceChange = (event) => {
+      const newAppearance = event.detail
+      
+      // Atualizar logo
+      if (newAppearance?.logoUrl) {
+        setCustomLogo(newAppearance.logoUrl)
+      } else {
+        setCustomLogo('/images_/2.png')
+      }
+      
+      // Reaplicar cores quando mudar
+      setTimeout(() => {
+        const sidebar = document.querySelector('.main-shell-sidebar')
+        const topbar = document.querySelector('.topbar')
+        const root = document.documentElement
+
+        if (newAppearance?.sidebarColor && sidebar) {
+          sidebar.style.backgroundColor = newAppearance.sidebarColor
+        } else if (sidebar && !newAppearance?.sidebarColor) {
+          sidebar.style.backgroundColor = ''
+        }
+
+        if (newAppearance?.topbarColor && topbar) {
+          topbar.style.backgroundColor = newAppearance.topbarColor
+        } else if (topbar && !newAppearance?.topbarColor) {
+          topbar.style.backgroundColor = ''
+        }
+
+        if (newAppearance?.backgroundColor) {
+          root.style.setProperty('--bg-primary', newAppearance.backgroundColor)
+          document.body.style.backgroundColor = newAppearance.backgroundColor
+        } else {
+          root.style.removeProperty('--bg-primary')
+          document.body.style.backgroundColor = ''
+        }
+
+        if (newAppearance?.lightColors) {
+          root.style.setProperty('--bg-secondary', newAppearance.lightColors)
+        } else {
+          root.style.removeProperty('--bg-secondary')
+        }
+
+        if (newAppearance?.mediumColors) {
+          root.style.setProperty('--bg-tertiary', newAppearance.mediumColors)
+        } else {
+          root.style.removeProperty('--bg-tertiary')
+        }
+      }, 50)
+    }
+
+    window.addEventListener('appearanceChanged', handleAppearanceChange)
+    return () => window.removeEventListener('appearanceChanged', handleAppearanceChange)
+  }, [])
+
   // Fechar dropdown ao clicar fora
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -421,7 +534,7 @@ export function MainLayout({ onLogout, user }) {
     <div className={`main-shell${sidebarCollapsed ? ' sidebar-collapsed' : ''}`}>
       <aside className="main-shell-sidebar">
         <div className="sidebar-brand">
-          <img src="/images_/2.png" alt="FoodIDDO" />
+          <img src={customLogo} alt="FoodIDDO" />
           <button
             type="button"
             className="sidebar-collapse-btn"
@@ -674,7 +787,7 @@ export function MainLayout({ onLogout, user }) {
           <div className={`mobile-menu-drawer ${mobileMenuOpen ? 'open' : ''}`} ref={mobileMenuRef}>
             <div className="mobile-menu-header">
               <div className="mobile-menu-brand">
-                <img src="/images_/2.png" alt="FoodIDDO" />
+                <img src={customLogo} alt="FoodIDDO" />
               </div>
               <button
                 type="button"

@@ -18,7 +18,7 @@
 }
 
 .main-shell-sidebar {
-  background: var(--bg-card, var(--bg-sidebar));
+  background: var(--custom-sidebar-bg, var(--bg-card, var(--bg-sidebar)));
   border-radius: 18px;
   box-shadow: var(--shadow-xl);
   border: 1px solid var(--border-primary);
@@ -209,7 +209,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: var(--bg-card);
+  background: var(--custom-topbar-bg, var(--bg-card));
   padding: 1.5rem 2rem;
   border-radius: 18px;
   box-shadow: var(--shadow-xl);
