@@ -389,6 +389,7 @@
   color: var(--text-primary);
   font-size: 0.95rem;
   font-family: monospace;
+  width: 100%;
 }
 
 .config-color-text-input:focus {
@@ -399,8 +400,8 @@
 
 .config-color-reset {
   width: 45px;
-  min-width: 45px;
   height: 45px;
+  min-width: 45px;
   border-radius: 12px;
   border: 1px solid var(--border-primary);
   background: var(--bg-secondary);
@@ -412,12 +413,14 @@
   font-size: 1.1rem;
   transition: all 0.2s ease;
   flex-shrink: 0;
+  font-weight: 600;
 }
 
 .config-color-reset:hover {
   background: var(--bg-tertiary);
   border-color: var(--primary-color);
   transform: rotate(90deg);
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.2);
 }
 
 /* Logo Upload */
@@ -517,19 +520,19 @@
   }
 
   .config-color-input {
-    width: 70px;
-    min-width: 70px;
+    width: 60px;
+    min-width: 60px;
   }
 
   .config-color-text-input {
-    min-width: calc(100% - 70px - 45px - 1rem);
+    min-width: calc(100% - 60px - 45px - 1rem);
     order: 3;
   }
 
   .config-color-reset {
-    width: 40px;
-    min-width: 40px;
-    height: 40px;
+    width: 45px;
+    min-width: 45px;
+    height: 45px;
   }
 
   .config-logo-actions {
