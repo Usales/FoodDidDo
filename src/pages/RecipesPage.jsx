@@ -339,7 +339,12 @@ export function RecipesPage() {
                   />
                   <span className="recipe-source-badge">{recipe.source ?? 'Receita'}</span>
                   {!recipe.video && (
-                    <span className="recipe-no-video-badge" title="Esta receita não possui vídeo">
+                    <span 
+                      className="recipe-no-video-badge" 
+                      title="Esta receita não possui vídeo"
+                      aria-label="Receita sem vídeo disponível"
+                      role="status"
+                    >
                       !
                     </span>
                   )}
