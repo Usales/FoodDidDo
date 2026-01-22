@@ -338,6 +338,7 @@ export function RecipesPage() {
                     }}
                   />
                   <span className="recipe-source-badge">{recipe.source ?? 'Receita'}</span>
+                  {/* Badge visual indicando que a receita não possui URL de vídeo */}
                   {!recipe.video && (
                     <span 
                       className="recipe-no-video-badge" 
