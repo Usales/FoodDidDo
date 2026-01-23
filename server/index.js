@@ -2015,6 +2015,349 @@ fastify.delete('/api/customers/:id', async (request, reply) => {
   }
 })
 
+// ============================================
+// ROTAS DE PAGAMENTOS (Payments)
+// ============================================
+
+// Listar pagamentos
+fastify.get('/api/payments', async (request, reply) => {
+  try {
+    const { status, method, provider } = request.query
+    
+    const where = {}
+    if (status) where.status = status
+    if (method) where.method = method
+    if (provider) where.provider = provider
+    
+    const payments = await prisma.payment.findMany({
+      where,
+      include: {
+        order: {
+          include: {
+            customer: true,
+            items: true
+          }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    })
+    return payments
+  } catch (error) {
+    fastify.log.error('Erro ao listar pagamentos:', error)
+    return reply.status(500).send({ 
+      error: 'Erro ao listar pagamentos', 
+      message: error.message 
+    })
+  }
+})
+
+// Buscar pagamento específico
+fastify.get('/api/payments/:id', async (request, reply) => {
+  try {
+    const { id } = request.params
+    const payment = await prisma.payment.findUnique({
+      where: { id },
+      include: {
+        order: {
+          include: {
+            customer: true,
+            items: true,
+            invoice: true
+          }
+        }
+      }
+    })
+    
+    if (!payment) {
+      return reply.status(404).send({ 
+        error: 'Pagamento não encontrado', 
+        message: `Pagamento com ID ${id} não foi encontrado` 
+      })
+    }
+    
+    return payment
+  } catch (error) {
+    fastify.log.error('Erro ao buscar pagamento:', error)
+    return reply.status(500).send({ 
+      error: 'Erro ao buscar pagamento', 
+      message: error.message 
+    })
+  }
+})
+
+// Criar pagamento
+fastify.post('/api/payments', async (request, reply) => {
+  try {
+    const { 
+      orderId,
+      amount,
+      method,
+      status,
+      provider,
+      providerId,
+      qrCode,
+      qrCodeText,
+      barcode,
+      barcodeUrl,
+      pixCopyPaste,
+      expirationDate,
+      paidAt,
+      failureReason,
+      metadata
+    } = request.body
+    
+    // Validar dados obrigatórios
+    if (!orderId) {
+      return reply.status(400).send({ 
+        error: 'Dados inválidos', 
+        message: 'orderId é obrigatório' 
+      })
+    }
+    
+    if (!amount || amount <= 0) {
+      return reply.status(400).send({ 
+        error: 'Dados inválidos', 
+        message: 'Valor do pagamento deve ser maior que zero' 
+      })
+    }
+    
+    if (!method) {
+      return reply.status(400).send({ 
+        error: 'Dados inválidos', 
+        message: 'Método de pagamento é obrigatório' 
+      })
+    }
+    
+    // Validar método de pagamento
+    const validMethods = ['pix', 'credit_card', 'debit_card', 'boleto', 'cash', 'other']
+    if (!validMethods.includes(method)) {
+      return reply.status(400).send({ 
+        error: 'Dados inválidos', 
+        message: `Método de pagamento deve ser um dos: ${validMethods.join(', ')}` 
+      })
+    }
+    
+    // Verificar se o pedido existe
+    const order = await prisma.order.findUnique({
+      where: { id: orderId }
+    })
+    
+    if (!order) {
+      return reply.status(404).send({ 
+        error: 'Pedido não encontrado', 
+        message: `Pedido com ID ${orderId} não foi encontrado` 
+      })
+    }
+    
+    // Verificar se já existe pagamento para este pedido
+    const existingPayment = await prisma.payment.findUnique({
+      where: { orderId }
+    })
+    
+    if (existingPayment) {
+      return reply.status(409).send({ 
+        error: 'Pagamento já existe', 
+        message: 'Este pedido já possui um pagamento associado' 
+      })
+    }
+    
+    const payment = await prisma.payment.create({
+      data: {
+        orderId,
+        amount: Number(amount),
+        method,
+        status: status || 'pending',
+        provider: provider || null,
+        providerId: providerId || null,
+        qrCode: qrCode || null,
+        qrCodeText: qrCodeText || null,
+        barcode: barcode || null,
+        barcodeUrl: barcodeUrl || null,
+        pixCopyPaste: pixCopyPaste || null,
+        expirationDate: expirationDate ? new Date(expirationDate) : null,
+        paidAt: paidAt ? new Date(paidAt) : (status === 'paid' ? new Date() : null),
+        failureReason: failureReason || null,
+        metadata: metadata ? (typeof metadata === 'string' ? metadata : JSON.stringify(metadata)) : null
+      },
+      include: {
+        order: {
+          include: {
+            customer: true,
+            items: true
+          }
+        }
+      }
+    })
+    
+    return payment
+  } catch (error) {
+    fastify.log.error('Erro ao criar pagamento:', error)
+    
+    if (error.code === 'P2002') {
+      return reply.status(409).send({ 
+        error: 'Pagamento já existe', 
+        message: 'Este pedido já possui um pagamento associado' 
+      })
+    }
+    
+    if (error.code === 'P2003') {
+      return reply.status(404).send({ 
+        error: 'Pedido não encontrado', 
+        message: 'Pedido associado não foi encontrado' 
+      })
+    }
+    
+    return reply.status(500).send({ 
+      error: 'Erro ao criar pagamento', 
+      message: error.message 
+    })
+  }
+})
+
+// Atualizar pagamento
+fastify.put('/api/payments/:id', async (request, reply) => {
+  try {
+    const { id } = request.params
+    const { 
+      amount,
+      method,
+      status,
+      provider,
+      providerId,
+      qrCode,
+      qrCodeText,
+      barcode,
+      barcodeUrl,
+      pixCopyPaste,
+      expirationDate,
+      paidAt,
+      failureReason,
+      metadata
+    } = request.body
+    
+    // Validar método de pagamento se fornecido
+    if (method) {
+      const validMethods = ['pix', 'credit_card', 'debit_card', 'boleto', 'cash', 'other']
+      if (!validMethods.includes(method)) {
+        return reply.status(400).send({ 
+          error: 'Dados inválidos', 
+          message: `Método de pagamento deve ser um dos: ${validMethods.join(', ')}` 
+        })
+      }
+    }
+    
+    const payment = await prisma.payment.update({
+      where: { id },
+      data: {
+        ...(amount !== undefined && { amount: Number(amount) }),
+        ...(method && { method }),
+        ...(status && { status }),
+        ...(provider !== undefined && { provider }),
+        ...(providerId !== undefined && { providerId }),
+        ...(qrCode !== undefined && { qrCode }),
+        ...(qrCodeText !== undefined && { qrCodeText }),
+        ...(barcode !== undefined && { barcode }),
+        ...(barcodeUrl !== undefined && { barcodeUrl }),
+        ...(pixCopyPaste !== undefined && { pixCopyPaste }),
+        ...(expirationDate !== undefined && { expirationDate: expirationDate ? new Date(expirationDate) : null }),
+        ...(paidAt !== undefined && { paidAt: paidAt ? new Date(paidAt) : null }),
+        ...(failureReason !== undefined && { failureReason }),
+        ...(metadata !== undefined && { metadata: metadata ? (typeof metadata === 'string' ? metadata : JSON.stringify(metadata)) : null })
+      },
+      include: {
+        order: {
+          include: {
+            customer: true,
+            items: true
+          }
+        }
+      }
+    })
+    
+    return payment
+  } catch (error) {
+    fastify.log.error('Erro ao atualizar pagamento:', error)
+    
+    if (error.code === 'P2025') {
+      return reply.status(404).send({ 
+        error: 'Pagamento não encontrado', 
+        message: error.meta?.cause || 'Pagamento não foi encontrado' 
+      })
+    }
+    
+    return reply.status(500).send({ 
+      error: 'Erro ao atualizar pagamento', 
+      message: error.message 
+    })
+  }
+})
+
+// Atualizar status do pagamento
+fastify.patch('/api/payments/:id/status', async (request, reply) => {
+  try {
+    const { id } = request.params
+    const { status, paidAt, failureReason } = request.body
+    
+    if (!status) {
+      return reply.status(400).send({ 
+        error: 'Dados inválidos', 
+        message: 'Status é obrigatório' 
+      })
+    }
+    
+    const validStatuses = ['pending', 'processing', 'paid', 'failed', 'refunded', 'cancelled']
+    if (!validStatuses.includes(status)) {
+      return reply.status(400).send({ 
+        error: 'Dados inválidos', 
+        message: `Status deve ser um dos: ${validStatuses.join(', ')}` 
+      })
+    }
+    
+    const updateData = { status }
+    
+    // Se mudou para pago, atualizar paidAt
+    if (status === 'paid' && !paidAt) {
+      updateData.paidAt = new Date()
+    } else if (paidAt) {
+      updateData.paidAt = new Date(paidAt)
+    }
+    
+    // Se mudou para falhou, incluir motivo se fornecido
+    if (status === 'failed' && failureReason) {
+      updateData.failureReason = failureReason
+    }
+    
+    const payment = await prisma.payment.update({
+      where: { id },
+      data: updateData,
+      include: {
+        order: {
+          include: {
+            customer: true,
+            items: true
+          }
+        }
+      }
+    })
+    
+    return payment
+  } catch (error) {
+    fastify.log.error('Erro ao atualizar status do pagamento:', error)
+    
+    if (error.code === 'P2025') {
+      return reply.status(404).send({ 
+        error: 'Pagamento não encontrado', 
+        message: error.meta?.cause || 'Pagamento não foi encontrado' 
+      })
+    }
+    
+    return reply.status(500).send({ 
+      error: 'Erro ao atualizar status do pagamento', 
+      message: error.message 
+    })
+  }
+})
+
 // Iniciar servidor
 const start = async () => {
   try {
