@@ -404,17 +404,97 @@ fastify.delete('/api/recipes/:id', async (request, reply) => {
 
 // Rotas de Orçamentos
 fastify.get('/api/budgets', async (request, reply) => {
-  const budgets = await prisma.budget.findMany({
-    orderBy: { createdAt: 'desc' }
-  })
-  return budgets
+  try {
+    const budgets = await prisma.budget.findMany({
+      orderBy: { createdAt: 'desc' }
+    })
+    return budgets
+  } catch (error) {
+    fastify.log.error('Erro ao listar orçamentos:', error)
+    return reply.status(500).send({ 
+      error: 'Erro ao listar orçamentos', 
+      message: error.message 
+    })
+  }
 })
 
 fastify.post('/api/budgets', async (request, reply) => {
-  const budget = await prisma.budget.create({
-    data: request.body
-  })
-  return budget
+  try {
+    const { period, amount, spent } = request.body
+    
+    if (!period || !amount) {
+      return reply.status(400).send({ 
+        error: 'Dados inválidos', 
+        message: 'Período e valor são obrigatórios' 
+      })
+    }
+    
+    const budget = await prisma.budget.create({
+      data: {
+        period,
+        amount: Number(amount),
+        spent: spent ? Number(spent) : 0
+      }
+    })
+    return budget
+  } catch (error) {
+    fastify.log.error('Erro ao criar orçamento:', error)
+    return reply.status(500).send({ 
+      error: 'Erro ao criar orçamento', 
+      message: error.message 
+    })
+  }
+})
+
+fastify.put('/api/budgets/:id', async (request, reply) => {
+  try {
+    const { id } = request.params
+    const { period, amount, spent } = request.body
+    
+    const budget = await prisma.budget.update({
+      where: { id },
+      data: {
+        ...(period && { period }),
+        ...(amount !== undefined && { amount: Number(amount) }),
+        ...(spent !== undefined && { spent: Number(spent) })
+      }
+    })
+    return budget
+  } catch (error) {
+    fastify.log.error('Erro ao atualizar orçamento:', error)
+    if (error.code === 'P2025') {
+      return reply.status(404).send({ 
+        error: 'Orçamento não encontrado', 
+        message: error.meta?.cause || 'Orçamento não foi encontrado' 
+      })
+    }
+    return reply.status(500).send({ 
+      error: 'Erro ao atualizar orçamento', 
+      message: error.message 
+    })
+  }
+})
+
+fastify.delete('/api/budgets/:id', async (request, reply) => {
+  try {
+    const { id } = request.params
+    await prisma.budget.delete({
+      where: { id }
+    })
+    return { success: true, message: 'Orçamento deletado com sucesso' }
+  } catch (error) {
+    fastify.log.error('Erro ao deletar orçamento:', error)
+    if (error.code === 'P2025') {
+      return reply.status(404).send({ 
+        error: 'Orçamento não encontrado', 
+        message: error.meta?.cause || 'Orçamento não foi encontrado' 
+      })
+    }
+    return reply.status(500).send({ 
+      error: 'Erro ao deletar orçamento', 
+      message: error.message 
+    })
+  }
 })
 
 // Rotas de Custos Fixos
@@ -805,17 +885,99 @@ fastify.post('/api/cashbox/movements', async (request, reply) => {
 
 // Rotas de Preços
 fastify.get('/api/pricing', async (request, reply) => {
-  const pricing = await prisma.pricing.findMany({
-    orderBy: { createdAt: 'desc' }
-  })
-  return pricing
+  try {
+    const pricing = await prisma.pricing.findMany({
+      orderBy: { createdAt: 'desc' }
+    })
+    return pricing
+  } catch (error) {
+    fastify.log.error('Erro ao listar preços:', error)
+    return reply.status(500).send({ 
+      error: 'Erro ao listar preços', 
+      message: error.message 
+    })
+  }
 })
 
 fastify.post('/api/pricing', async (request, reply) => {
-  const pricing = await prisma.pricing.create({
-    data: request.body
-  })
-  return pricing
+  try {
+    const { recipeId, recipeName, price, margin } = request.body
+    
+    if (!price || price <= 0) {
+      return reply.status(400).send({ 
+        error: 'Dados inválidos', 
+        message: 'Preço é obrigatório e deve ser maior que zero' 
+      })
+    }
+    
+    const pricing = await prisma.pricing.create({
+      data: {
+        recipeId: recipeId || null,
+        recipeName: recipeName || null,
+        price: Number(price),
+        margin: margin ? Number(margin) : null
+      }
+    })
+    return pricing
+  } catch (error) {
+    fastify.log.error('Erro ao criar preço:', error)
+    return reply.status(500).send({ 
+      error: 'Erro ao criar preço', 
+      message: error.message 
+    })
+  }
+})
+
+fastify.put('/api/pricing/:id', async (request, reply) => {
+  try {
+    const { id } = request.params
+    const { recipeId, recipeName, price, margin } = request.body
+    
+    const pricing = await prisma.pricing.update({
+      where: { id },
+      data: {
+        ...(recipeId !== undefined && { recipeId }),
+        ...(recipeName !== undefined && { recipeName }),
+        ...(price !== undefined && { price: Number(price) }),
+        ...(margin !== undefined && { margin: margin ? Number(margin) : null })
+      }
+    })
+    return pricing
+  } catch (error) {
+    fastify.log.error('Erro ao atualizar preço:', error)
+    if (error.code === 'P2025') {
+      return reply.status(404).send({ 
+        error: 'Preço não encontrado', 
+        message: error.meta?.cause || 'Preço não foi encontrado' 
+      })
+    }
+    return reply.status(500).send({ 
+      error: 'Erro ao atualizar preço', 
+      message: error.message 
+    })
+  }
+})
+
+fastify.delete('/api/pricing/:id', async (request, reply) => {
+  try {
+    const { id } = request.params
+    await prisma.pricing.delete({
+      where: { id }
+    })
+    return { success: true, message: 'Preço deletado com sucesso' }
+  } catch (error) {
+    fastify.log.error('Erro ao deletar preço:', error)
+    if (error.code === 'P2025') {
+      return reply.status(404).send({ 
+        error: 'Preço não encontrado', 
+        message: error.meta?.cause || 'Preço não foi encontrado' 
+      })
+    }
+    return reply.status(500).send({ 
+      error: 'Erro ao deletar preço', 
+      message: error.message 
+    })
+  }
 })
 
 // ============================================
@@ -889,45 +1051,232 @@ fastify.get('/api/lookup/cnpj/:cnpj', async (request, reply) => {
 
 // Rotas de Movimentações de Estoque
 fastify.get('/api/stock-movements', async (request, reply) => {
-  const movements = await prisma.stockMovement.findMany({
-    include: {
-      ingredient: true
-    },
-    orderBy: { createdAt: 'desc' }
-  })
-  return movements
+  try {
+    const movements = await prisma.stockMovement.findMany({
+      include: {
+        ingredient: true
+      },
+      orderBy: { createdAt: 'desc' }
+    })
+    return movements
+  } catch (error) {
+    fastify.log.error('Erro ao listar movimentações de estoque:', error)
+    return reply.status(500).send({ 
+      error: 'Erro ao listar movimentações de estoque', 
+      message: error.message 
+    })
+  }
 })
 
 fastify.post('/api/stock-movements', async (request, reply) => {
-  const { ingredientId, type, quantity, reference } = request.body
-  
-  // Atualizar estoque do ingrediente
-  const ingredient = await prisma.ingredient.findUnique({
-    where: { id: ingredientId }
-  })
-  
-  const newStockQty = type === 'entrada' 
-    ? ingredient.stockQty + quantity 
-    : ingredient.stockQty - quantity
-  
-  await prisma.ingredient.update({
-    where: { id: ingredientId },
-    data: { stockQty: newStockQty }
-  })
-  
-  const movement = await prisma.stockMovement.create({
-    data: {
-      ingredientId,
-      type,
-      quantity,
-      reference
-    },
-    include: {
-      ingredient: true
+  try {
+    const { ingredientId, type, quantity, reference } = request.body
+    
+    if (!ingredientId || !type || !quantity) {
+      return reply.status(400).send({ 
+        error: 'Dados inválidos', 
+        message: 'Ingrediente, tipo e quantidade são obrigatórios' 
+      })
     }
-  })
-  
-  return movement
+    
+    if (!['entrada', 'saída'].includes(type)) {
+      return reply.status(400).send({ 
+        error: 'Dados inválidos', 
+        message: 'Tipo deve ser "entrada" ou "saída"' 
+      })
+    }
+    
+    if (quantity <= 0) {
+      return reply.status(400).send({ 
+        error: 'Dados inválidos', 
+        message: 'Quantidade deve ser maior que zero' 
+      })
+    }
+    
+    // Verificar se ingrediente existe
+    const ingredient = await prisma.ingredient.findUnique({
+      where: { id: ingredientId }
+    })
+    
+    if (!ingredient) {
+      return reply.status(404).send({ 
+        error: 'Ingrediente não encontrado', 
+        message: `Ingrediente com ID ${ingredientId} não foi encontrado` 
+      })
+    }
+    
+    // Atualizar estoque do ingrediente
+    const newStockQty = type === 'entrada' 
+      ? ingredient.stockQty + quantity 
+      : ingredient.stockQty - quantity
+    
+    // Verificar se não vai ficar negativo
+    if (newStockQty < 0) {
+      return reply.status(400).send({ 
+        error: 'Estoque insuficiente', 
+        message: `Estoque atual (${ingredient.stockQty}) é menor que a quantidade a retirar (${quantity})` 
+      })
+    }
+    
+    await prisma.ingredient.update({
+      where: { id: ingredientId },
+      data: { stockQty: newStockQty }
+    })
+    
+    const movement = await prisma.stockMovement.create({
+      data: {
+        ingredientId,
+        type,
+        quantity: Number(quantity),
+        reference: reference || null
+      },
+      include: {
+        ingredient: true
+      }
+    })
+    
+    return movement
+  } catch (error) {
+    fastify.log.error('Erro ao criar movimentação de estoque:', error)
+    return reply.status(500).send({ 
+      error: 'Erro ao criar movimentação de estoque', 
+      message: error.message 
+    })
+  }
+})
+
+fastify.put('/api/stock-movements/:id', async (request, reply) => {
+  try {
+    const { id } = request.params
+    const { type, quantity, reference } = request.body
+    
+    // Buscar movimentação atual
+    const currentMovement = await prisma.stockMovement.findUnique({
+      where: { id },
+      include: { ingredient: true }
+    })
+    
+    if (!currentMovement) {
+      return reply.status(404).send({ 
+        error: 'Movimentação não encontrada', 
+        message: `Movimentação com ID ${id} não foi encontrada` 
+      })
+    }
+    
+    // Reverter alteração anterior no estoque
+    const oldStockQty = currentMovement.type === 'entrada'
+      ? currentMovement.ingredient.stockQty - currentMovement.quantity
+      : currentMovement.ingredient.stockQty + currentMovement.quantity
+    
+    // Aplicar nova alteração
+    const newQuantity = quantity !== undefined ? Number(quantity) : currentMovement.quantity
+    const newType = type || currentMovement.type
+    
+    if (!['entrada', 'saída'].includes(newType)) {
+      return reply.status(400).send({ 
+        error: 'Dados inválidos', 
+        message: 'Tipo deve ser "entrada" ou "saída"' 
+      })
+    }
+    
+    const newStockQty = newType === 'entrada'
+      ? oldStockQty + newQuantity
+      : oldStockQty - newQuantity
+    
+    if (newStockQty < 0) {
+      return reply.status(400).send({ 
+        error: 'Estoque insuficiente', 
+        message: 'A alteração resultaria em estoque negativo' 
+      })
+    }
+    
+    // Atualizar estoque e movimentação
+    await prisma.ingredient.update({
+      where: { id: currentMovement.ingredientId },
+      data: { stockQty: newStockQty }
+    })
+    
+    const movement = await prisma.stockMovement.update({
+      where: { id },
+      data: {
+        ...(type && { type }),
+        ...(quantity !== undefined && { quantity: Number(quantity) }),
+        ...(reference !== undefined && { reference })
+      },
+      include: {
+        ingredient: true
+      }
+    })
+    
+    return movement
+  } catch (error) {
+    fastify.log.error('Erro ao atualizar movimentação de estoque:', error)
+    if (error.code === 'P2025') {
+      return reply.status(404).send({ 
+        error: 'Movimentação não encontrada', 
+        message: error.meta?.cause || 'Movimentação não foi encontrada' 
+      })
+    }
+    return reply.status(500).send({ 
+      error: 'Erro ao atualizar movimentação de estoque', 
+      message: error.message 
+    })
+  }
+})
+
+fastify.delete('/api/stock-movements/:id', async (request, reply) => {
+  try {
+    const { id } = request.params
+    
+    // Buscar movimentação atual
+    const movement = await prisma.stockMovement.findUnique({
+      where: { id },
+      include: { ingredient: true }
+    })
+    
+    if (!movement) {
+      return reply.status(404).send({ 
+        error: 'Movimentação não encontrada', 
+        message: `Movimentação com ID ${id} não foi encontrada` 
+      })
+    }
+    
+    // Reverter alteração no estoque
+    const newStockQty = movement.type === 'entrada'
+      ? movement.ingredient.stockQty - movement.quantity
+      : movement.ingredient.stockQty + movement.quantity
+    
+    if (newStockQty < 0) {
+      return reply.status(400).send({ 
+        error: 'Não é possível deletar', 
+        message: 'A deleção resultaria em estoque negativo' 
+      })
+    }
+    
+    // Atualizar estoque e deletar movimentação
+    await prisma.ingredient.update({
+      where: { id: movement.ingredientId },
+      data: { stockQty: newStockQty }
+    })
+    
+    await prisma.stockMovement.delete({
+      where: { id }
+    })
+    
+    return { success: true, message: 'Movimentação deletada com sucesso' }
+  } catch (error) {
+    fastify.log.error('Erro ao deletar movimentação de estoque:', error)
+    if (error.code === 'P2025') {
+      return reply.status(404).send({ 
+        error: 'Movimentação não encontrada', 
+        message: error.meta?.cause || 'Movimentação não foi encontrada' 
+      })
+    }
+    return reply.status(500).send({ 
+      error: 'Erro ao deletar movimentação de estoque', 
+      message: error.message 
+    })
+  }
 })
 
 // Rotas de Armazéns
@@ -973,15 +1322,117 @@ fastify.delete('/api/warehouses/:id', async (request, reply) => {
 })
 
 // Rotas de Itens do Armazém
-fastify.post('/api/warehouses/:warehouseId/items', async (request, reply) => {
-  const { warehouseId } = request.params
-  const item = await prisma.warehouseItem.create({
-    data: {
-      ...request.body,
-      warehouseId
+fastify.get('/api/warehouses/:warehouseId/items', async (request, reply) => {
+  try {
+    const { warehouseId } = request.params
+    
+    // Verificar se armazém existe
+    const warehouse = await prisma.warehouse.findUnique({
+      where: { id: warehouseId }
+    })
+    
+    if (!warehouse) {
+      return reply.status(404).send({ 
+        error: 'Armazém não encontrado', 
+        message: `Armazém com ID ${warehouseId} não foi encontrado` 
+      })
     }
-  })
-  return item
+    
+    const items = await prisma.warehouseItem.findMany({
+      where: { warehouseId },
+      orderBy: { createdAt: 'desc' }
+    })
+    
+    return items
+  } catch (error) {
+    fastify.log.error('Erro ao listar itens do armazém:', error)
+    return reply.status(500).send({ 
+      error: 'Erro ao listar itens do armazém', 
+      message: error.message 
+    })
+  }
+})
+
+fastify.get('/api/warehouses/:warehouseId/items/:itemId', async (request, reply) => {
+  try {
+    const { warehouseId, itemId } = request.params
+    
+    const item = await prisma.warehouseItem.findUnique({
+      where: { id: itemId },
+      include: {
+        warehouse: true
+      }
+    })
+    
+    if (!item) {
+      return reply.status(404).send({ 
+        error: 'Item não encontrado', 
+        message: `Item com ID ${itemId} não foi encontrado` 
+      })
+    }
+    
+    if (item.warehouseId !== warehouseId) {
+      return reply.status(400).send({ 
+        error: 'Item não pertence ao armazém', 
+        message: 'O item não pertence ao armazém especificado' 
+      })
+    }
+    
+    return item
+  } catch (error) {
+    fastify.log.error('Erro ao buscar item do armazém:', error)
+    return reply.status(500).send({ 
+      error: 'Erro ao buscar item do armazém', 
+      message: error.message 
+    })
+  }
+})
+
+fastify.post('/api/warehouses/:warehouseId/items', async (request, reply) => {
+  try {
+    const { warehouseId } = request.params
+    const { name, quantity, unit, emoji, minIdeal, unitCost, category, notes } = request.body
+    
+    if (!name || !quantity || !unit) {
+      return reply.status(400).send({ 
+        error: 'Dados inválidos', 
+        message: 'Nome, quantidade e unidade são obrigatórios' 
+      })
+    }
+    
+    // Verificar se armazém existe
+    const warehouse = await prisma.warehouse.findUnique({
+      where: { id: warehouseId }
+    })
+    
+    if (!warehouse) {
+      return reply.status(404).send({ 
+        error: 'Armazém não encontrado', 
+        message: `Armazém com ID ${warehouseId} não foi encontrado` 
+      })
+    }
+    
+    const item = await prisma.warehouseItem.create({
+      data: {
+        warehouseId,
+        name: name.trim(),
+        quantity: Number(quantity),
+        unit: unit.trim(),
+        emoji: emoji || null,
+        minIdeal: minIdeal ? Number(minIdeal) : null,
+        unitCost: unitCost ? Number(unitCost) : null,
+        category: category || null,
+        notes: notes || null
+      }
+    })
+    return item
+  } catch (error) {
+    fastify.log.error('Erro ao criar item do armazém:', error)
+    return reply.status(500).send({ 
+      error: 'Erro ao criar item do armazém', 
+      message: error.message 
+    })
+  }
 })
 
 fastify.put('/api/warehouses/:warehouseId/items/:itemId', async (request, reply) => {
