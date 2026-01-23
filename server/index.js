@@ -1736,6 +1736,285 @@ fastify.patch('/api/orders/:id', async (request, reply) => {
   }
 })
 
+// ============================================
+// ROTAS DE CLIENTES (Customers)
+// ============================================
+
+// Listar clientes
+fastify.get('/api/customers', async (request, reply) => {
+  try {
+    const customers = await prisma.customer.findMany({
+      include: {
+        orders: {
+          select: {
+            id: true,
+            orderNumber: true,
+            status: true,
+            total: true,
+            createdAt: true
+          },
+          orderBy: { createdAt: 'desc' },
+          take: 5 // Últimos 5 pedidos
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    })
+    return customers
+  } catch (error) {
+    fastify.log.error('Erro ao listar clientes:', error)
+    return reply.status(500).send({ 
+      error: 'Erro ao listar clientes', 
+      message: error.message 
+    })
+  }
+})
+
+// Buscar cliente específico
+fastify.get('/api/customers/:id', async (request, reply) => {
+  try {
+    const { id } = request.params
+    const customer = await prisma.customer.findUnique({
+      where: { id },
+      include: {
+        orders: {
+          include: {
+            items: true,
+            payment: true
+          },
+          orderBy: { createdAt: 'desc' }
+        }
+      }
+    })
+    
+    if (!customer) {
+      return reply.status(404).send({ 
+        error: 'Cliente não encontrado', 
+        message: `Cliente com ID ${id} não foi encontrado` 
+      })
+    }
+    
+    return customer
+  } catch (error) {
+    fastify.log.error('Erro ao buscar cliente:', error)
+    return reply.status(500).send({ 
+      error: 'Erro ao buscar cliente', 
+      message: error.message 
+    })
+  }
+})
+
+// Criar cliente
+fastify.post('/api/customers', async (request, reply) => {
+  try {
+    const { 
+      name, 
+      email, 
+      cpfCnpj, 
+      phone, 
+      address, 
+      city, 
+      state, 
+      zipCode, 
+      notes 
+    } = request.body
+    
+    // Validar dados obrigatórios
+    if (!name || name.trim().length === 0) {
+      return reply.status(400).send({ 
+        error: 'Dados inválidos', 
+        message: 'Nome é obrigatório' 
+      })
+    }
+    
+    // Validar formato de email se fornecido
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return reply.status(400).send({ 
+        error: 'Dados inválidos', 
+        message: 'Email inválido' 
+      })
+    }
+    
+    // Validar CPF/CNPJ se fornecido (apenas formato básico)
+    if (cpfCnpj) {
+      const cleanCpfCnpj = digitsOnly(cpfCnpj)
+      if (cleanCpfCnpj.length !== 11 && cleanCpfCnpj.length !== 14) {
+        return reply.status(400).send({ 
+          error: 'Dados inválidos', 
+          message: 'CPF deve ter 11 dígitos ou CNPJ deve ter 14 dígitos' 
+        })
+      }
+    }
+    
+    const customer = await prisma.customer.create({
+      data: {
+        name: name.trim(),
+        email: email?.trim() || null,
+        cpfCnpj: cpfCnpj ? digitsOnly(cpfCnpj) : null,
+        phone: phone?.trim() || null,
+        address: address?.trim() || null,
+        city: city?.trim() || null,
+        state: state?.trim() || null,
+        zipCode: zipCode ? digitsOnly(zipCode) : null,
+        notes: notes?.trim() || null
+      }
+    })
+    
+    return customer
+  } catch (error) {
+    fastify.log.error('Erro ao criar cliente:', error)
+    
+    // Verificar se é erro de duplicação
+    if (error.code === 'P2002') {
+      const field = error.meta?.target?.[0]
+      return reply.status(409).send({ 
+        error: 'Cliente já existe', 
+        message: `Já existe um cliente com este ${field === 'email' ? 'email' : 'CPF/CNPJ'}` 
+      })
+    }
+    
+    return reply.status(500).send({ 
+      error: 'Erro ao criar cliente', 
+      message: error.message 
+    })
+  }
+})
+
+// Atualizar cliente
+fastify.put('/api/customers/:id', async (request, reply) => {
+  try {
+    const { id } = request.params
+    const { 
+      name, 
+      email, 
+      cpfCnpj, 
+      phone, 
+      address, 
+      city, 
+      state, 
+      zipCode, 
+      notes 
+    } = request.body
+    
+    // Validar dados obrigatórios
+    if (!name || name.trim().length === 0) {
+      return reply.status(400).send({ 
+        error: 'Dados inválidos', 
+        message: 'Nome é obrigatório' 
+      })
+    }
+    
+    // Validar formato de email se fornecido
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return reply.status(400).send({ 
+        error: 'Dados inválidos', 
+        message: 'Email inválido' 
+      })
+    }
+    
+    // Validar CPF/CNPJ se fornecido
+    if (cpfCnpj) {
+      const cleanCpfCnpj = digitsOnly(cpfCnpj)
+      if (cleanCpfCnpj.length !== 11 && cleanCpfCnpj.length !== 14) {
+        return reply.status(400).send({ 
+          error: 'Dados inválidos', 
+          message: 'CPF deve ter 11 dígitos ou CNPJ deve ter 14 dígitos' 
+        })
+      }
+    }
+    
+    const customer = await prisma.customer.update({
+      where: { id },
+      data: {
+        name: name.trim(),
+        email: email?.trim() || null,
+        cpfCnpj: cpfCnpj ? digitsOnly(cpfCnpj) : null,
+        phone: phone?.trim() || null,
+        address: address?.trim() || null,
+        city: city?.trim() || null,
+        state: state?.trim() || null,
+        zipCode: zipCode ? digitsOnly(zipCode) : null,
+        notes: notes?.trim() || null
+      }
+    })
+    
+    return customer
+  } catch (error) {
+    fastify.log.error('Erro ao atualizar cliente:', error)
+    
+    if (error.code === 'P2025') {
+      return reply.status(404).send({ 
+        error: 'Cliente não encontrado', 
+        message: error.meta?.cause || 'Cliente não foi encontrado' 
+      })
+    }
+    
+    if (error.code === 'P2002') {
+      const field = error.meta?.target?.[0]
+      return reply.status(409).send({ 
+        error: 'Dados duplicados', 
+        message: `Já existe outro cliente com este ${field === 'email' ? 'email' : 'CPF/CNPJ'}` 
+      })
+    }
+    
+    return reply.status(500).send({ 
+      error: 'Erro ao atualizar cliente', 
+      message: error.message 
+    })
+  }
+})
+
+// Deletar cliente
+fastify.delete('/api/customers/:id', async (request, reply) => {
+  try {
+    const { id } = request.params
+    
+    // Verificar se o cliente existe
+    const customer = await prisma.customer.findUnique({
+      where: { id },
+      include: {
+        orders: {
+          select: { id: true }
+        }
+      }
+    })
+    
+    if (!customer) {
+      return reply.status(404).send({ 
+        error: 'Cliente não encontrado', 
+        message: `Cliente com ID ${id} não foi encontrado` 
+      })
+    }
+    
+    // Verificar se tem pedidos associados
+    if (customer.orders && customer.orders.length > 0) {
+      return reply.status(400).send({ 
+        error: 'Não é possível deletar', 
+        message: `Cliente possui ${customer.orders.length} pedido(s) associado(s). Remova os pedidos antes de deletar o cliente.` 
+      })
+    }
+    
+    await prisma.customer.delete({
+      where: { id }
+    })
+    
+    return { success: true, message: 'Cliente deletado com sucesso' }
+  } catch (error) {
+    fastify.log.error('Erro ao deletar cliente:', error)
+    
+    if (error.code === 'P2025') {
+      return reply.status(404).send({ 
+        error: 'Cliente não encontrado', 
+        message: error.meta?.cause || 'Cliente não foi encontrado' 
+      })
+    }
+    
+    return reply.status(500).send({ 
+      error: 'Erro ao deletar cliente', 
+      message: error.message 
+    })
+  }
+})
+
 // Iniciar servidor
 const start = async () => {
   try {
