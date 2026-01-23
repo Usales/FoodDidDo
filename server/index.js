@@ -2358,6 +2358,546 @@ fastify.patch('/api/payments/:id/status', async (request, reply) => {
   }
 })
 
+// ============================================
+// ROTAS DE NOTAS FISCAIS (Invoices)
+// ============================================
+
+// Listar notas fiscais
+fastify.get('/api/invoices', async (request, reply) => {
+  try {
+    const { status, type, provider } = request.query
+    
+    const where = {}
+    if (status) where.status = status
+    if (type) where.type = type
+    if (provider) where.provider = provider
+    
+    const invoices = await prisma.invoice.findMany({
+      where,
+      include: {
+        order: {
+          include: {
+            customer: true,
+            items: true,
+            payment: true
+          }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    })
+    return invoices
+  } catch (error) {
+    fastify.log.error('Erro ao listar notas fiscais:', error)
+    return reply.status(500).send({ 
+      error: 'Erro ao listar notas fiscais', 
+      message: error.message 
+    })
+  }
+})
+
+// Buscar nota fiscal específica
+fastify.get('/api/invoices/:id', async (request, reply) => {
+  try {
+    const { id } = request.params
+    const invoice = await prisma.invoice.findUnique({
+      where: { id },
+      include: {
+        order: {
+          include: {
+            customer: true,
+            items: true,
+            payment: true
+          }
+        }
+      }
+    })
+    
+    if (!invoice) {
+      return reply.status(404).send({ 
+        error: 'Nota fiscal não encontrada', 
+        message: `Nota fiscal com ID ${id} não foi encontrada` 
+      })
+    }
+    
+    return invoice
+  } catch (error) {
+    fastify.log.error('Erro ao buscar nota fiscal:', error)
+    return reply.status(500).send({ 
+      error: 'Erro ao buscar nota fiscal', 
+      message: error.message 
+    })
+  }
+})
+
+// Criar nota fiscal
+fastify.post('/api/invoices', async (request, reply) => {
+  try {
+    const { 
+      orderId,
+      type,
+      number,
+      series,
+      accessKey,
+      status,
+      provider,
+      providerId,
+      xml,
+      xmlUrl,
+      pdfUrl,
+      pdfBase64,
+      cancellationReason,
+      cancelledAt,
+      issuedAt,
+      errorMessage,
+      metadata
+    } = request.body
+    
+    // Validar dados obrigatórios
+    if (!orderId) {
+      return reply.status(400).send({ 
+        error: 'Dados inválidos', 
+        message: 'orderId é obrigatório' 
+      })
+    }
+    
+    if (!type) {
+      return reply.status(400).send({ 
+        error: 'Dados inválidos', 
+        message: 'Tipo de nota fiscal é obrigatório' 
+      })
+    }
+    
+    // Validar tipo de nota fiscal
+    const validTypes = ['NFe', 'NFCe']
+    if (!validTypes.includes(type)) {
+      return reply.status(400).send({ 
+        error: 'Dados inválidos', 
+        message: `Tipo de nota fiscal deve ser um dos: ${validTypes.join(', ')}` 
+      })
+    }
+    
+    // Verificar se o pedido existe
+    const order = await prisma.order.findUnique({
+      where: { id: orderId }
+    })
+    
+    if (!order) {
+      return reply.status(404).send({ 
+        error: 'Pedido não encontrado', 
+        message: `Pedido com ID ${orderId} não foi encontrado` 
+      })
+    }
+    
+    // Verificar se já existe nota fiscal para este pedido
+    const existingInvoice = await prisma.invoice.findUnique({
+      where: { orderId }
+    })
+    
+    if (existingInvoice) {
+      return reply.status(409).send({ 
+        error: 'Nota fiscal já existe', 
+        message: 'Este pedido já possui uma nota fiscal associada' 
+      })
+    }
+    
+    const invoice = await prisma.invoice.create({
+      data: {
+        orderId,
+        type,
+        number: number || null,
+        series: series || null,
+        accessKey: accessKey || null,
+        status: status || 'pending',
+        provider: provider || null,
+        providerId: providerId || null,
+        xml: xml || null,
+        xmlUrl: xmlUrl || null,
+        pdfUrl: pdfUrl || null,
+        pdfBase64: pdfBase64 || null,
+        cancellationReason: cancellationReason || null,
+        cancelledAt: cancelledAt ? new Date(cancelledAt) : null,
+        issuedAt: issuedAt ? new Date(issuedAt) : null,
+        errorMessage: errorMessage || null,
+        metadata: metadata ? (typeof metadata === 'string' ? metadata : JSON.stringify(metadata)) : null
+      },
+      include: {
+        order: {
+          include: {
+            customer: true,
+            items: true,
+            payment: true
+          }
+        }
+      }
+    })
+    
+    return invoice
+  } catch (error) {
+    fastify.log.error('Erro ao criar nota fiscal:', error)
+    
+    if (error.code === 'P2002') {
+      return reply.status(409).send({ 
+        error: 'Nota fiscal já existe', 
+        message: 'Este pedido já possui uma nota fiscal associada' 
+      })
+    }
+    
+    if (error.code === 'P2003') {
+      return reply.status(404).send({ 
+        error: 'Pedido não encontrado', 
+        message: 'Pedido associado não foi encontrado' 
+      })
+    }
+    
+    return reply.status(500).send({ 
+      error: 'Erro ao criar nota fiscal', 
+      message: error.message 
+    })
+  }
+})
+
+// Atualizar nota fiscal
+fastify.put('/api/invoices/:id', async (request, reply) => {
+  try {
+    const { id } = request.params
+    const { 
+      type,
+      number,
+      series,
+      accessKey,
+      status,
+      provider,
+      providerId,
+      xml,
+      xmlUrl,
+      pdfUrl,
+      pdfBase64,
+      cancellationReason,
+      cancelledAt,
+      issuedAt,
+      errorMessage,
+      metadata
+    } = request.body
+    
+    // Validar tipo de nota fiscal se fornecido
+    if (type) {
+      const validTypes = ['NFe', 'NFCe']
+      if (!validTypes.includes(type)) {
+        return reply.status(400).send({ 
+          error: 'Dados inválidos', 
+          message: `Tipo de nota fiscal deve ser um dos: ${validTypes.join(', ')}` 
+        })
+      }
+    }
+    
+    const invoice = await prisma.invoice.update({
+      where: { id },
+      data: {
+        ...(type && { type }),
+        ...(number !== undefined && { number }),
+        ...(series !== undefined && { series }),
+        ...(accessKey !== undefined && { accessKey }),
+        ...(status && { status }),
+        ...(provider !== undefined && { provider }),
+        ...(providerId !== undefined && { providerId }),
+        ...(xml !== undefined && { xml }),
+        ...(xmlUrl !== undefined && { xmlUrl }),
+        ...(pdfUrl !== undefined && { pdfUrl }),
+        ...(pdfBase64 !== undefined && { pdfBase64 }),
+        ...(cancellationReason !== undefined && { cancellationReason }),
+        ...(cancelledAt !== undefined && { cancelledAt: cancelledAt ? new Date(cancelledAt) : null }),
+        ...(issuedAt !== undefined && { issuedAt: issuedAt ? new Date(issuedAt) : null }),
+        ...(errorMessage !== undefined && { errorMessage }),
+        ...(metadata !== undefined && { metadata: metadata ? (typeof metadata === 'string' ? metadata : JSON.stringify(metadata)) : null })
+      },
+      include: {
+        order: {
+          include: {
+            customer: true,
+            items: true,
+            payment: true
+          }
+        }
+      }
+    })
+    
+    return invoice
+  } catch (error) {
+    fastify.log.error('Erro ao atualizar nota fiscal:', error)
+    
+    if (error.code === 'P2025') {
+      return reply.status(404).send({ 
+        error: 'Nota fiscal não encontrada', 
+        message: error.meta?.cause || 'Nota fiscal não foi encontrada' 
+      })
+    }
+    
+    return reply.status(500).send({ 
+      error: 'Erro ao atualizar nota fiscal', 
+      message: error.message 
+    })
+  }
+})
+
+// Emitir nota fiscal (endpoint específico para integração com provedores)
+fastify.post('/api/invoices/issue', async (request, reply) => {
+  try {
+    const { orderId, type, provider } = request.body
+    
+    if (!orderId) {
+      return reply.status(400).send({ 
+        error: 'Dados inválidos', 
+        message: 'orderId é obrigatório' 
+      })
+    }
+    
+    if (!type) {
+      return reply.status(400).send({ 
+        error: 'Dados inválidos', 
+        message: 'Tipo de nota fiscal é obrigatório' 
+      })
+    }
+    
+    // Buscar pedido com dados completos
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+      include: {
+        customer: true,
+        items: true,
+        payment: true
+      }
+    })
+    
+    if (!order) {
+      return reply.status(404).send({ 
+        error: 'Pedido não encontrado', 
+        message: `Pedido com ID ${orderId} não foi encontrado` 
+      })
+    }
+    
+    // Verificar se já existe nota fiscal
+    const existingInvoice = await prisma.invoice.findUnique({
+      where: { orderId }
+    })
+    
+    if (existingInvoice) {
+      return reply.status(409).send({ 
+        error: 'Nota fiscal já existe', 
+        message: 'Este pedido já possui uma nota fiscal associada',
+        invoice: existingInvoice
+      })
+    }
+    
+    // TODO: Integrar com provedor de nota fiscal (Focus NFe, Bling, TecnoSpeed)
+    // Por enquanto, criar nota fiscal com status 'pending'
+    const invoice = await prisma.invoice.create({
+      data: {
+        orderId,
+        type,
+        status: 'pending',
+        provider: provider || null
+      },
+      include: {
+        order: {
+          include: {
+            customer: true,
+            items: true,
+            payment: true
+          }
+        }
+      }
+    })
+    
+    // TODO: Chamar API do provedor para emitir nota fiscal
+    // Exemplo:
+    // if (provider === 'focus') {
+    //   const result = await focusNFe.issueInvoice(order, invoice)
+    //   await prisma.invoice.update({
+    //     where: { id: invoice.id },
+    //     data: {
+    //       status: result.status,
+    //       number: result.number,
+    //       accessKey: result.accessKey,
+    //       xml: result.xml,
+    //       pdfUrl: result.pdfUrl,
+    //       issuedAt: new Date()
+    //     }
+    //   })
+    // }
+    
+    return {
+      ...invoice,
+      message: 'Nota fiscal criada. Integração com provedor ainda não implementada.'
+    }
+  } catch (error) {
+    fastify.log.error('Erro ao emitir nota fiscal:', error)
+    return reply.status(500).send({ 
+      error: 'Erro ao emitir nota fiscal', 
+      message: error.message 
+    })
+  }
+})
+
+// Cancelar nota fiscal
+fastify.post('/api/invoices/:id/cancel', async (request, reply) => {
+  try {
+    const { id } = request.params
+    const { cancellationReason } = request.body
+    
+    if (!cancellationReason || cancellationReason.trim().length === 0) {
+      return reply.status(400).send({ 
+        error: 'Dados inválidos', 
+        message: 'Motivo do cancelamento é obrigatório' 
+      })
+    }
+    
+    const invoice = await prisma.invoice.findUnique({
+      where: { id },
+      include: {
+        order: true
+      }
+    })
+    
+    if (!invoice) {
+      return reply.status(404).send({ 
+        error: 'Nota fiscal não encontrada', 
+        message: `Nota fiscal com ID ${id} não foi encontrada` 
+      })
+    }
+    
+    if (invoice.status === 'cancelled') {
+      return reply.status(400).send({ 
+        error: 'Nota fiscal já cancelada', 
+        message: 'Esta nota fiscal já está cancelada' 
+      })
+    }
+    
+    // TODO: Integrar com provedor para cancelar nota fiscal
+    // Por enquanto, apenas atualizar status localmente
+    const updatedInvoice = await prisma.invoice.update({
+      where: { id },
+      data: {
+        status: 'cancelled',
+        cancellationReason: cancellationReason.trim(),
+        cancelledAt: new Date()
+      },
+      include: {
+        order: {
+          include: {
+            customer: true,
+            items: true,
+            payment: true
+          }
+        }
+      }
+    })
+    
+    return {
+      ...updatedInvoice,
+      message: 'Nota fiscal cancelada localmente. Integração com provedor ainda não implementada.'
+    }
+  } catch (error) {
+    fastify.log.error('Erro ao cancelar nota fiscal:', error)
+    
+    if (error.code === 'P2025') {
+      return reply.status(404).send({ 
+        error: 'Nota fiscal não encontrada', 
+        message: error.meta?.cause || 'Nota fiscal não foi encontrada' 
+      })
+    }
+    
+    return reply.status(500).send({ 
+      error: 'Erro ao cancelar nota fiscal', 
+      message: error.message 
+    })
+  }
+})
+
+// Download do PDF da nota fiscal
+fastify.get('/api/invoices/:id/pdf', async (request, reply) => {
+  try {
+    const { id } = request.params
+    const invoice = await prisma.invoice.findUnique({
+      where: { id }
+    })
+    
+    if (!invoice) {
+      return reply.status(404).send({ 
+        error: 'Nota fiscal não encontrada', 
+        message: `Nota fiscal com ID ${id} não foi encontrada` 
+      })
+    }
+    
+    if (!invoice.pdfUrl && !invoice.pdfBase64) {
+      return reply.status(404).send({ 
+        error: 'PDF não disponível', 
+        message: 'PDF da nota fiscal não está disponível' 
+      })
+    }
+    
+    // Se tiver URL, redirecionar
+    if (invoice.pdfUrl) {
+      return reply.redirect(invoice.pdfUrl)
+    }
+    
+    // Se tiver base64, retornar como PDF
+    if (invoice.pdfBase64) {
+      const pdfBuffer = Buffer.from(invoice.pdfBase64, 'base64')
+      reply.type('application/pdf')
+      reply.header('Content-Disposition', `attachment; filename="nota-fiscal-${invoice.number || invoice.id}.pdf"`)
+      return pdfBuffer
+    }
+  } catch (error) {
+    fastify.log.error('Erro ao buscar PDF da nota fiscal:', error)
+    return reply.status(500).send({ 
+      error: 'Erro ao buscar PDF da nota fiscal', 
+      message: error.message 
+    })
+  }
+})
+
+// Download do XML da nota fiscal
+fastify.get('/api/invoices/:id/xml', async (request, reply) => {
+  try {
+    const { id } = request.params
+    const invoice = await prisma.invoice.findUnique({
+      where: { id }
+    })
+    
+    if (!invoice) {
+      return reply.status(404).send({ 
+        error: 'Nota fiscal não encontrada', 
+        message: `Nota fiscal com ID ${id} não foi encontrada` 
+      })
+    }
+    
+    if (!invoice.xml && !invoice.xmlUrl) {
+      return reply.status(404).send({ 
+        error: 'XML não disponível', 
+        message: 'XML da nota fiscal não está disponível' 
+      })
+    }
+    
+    // Se tiver URL, redirecionar
+    if (invoice.xmlUrl) {
+      return reply.redirect(invoice.xmlUrl)
+    }
+    
+    // Se tiver XML direto, retornar
+    if (invoice.xml) {
+      reply.type('application/xml')
+      reply.header('Content-Disposition', `attachment; filename="nota-fiscal-${invoice.number || invoice.id}.xml"`)
+      return invoice.xml
+    }
+  } catch (error) {
+    fastify.log.error('Erro ao buscar XML da nota fiscal:', error)
+    return reply.status(500).send({ 
+      error: 'Erro ao buscar XML da nota fiscal', 
+      message: error.message 
+    })
+  }
+})
+
 // Iniciar servidor
 const start = async () => {
   try {
