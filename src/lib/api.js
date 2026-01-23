@@ -69,6 +69,8 @@ export const api = {
   // Orçamentos
   getBudgets: () => request('/api/budgets'),
   createBudget: (data) => request('/api/budgets', { method: 'POST', body: data }),
+  updateBudget: (id, data) => request(`/api/budgets/${id}`, { method: 'PUT', body: data }),
+  deleteBudget: (id) => request(`/api/budgets/${id}`, { method: 'DELETE' }),
 
   // Custos Fixos
   getFixedCosts: () => request('/api/fixed-costs'),
@@ -85,10 +87,14 @@ export const api = {
   // Preços
   getPricing: () => request('/api/pricing'),
   createPricing: (data) => request('/api/pricing', { method: 'POST', body: data }),
+  updatePricing: (id, data) => request(`/api/pricing/${id}`, { method: 'PUT', body: data }),
+  deletePricing: (id) => request(`/api/pricing/${id}`, { method: 'DELETE' }),
 
   // Movimentações de Estoque
   getStockMovements: () => request('/api/stock-movements'),
   createStockMovement: (data) => request('/api/stock-movements', { method: 'POST', body: data }),
+  updateStockMovement: (id, data) => request(`/api/stock-movements/${id}`, { method: 'PUT', body: data }),
+  deleteStockMovement: (id) => request(`/api/stock-movements/${id}`, { method: 'DELETE' }),
 
   // Armazéns
   getWarehouses: () => request('/api/warehouses'),
@@ -97,6 +103,8 @@ export const api = {
   deleteWarehouse: (id) => request(`/api/warehouses/${id}`, { method: 'DELETE' }),
 
   // Itens do Armazém
+  getWarehouseItems: (warehouseId) => request(`/api/warehouses/${warehouseId}/items`),
+  getWarehouseItem: (warehouseId, itemId) => request(`/api/warehouses/${warehouseId}/items/${itemId}`),
   createWarehouseItem: (warehouseId, data) => request(`/api/warehouses/${warehouseId}/items`, { method: 'POST', body: data }),
   updateWarehouseItem: (warehouseId, itemId, data) => request(`/api/warehouses/${warehouseId}/items/${itemId}`, { method: 'PUT', body: data }),
   deleteWarehouseItem: (warehouseId, itemId) => request(`/api/warehouses/${warehouseId}/items/${itemId}`, { method: 'DELETE' }),
@@ -119,6 +127,36 @@ export const api = {
   openCashbox: (data) => request('/api/cashbox/open', { method: 'POST', body: data }),
   closeCashbox: (data) => request('/api/cashbox/close', { method: 'POST', body: data }),
   getCashboxMovements: () => request('/api/cashbox/movements'),
-  createCashboxMovement: (data) => request('/api/cashbox/movements', { method: 'POST', body: data })
+  createCashboxMovement: (data) => request('/api/cashbox/movements', { method: 'POST', body: data }),
+
+  // Clientes (Customers)
+  getCustomers: () => request('/api/customers'),
+  getCustomer: (id) => request(`/api/customers/${id}`),
+  createCustomer: (data) => request('/api/customers', { method: 'POST', body: data }),
+  updateCustomer: (id, data) => request(`/api/customers/${id}`, { method: 'PUT', body: data }),
+  deleteCustomer: (id) => request(`/api/customers/${id}`, { method: 'DELETE' }),
+
+  // Pagamentos (Payments)
+  getPayments: (params) => {
+    const queryString = params ? '?' + new URLSearchParams(params).toString() : ''
+    return request(`/api/payments${queryString}`)
+  },
+  getPayment: (id) => request(`/api/payments/${id}`),
+  createPayment: (data) => request('/api/payments', { method: 'POST', body: data }),
+  updatePayment: (id, data) => request(`/api/payments/${id}`, { method: 'PUT', body: data }),
+  updatePaymentStatus: (id, data) => request(`/api/payments/${id}/status`, { method: 'PATCH', body: data }),
+
+  // Notas Fiscais (Invoices)
+  getInvoices: (params) => {
+    const queryString = params ? '?' + new URLSearchParams(params).toString() : ''
+    return request(`/api/invoices${queryString}`)
+  },
+  getInvoice: (id) => request(`/api/invoices/${id}`),
+  createInvoice: (data) => request('/api/invoices', { method: 'POST', body: data }),
+  updateInvoice: (id, data) => request(`/api/invoices/${id}`, { method: 'PUT', body: data }),
+  issueInvoice: (data) => request('/api/invoices/issue', { method: 'POST', body: data }),
+  cancelInvoice: (id, cancellationReason) => request(`/api/invoices/${id}/cancel`, { method: 'POST', body: { cancellationReason } }),
+  getInvoicePdf: (id) => request(`/api/invoices/${id}/pdf`),
+  getInvoiceXml: (id) => request(`/api/invoices/${id}/xml`)
 }
 
