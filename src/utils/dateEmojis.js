@@ -167,6 +167,28 @@ function calculateCarnival(year) {
 }
 
 /**
+ * Verifica se uma data está no período de Carnaval (sábado a terça-feira)
+ * @param {Date} currentDate - Data a verificar
+ * @returns {boolean} - True se estiver no período de Carnaval
+ */
+function isCarnivalPeriod(currentDate) {
+  const year = currentDate.getFullYear()
+  const carnivalTuesday = calculateCarnival(year)
+  
+  // Período de Carnaval: sábado (3 dias antes) até terça-feira
+  const carnivalSaturday = new Date(carnivalTuesday)
+  carnivalSaturday.setDate(carnivalTuesday.getDate() - 3)
+  
+  // Normaliza as datas para comparar apenas o dia (ignora horas)
+  const currentDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate())
+  const saturdayDay = new Date(carnivalSaturday.getFullYear(), carnivalSaturday.getMonth(), carnivalSaturday.getDate())
+  const tuesdayDay = new Date(carnivalTuesday.getFullYear(), carnivalTuesday.getMonth(), carnivalTuesday.getDate())
+  
+  // Verifica se a data está entre sábado e terça-feira de Carnaval
+  return currentDay >= saturdayDay && currentDay <= tuesdayDay
+}
+
+/**
  * Verifica se duas datas são do mesmo dia (ignorando horas)
  * @param {Date} date1 - Primeira data
  * @param {Date} date2 - Segunda data
