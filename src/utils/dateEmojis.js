@@ -248,6 +248,11 @@ function getCurrentSpecialDate(currentDate = new Date()) {
   }
 
   // Datas móveis
+  // Verifica Carnaval primeiro (pode coincidir com outras datas, mas Carnaval tem prioridade)
+  if (isCarnivalPeriod(currentDate)) {
+    return 'carnaval'
+  }
+
   const easterDate = calculateEaster(year)
   if (isSameDay(currentDate, easterDate)) {
     return 'pascoa'
@@ -297,5 +302,5 @@ export function getSpecialDateName(currentDate = new Date()) {
 }
 
 // Exporta também as funções auxiliares caso sejam necessárias
-export { getCurrentSpecialDate, calculateEaster, calculateMothersDay, calculateFathersDay }
+export { getCurrentSpecialDate, calculateEaster, calculateMothersDay, calculateFathersDay, calculateCarnival, isCarnivalPeriod }
 
