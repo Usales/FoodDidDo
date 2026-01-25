@@ -155,6 +155,18 @@ function calculateFathersDay(year) {
 }
 
 /**
+ * Calcula a Terça-feira de Carnaval (47 dias antes da Páscoa)
+ * @param {number} year - Ano para calcular
+ * @returns {Date} - Data da Terça-feira de Carnaval
+ */
+function calculateCarnival(year) {
+  const easterDate = calculateEaster(year)
+  const carnivalTuesday = new Date(easterDate)
+  carnivalTuesday.setDate(easterDate.getDate() - 47)
+  return carnivalTuesday
+}
+
+/**
  * Verifica se duas datas são do mesmo dia (ignorando horas)
  * @param {Date} date1 - Primeira data
  * @param {Date} date2 - Segunda data
