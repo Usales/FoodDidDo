@@ -555,6 +555,84 @@ export function ConfigPage() {
                   </div>
                 </div>
               </div>
+
+              {/* Cores de Fundo */}
+              <div className="config-color-group">
+                <h3 className="config-color-group-title">Cores de Fundo</h3>
+                <div className="config-color-items">
+                  <div className="config-color-item">
+                    <label className="config-color-label">
+                      Fundo Principal
+                      <Tooltip content="Cor de fundo principal da aplicação">
+                        <span className="tooltip-icon">ⓘ</span>
+                      </Tooltip>
+                    </label>
+                    <div className="config-color-input-wrapper">
+                      <input
+                        type="color"
+                        value={customColors?.['--bg-primary'] || (theme === 'dark' ? '#0e0e0e' : '#ffffff')}
+                        onChange={(e) => updateCustomColor('--bg-primary', e.target.value)}
+                        className="config-color-input"
+                      />
+                      <input
+                        type="text"
+                        value={customColors?.['--bg-primary'] || (theme === 'dark' ? '#0e0e0e' : '#ffffff')}
+                        onChange={(e) => updateCustomColor('--bg-primary', e.target.value)}
+                        className="config-color-text-input"
+                        placeholder="#ffffff"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="config-color-item">
+                    <label className="config-color-label">
+                      Fundo Secundário
+                      <Tooltip content="Cor de fundo para cards e painéis">
+                        <span className="tooltip-icon">ⓘ</span>
+                      </Tooltip>
+                    </label>
+                    <div className="config-color-input-wrapper">
+                      <input
+                        type="color"
+                        value={customColors?.['--bg-secondary'] || (theme === 'dark' ? '#111111' : '#f8fafc')}
+                        onChange={(e) => updateCustomColor('--bg-secondary', e.target.value)}
+                        className="config-color-input"
+                      />
+                      <input
+                        type="text"
+                        value={customColors?.['--bg-secondary'] || (theme === 'dark' ? '#111111' : '#f8fafc')}
+                        onChange={(e) => updateCustomColor('--bg-secondary', e.target.value)}
+                        className="config-color-text-input"
+                        placeholder="#f8fafc"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="config-color-item">
+                    <label className="config-color-label">
+                      Fundo de Cards
+                      <Tooltip content="Cor de fundo para cards e elementos destacados">
+                        <span className="tooltip-icon">ⓘ</span>
+                      </Tooltip>
+                    </label>
+                    <div className="config-color-input-wrapper">
+                      <input
+                        type="color"
+                        value={customColors?.['--bg-card'] || (theme === 'dark' ? '#181818' : '#ffffff')}
+                        onChange={(e) => updateCustomColor('--bg-card', e.target.value)}
+                        className="config-color-input"
+                      />
+                      <input
+                        type="text"
+                        value={customColors?.['--bg-card'] || (theme === 'dark' ? '#181818' : '#ffffff')}
+                        onChange={(e) => updateCustomColor('--bg-card', e.target.value)}
+                        className="config-color-text-input"
+                        placeholder="#ffffff"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </section>
         </div>
