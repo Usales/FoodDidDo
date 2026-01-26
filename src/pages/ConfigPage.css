@@ -294,6 +294,114 @@
   margin-top: 0.5rem;
 }
 
+/* Seção de Personalização de Cores */
+.config-colors-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-top: 1.5rem;
+}
+
+.config-color-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-primary);
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+}
+
+.config-color-group-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-primary);
+}
+
+.config-color-items {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.config-color-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.config-color-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.config-color-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.config-color-input {
+  width: 60px;
+  height: 40px;
+  border: 2px solid var(--border-primary);
+  border-radius: 8px;
+  cursor: pointer;
+  background: transparent;
+  padding: 0;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.config-color-input::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.config-color-input::-webkit-color-swatch {
+  border: none;
+  border-radius: 6px;
+}
+
+.config-color-input::-moz-color-swatch {
+  border: none;
+  border-radius: 6px;
+}
+
+.config-color-text-input {
+  flex: 1;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--border-primary);
+  border-radius: 8px;
+  background: var(--input-bg);
+  color: var(--input-text);
+  font-size: 0.9rem;
+  font-family: 'Courier New', monospace;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.config-color-text-input:focus {
+  outline: none;
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+.config-colors-actions {
+  display: flex;
+  justify-content: flex-start;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-primary);
+}
+
 .config-theme-toggle-wrapper {
   display: flex;
   align-items: center;
