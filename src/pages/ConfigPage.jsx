@@ -493,6 +493,17 @@ export function ConfigPage() {
               </div>
             </div>
           </section>
+
+          {/* Personalização de Cores */}
+          <section className="config-section">
+            <h2 className="config-section-title">Alterar cores do sistema</h2>
+            <p className="config-section-description">
+              Personalize as cores do sistema. As alterações serão aplicadas em todas as partes que usam essas cores.
+            </p>
+            
+            <div className="config-colors-grid">
+            </div>
+          </section>
         </div>
       )
     }
