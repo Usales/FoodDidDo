@@ -65,11 +65,50 @@ export function ConfigPage() {
   const [cashflowPageSettings, setCashflowPageSettings] = useState(defaultCashflowPageSettings)
   const [sidebarSettings, setSidebarSettings] = useState(defaultSidebarSettings)
   const [activeTab, setActiveTab] = useState('geral')
+  
+  // Estado para cores personalizadas
+  const [customColors, setCustomColors] = useState(() => {
+    try {
+      const saved = localStorage.getItem('customColors')
+      return saved ? JSON.parse(saved) : {}
+    } catch (error) {
+      console.error('Erro ao carregar cores personalizadas:', error)
+      return {}
+    }
+  })
 
   // Carregar preferências gerais (moeda/idioma/backup) do localStorage
   useEffect(() => {
     setSettings(getAppSettings())
   }, [])
+
+  // Aplicar cores personalizadas ao documento
+  useEffect(() => {
+    const root = document.documentElement
+    
+    // Sempre aplicar cores personalizadas se existirem
+    if (customColors && typeof customColors === 'object' && Object.keys(customColors).length > 0) {
+      Object.entries(customColors).forEach(([key, value]) => {
+        if (value && typeof value === 'string') {
+          root.style.setProperty(key, value)
+        }
+      })
+    } else {
+      // Remover cores personalizadas para voltar ao padrão do tema
+      const allColorVars = [
+        '--primary-color', '--primary-dark', '--primary-light',
+        '--bg-primary', '--bg-secondary', '--bg-tertiary', '--bg-card',
+        '--text-primary', '--text-secondary', '--text-tertiary',
+        '--border-primary', '--border-secondary', '--border-focus',
+        '--input-bg', '--input-border', '--input-focus', '--input-text',
+        '--success', '--warning', '--error', '--info'
+      ]
+      
+      allColorVars.forEach(key => {
+        root.style.removeProperty(key)
+      })
+    }
+  }, [customColors, theme])
 
   // Carregar configurações do dashboard do localStorage
   useEffect(() => {
