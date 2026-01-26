@@ -741,6 +741,134 @@ export function ConfigPage() {
                   </div>
                 </div>
               </div>
+
+              {/* Cores de Status */}
+              <div className="config-color-group">
+                <h3 className="config-color-group-title">Cores de Status</h3>
+                <div className="config-color-items">
+                  <div className="config-color-item">
+                    <label className="config-color-label">
+                      Sucesso
+                      <Tooltip content="Cor para mensagens e indicadores de sucesso">
+                        <span className="tooltip-icon">ⓘ</span>
+                      </Tooltip>
+                    </label>
+                    <div className="config-color-input-wrapper">
+                      <input
+                        type="color"
+                        value={customColors?.['--success'] || '#10b981'}
+                        onChange={(e) => updateCustomColor('--success', e.target.value)}
+                        className="config-color-input"
+                      />
+                      <input
+                        type="text"
+                        value={customColors?.['--success'] || '#10b981'}
+                        onChange={(e) => updateCustomColor('--success', e.target.value)}
+                        className="config-color-text-input"
+                        placeholder="#10b981"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="config-color-item">
+                    <label className="config-color-label">
+                      Aviso
+                      <Tooltip content="Cor para mensagens e indicadores de aviso">
+                        <span className="tooltip-icon">ⓘ</span>
+                      </Tooltip>
+                    </label>
+                    <div className="config-color-input-wrapper">
+                      <input
+                        type="color"
+                        value={customColors?.['--warning'] || '#f59e0b'}
+                        onChange={(e) => updateCustomColor('--warning', e.target.value)}
+                        className="config-color-input"
+                      />
+                      <input
+                        type="text"
+                        value={customColors?.['--warning'] || '#f59e0b'}
+                        onChange={(e) => updateCustomColor('--warning', e.target.value)}
+                        className="config-color-text-input"
+                        placeholder="#f59e0b"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="config-color-item">
+                    <label className="config-color-label">
+                      Erro
+                      <Tooltip content="Cor para mensagens e indicadores de erro">
+                        <span className="tooltip-icon">ⓘ</span>
+                      </Tooltip>
+                    </label>
+                    <div className="config-color-input-wrapper">
+                      <input
+                        type="color"
+                        value={customColors?.['--error'] || '#ef4444'}
+                        onChange={(e) => updateCustomColor('--error', e.target.value)}
+                        className="config-color-input"
+                      />
+                      <input
+                        type="text"
+                        value={customColors?.['--error'] || '#ef4444'}
+                        onChange={(e) => updateCustomColor('--error', e.target.value)}
+                        className="config-color-text-input"
+                        placeholder="#ef4444"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="config-color-item">
+                    <label className="config-color-label">
+                      Informação
+                      <Tooltip content="Cor para mensagens e indicadores informativos">
+                        <span className="tooltip-icon">ⓘ</span>
+                      </Tooltip>
+                    </label>
+                    <div className="config-color-input-wrapper">
+                      <input
+                        type="color"
+                        value={customColors?.['--info'] || '#3b82f6'}
+                        onChange={(e) => updateCustomColor('--info', e.target.value)}
+                        className="config-color-input"
+                      />
+                      <input
+                        type="text"
+                        value={customColors?.['--info'] || '#3b82f6'}
+                        onChange={(e) => updateCustomColor('--info', e.target.value)}
+                        className="config-color-text-input"
+                        placeholder="#3b82f6"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="config-colors-actions">
+              <button
+                type="button"
+                className="config-btn-secondary"
+                onClick={() => {
+                  setCustomColors({})
+                  localStorage.removeItem('customColors')
+                  // Remover todas as cores personalizadas do documento
+                  const root = document.documentElement
+                  const allColorVars = [
+                    '--primary-color', '--primary-dark', '--primary-light',
+                    '--bg-primary', '--bg-secondary', '--bg-tertiary', '--bg-card',
+                    '--text-primary', '--text-secondary', '--text-tertiary',
+                    '--border-primary', '--border-secondary', '--border-focus',
+                    '--input-bg', '--input-border', '--input-focus', '--input-text',
+                    '--success', '--warning', '--error', '--info'
+                  ]
+                  allColorVars.forEach(key => {
+                    root.style.removeProperty(key)
+                  })
+                }}
+              >
+                Restaurar cores padrão
+              </button>
             </div>
           </section>
         </div>
