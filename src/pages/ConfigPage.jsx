@@ -633,6 +633,60 @@ export function ConfigPage() {
                   </div>
                 </div>
               </div>
+
+              {/* Cores de Texto */}
+              <div className="config-color-group">
+                <h3 className="config-color-group-title">Cores de Texto</h3>
+                <div className="config-color-items">
+                  <div className="config-color-item">
+                    <label className="config-color-label">
+                      Texto Principal
+                      <Tooltip content="Cor do texto principal em toda a aplicação">
+                        <span className="tooltip-icon">ⓘ</span>
+                      </Tooltip>
+                    </label>
+                    <div className="config-color-input-wrapper">
+                      <input
+                        type="color"
+                        value={customColors?.['--text-primary'] || (theme === 'dark' ? '#ffffff' : '#1e293b')}
+                        onChange={(e) => updateCustomColor('--text-primary', e.target.value)}
+                        className="config-color-input"
+                      />
+                      <input
+                        type="text"
+                        value={customColors?.['--text-primary'] || (theme === 'dark' ? '#ffffff' : '#1e293b')}
+                        onChange={(e) => updateCustomColor('--text-primary', e.target.value)}
+                        className="config-color-text-input"
+                        placeholder="#1e293b"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="config-color-item">
+                    <label className="config-color-label">
+                      Texto Secundário
+                      <Tooltip content="Cor do texto secundário para labels e descrições">
+                        <span className="tooltip-icon">ⓘ</span>
+                      </Tooltip>
+                    </label>
+                    <div className="config-color-input-wrapper">
+                      <input
+                        type="color"
+                        value={customColors?.['--text-secondary'] || (theme === 'dark' ? '#e2e8f0' : '#64748b')}
+                        onChange={(e) => updateCustomColor('--text-secondary', e.target.value)}
+                        className="config-color-input"
+                      />
+                      <input
+                        type="text"
+                        value={customColors?.['--text-secondary'] || (theme === 'dark' ? '#e2e8f0' : '#64748b')}
+                        onChange={(e) => updateCustomColor('--text-secondary', e.target.value)}
+                        className="config-color-text-input"
+                        placeholder="#64748b"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </section>
         </div>
