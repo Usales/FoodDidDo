@@ -687,6 +687,60 @@ export function ConfigPage() {
                   </div>
                 </div>
               </div>
+
+              {/* Cores de Borda */}
+              <div className="config-color-group">
+                <h3 className="config-color-group-title">Cores de Borda</h3>
+                <div className="config-color-items">
+                  <div className="config-color-item">
+                    <label className="config-color-label">
+                      Borda Principal
+                      <Tooltip content="Cor das bordas principais em cards e elementos">
+                        <span className="tooltip-icon">ⓘ</span>
+                      </Tooltip>
+                    </label>
+                    <div className="config-color-input-wrapper">
+                      <input
+                        type="color"
+                        value={rgbaToHex(customColors?.['--border-primary'] || (theme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : '#e2e8f0'))}
+                        onChange={(e) => updateCustomColor('--border-primary', e.target.value)}
+                        className="config-color-input"
+                      />
+                      <input
+                        type="text"
+                        value={customColors?.['--border-primary'] || (theme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : '#e2e8f0')}
+                        onChange={(e) => updateCustomColor('--border-primary', e.target.value)}
+                        className="config-color-text-input"
+                        placeholder="#e2e8f0"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="config-color-item">
+                    <label className="config-color-label">
+                      Borda de Foco
+                      <Tooltip content="Cor da borda quando um elemento está em foco">
+                        <span className="tooltip-icon">ⓘ</span>
+                      </Tooltip>
+                    </label>
+                    <div className="config-color-input-wrapper">
+                      <input
+                        type="color"
+                        value={customColors?.['--border-focus'] || (theme === 'dark' ? '#ff3b30' : '#dc2626')}
+                        onChange={(e) => updateCustomColor('--border-focus', e.target.value)}
+                        className="config-color-input"
+                      />
+                      <input
+                        type="text"
+                        value={customColors?.['--border-focus'] || (theme === 'dark' ? '#ff3b30' : '#dc2626')}
+                        onChange={(e) => updateCustomColor('--border-focus', e.target.value)}
+                        className="config-color-text-input"
+                        placeholder="#dc2626"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </section>
         </div>
