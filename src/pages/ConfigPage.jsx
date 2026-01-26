@@ -85,12 +85,15 @@ export function ConfigPage() {
   // Aplicar cores personalizadas ao documento
   useEffect(() => {
     const root = document.documentElement
+    const body = document.body
     
     // Sempre aplicar cores personalizadas se existirem
     if (customColors && typeof customColors === 'object' && Object.keys(customColors).length > 0) {
       Object.entries(customColors).forEach(([key, value]) => {
         if (value && typeof value === 'string') {
-          root.style.setProperty(key, value)
+          // Aplicar com !important para sobrescrever tema
+          root.style.setProperty(key, value, 'important')
+          body.style.setProperty(key, value, 'important')
         }
       })
     } else {
@@ -106,6 +109,7 @@ export function ConfigPage() {
       
       allColorVars.forEach(key => {
         root.style.removeProperty(key)
+        body.style.removeProperty(key)
       })
     }
   }, [customColors, theme])
@@ -382,9 +386,11 @@ export function ConfigPage() {
     const newColors = { ...(customColors || {}), [colorVar]: value }
     setCustomColors(newColors)
     localStorage.setItem('customColors', JSON.stringify(newColors))
-    // Aplicar imediatamente ao documento
+    // Aplicar imediatamente ao documento - usar !important para sobrescrever tema
     const root = document.documentElement
-    root.style.setProperty(colorVar, value)
+    root.style.setProperty(colorVar, value, 'important')
+    // Também aplicar no body para garantir que funcione com tema escuro
+    document.body.style.setProperty(colorVar, value, 'important')
   }
 
   const renderActiveTabPanel = () => {
@@ -854,6 +860,7 @@ export function ConfigPage() {
                   localStorage.removeItem('customColors')
                   // Remover todas as cores personalizadas do documento
                   const root = document.documentElement
+                  const body = document.body
                   const allColorVars = [
                     '--primary-color', '--primary-dark', '--primary-light',
                     '--bg-primary', '--bg-secondary', '--bg-tertiary', '--bg-card',
@@ -864,6 +871,7 @@ export function ConfigPage() {
                   ]
                   allColorVars.forEach(key => {
                     root.style.removeProperty(key)
+                    body.style.removeProperty(key)
                   })
                 }}
               >
