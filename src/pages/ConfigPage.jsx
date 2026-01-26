@@ -362,6 +362,31 @@ export function ConfigPage() {
     return labels[code] || code
   }
 
+  // Função auxiliar para converter rgba/rgb para hex para o input type="color"
+  const rgbaToHex = (rgba) => {
+    if (!rgba) return '#ffffff'
+    if (rgba.startsWith('#')) return rgba
+    
+    const match = rgba.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/)
+    if (match) {
+      const r = parseInt(match[1]).toString(16).padStart(2, '0')
+      const g = parseInt(match[2]).toString(16).padStart(2, '0')
+      const b = parseInt(match[3]).toString(16).padStart(2, '0')
+      return `#${r}${g}${b}`
+    }
+    return '#ffffff'
+  }
+
+  // Função helper para atualizar uma cor personalizada
+  const updateCustomColor = (colorVar, value) => {
+    const newColors = { ...(customColors || {}), [colorVar]: value }
+    setCustomColors(newColors)
+    localStorage.setItem('customColors', JSON.stringify(newColors))
+    // Aplicar imediatamente ao documento
+    const root = document.documentElement
+    root.style.setProperty(colorVar, value)
+  }
+
   const renderActiveTabPanel = () => {
     if (activeTab === 'geral') {
       return (
