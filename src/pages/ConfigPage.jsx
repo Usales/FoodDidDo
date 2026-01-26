@@ -502,6 +502,59 @@ export function ConfigPage() {
             </p>
             
             <div className="config-colors-grid">
+              {/* Cores Principais */}
+              <div className="config-color-group">
+                <h3 className="config-color-group-title">Cores Principais</h3>
+                <div className="config-color-items">
+                  <div className="config-color-item">
+                    <label className="config-color-label">
+                      Cor Primária
+                      <Tooltip content="Cor principal usada em botões, links e elementos de destaque">
+                        <span className="tooltip-icon">ⓘ</span>
+                      </Tooltip>
+                    </label>
+                    <div className="config-color-input-wrapper">
+                      <input
+                        type="color"
+                        value={customColors?.['--primary-color'] || (theme === 'dark' ? '#ff3b30' : '#dc2626')}
+                        onChange={(e) => updateCustomColor('--primary-color', e.target.value)}
+                        className="config-color-input"
+                      />
+                      <input
+                        type="text"
+                        value={customColors?.['--primary-color'] || (theme === 'dark' ? '#ff3b30' : '#dc2626')}
+                        onChange={(e) => updateCustomColor('--primary-color', e.target.value)}
+                        className="config-color-text-input"
+                        placeholder="#dc2626"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="config-color-item">
+                    <label className="config-color-label">
+                      Cor Primária Escura
+                      <Tooltip content="Versão mais escura da cor primária para hover e estados ativos">
+                        <span className="tooltip-icon">ⓘ</span>
+                      </Tooltip>
+                    </label>
+                    <div className="config-color-input-wrapper">
+                      <input
+                        type="color"
+                        value={customColors?.['--primary-dark'] || (theme === 'dark' ? '#dc2626' : '#b91c1c')}
+                        onChange={(e) => updateCustomColor('--primary-dark', e.target.value)}
+                        className="config-color-input"
+                      />
+                      <input
+                        type="text"
+                        value={customColors?.['--primary-dark'] || (theme === 'dark' ? '#dc2626' : '#b91c1c')}
+                        onChange={(e) => updateCustomColor('--primary-dark', e.target.value)}
+                        className="config-color-text-input"
+                        placeholder="#b91c1c"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </section>
         </div>
